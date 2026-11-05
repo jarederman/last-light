@@ -23,7 +23,7 @@ h1, h2 { font-family: Georgia, serif; font-weight: 400; line-height: 1.08; }
 .live .station { filter: brightness(.73) saturate(.7); }
 .rain { background: repeating-linear-gradient(114deg, transparent 0 44px, #9aaeb014 46px 47px, transparent 48px 83px); mask-image: linear-gradient(#000 1%, #000 31%, transparent 38%); animation: rain 2s linear infinite; }
 @keyframes rain { to { background-position: -25px 44px; } }
-.sprite { position: absolute; width: 5%; aspect-ratio: 16 / 17; translate: -50% -88%; background: url("../../assets/characters/player.png") no-repeat 0 0 / 400% 300%; image-rendering: pixelated; pointer-events: none; z-index: 2; filter: drop-shadow(0 2px 0 #111a20); }
+.sprite { position: absolute; width: 5%; aspect-ratio: 16 / 17; translate: -50% -88%; background: url("../../assets/characters/player.png") no-repeat 0 0 / 400% 300%; image-rendering: pixelated; pointer-events: none; z-index: 2; filter: brightness(.85) saturate(.85) drop-shadow(0 2px 0 #111a20); }
 .sprite::before { position: absolute; content: ""; inset: 85% 16% 0; border-radius: 50%; background: #10182070; z-index: -1; }
 .player[data-dir="up"] { background-position-x: calc(200% / 3); }
 .player[data-dir="right"] { background-position-x: 100%; }
@@ -104,7 +104,7 @@ dialog[data-menu="title"]::backdrop { background: #0b141cbc; }
   .report dd { margin-bottom: 10px; }
 }
 
-.room::after { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at 49% 56%, transparent 30%, #07111c9e 100%); pointer-events: none; z-index: 1; }
+.room::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, #06111dcc 0%, #06111d55 18%, transparent 27%, transparent 88%, #06111d99 100%), radial-gradient(ellipse at 49% 56%, transparent 30%, #07111c9e 100%); pointer-events: none; z-index: 1; }
 .light-pool { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 23% 44%, #f5bb6e30, transparent 29%), radial-gradient(ellipse at 75% 68%, #f5bb6e29, transparent 28%); mix-blend-mode: screen; }
 a { color: var(--amber); }
 .panel { border-top: 3px solid #a58b64; }
