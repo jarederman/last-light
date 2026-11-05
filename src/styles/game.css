@@ -19,18 +19,22 @@ h1, h2 { font-family: Georgia, serif; font-weight: 400; line-height: 1.08; }
 .room { position: relative; aspect-ratio: 8 / 5; background: #101a22; border-block: 1px solid var(--line); overflow: hidden; touch-action: manipulation; isolation: isolate; cursor: crosshair; }
 .station, .rain, .objects { position: absolute; inset: 0; width: 100%; height: 100%; }
 .station, .rain, .objects { pointer-events: none; }
-.station { transition: filter 1.2s ease; }
-.live .station { filter: saturate(.82) hue-rotate(-7deg) brightness(1.07); }
-.rain { background: repeating-linear-gradient(114deg, transparent 0 44px, #9aaeb014 46px 47px, transparent 48px 83px); mask-image: linear-gradient(#000 1%, #000 14%, transparent 24%); animation: rain 2s linear infinite; }
+.station { image-rendering: pixelated; filter: brightness(.66) saturate(.65); transition: filter 1.2s ease; }
+.live .station { filter: brightness(.73) saturate(.7); }
+.rain { background: repeating-linear-gradient(114deg, transparent 0 44px, #9aaeb014 46px 47px, transparent 48px 83px); mask-image: linear-gradient(#000 1%, #000 31%, transparent 38%); animation: rain 2s linear infinite; }
 @keyframes rain { to { background-position: -25px 44px; } }
-.sprite { position: absolute; width: 7.5%; aspect-ratio: 1; translate: -50% -88%; background: url("../../assets/characters/crew.svg") no-repeat 0 0 / 800% 100%; pointer-events: none; z-index: 2; }
-.sprite::before { position: absolute; content: ""; inset: 80% 19% 1%; border-radius: 50%; background: #18191f8c; z-index: -1; }
-.player[data-dir="up"] { background-position-x: calc(100% / 7); }
-.player[data-dir="right"] { background-position-x: calc(200% / 7); }
-.player[data-dir="left"] { background-position-x: calc(300% / 7); }
-.player.walking { animation: step .24s steps(2, jump-none) infinite; }
-@keyframes step { to { transform: translateY(-5%); } }
-.mara { background-position-x: calc(400% / 7); }
+.sprite { position: absolute; width: 5%; aspect-ratio: 16 / 17; translate: -50% -88%; background: url("../../assets/characters/player.png") no-repeat 0 0 / 400% 300%; image-rendering: pixelated; pointer-events: none; z-index: 2; filter: drop-shadow(0 2px 0 #111a20); }
+.sprite::before { position: absolute; content: ""; inset: 85% 16% 0; border-radius: 50%; background: #10182070; z-index: -1; }
+.player[data-dir="up"] { background-position-x: calc(200% / 3); }
+.player[data-dir="right"] { background-position-x: 100%; }
+.player[data-dir="left"] { background-position-x: calc(100% / 3); }
+.player.walking { animation: walk-frames .5s steps(1, end) infinite; }
+@keyframes walk-frames {
+  0%, 100% { background-position-y: 0; }
+  33% { background-position-y: 50%; }
+  66% { background-position-y: 100%; }
+}
+.mara { background-image: url("../../assets/characters/mara.png"); }
 .lamp-signal { position: absolute; width: 1.05%; aspect-ratio: 1; left: 74.6%; top: 68.6%; translate: -50% -50%; background: #f5d399; border-radius: 50%; box-shadow: 0 0 12px 4px #ecc88a77; opacity: .66; }
 .live .lamp-signal { animation: glow 2.2s ease-in-out infinite alternate; }
 @keyframes glow { from { opacity: .37; } to { opacity: 1; } }
@@ -83,7 +87,7 @@ body { overflow: hidden; background: #0d151d; }
   .touch-menu button { width: 44px; height: 44px; background: #162228db; border: 1px solid var(--line); border-radius: 5px; }
 }
 dialog[data-menu="title"] { text-align: center; background: #141f25ee; }
-dialog[data-menu="title"] .close { display: none; }
+dialog[data-menu="title"] .close, dialog[data-menu="credits"] .close { display: none; }
 dialog[data-menu="title"] h2 { font-size: clamp(3rem, 8vw, 5rem); }
 dialog[data-menu="title"] .action { text-align: center; }
 dialog[data-menu="title"]::backdrop { background: #0b141cbc; }
@@ -99,3 +103,11 @@ dialog[data-menu="title"]::backdrop { background: #0b141cbc; }
   .report { grid-template-columns: 1fr; gap: 4px; }
   .report dd { margin-bottom: 10px; }
 }
+
+.room::after { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at 49% 56%, transparent 30%, #07111c9e 100%); pointer-events: none; z-index: 1; }
+.light-pool { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 23% 44%, #f5bb6e30, transparent 29%), radial-gradient(ellipse at 75% 68%, #f5bb6e29, transparent 28%); mix-blend-mode: screen; }
+a { color: var(--amber); }
+.panel { border-top: 3px solid #a58b64; }
+.panel .eyebrow { letter-spacing: .19em; }
+.panel .record { background: #28322f; }
+@media (prefers-reduced-motion: reduce) { .player.walking { animation: none; } }

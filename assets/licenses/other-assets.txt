@@ -1,0 +1,21 @@
+Tiny Characters Set
+Fleurman, based on RPG character sprites by GrafxKid.
+https://opengameart.org/content/tiny-characters-set
+https://opengameart.org/content/rpg-character-sprites
+License selected from source page: CC0 1.0 Universal.
+Player uses M_02.png. Mara uses F_12.png. PNG sheets are unmodified.
+
+32px Electronics
+Airos. Original CC0 artwork from OpenClipArt is identified on the source page.
+https://opengameart.org/content/32px-electronics
+License selected from source page: CC0 1.0 Universal.
+Boombox, walkie-talkie and laptop PNGs are unmodified.
+
+Rain on Window Loop
+alxl
+https://opengameart.org/content/rain-on-window-loop
+The author explicitly offers CC0. This project selects CC0 1.0 Universal.
+Converted from the original WAV to mono Ogg Vorbis at 22050 Hz for web delivery.
+
+CC0 1.0 Universal
+https://creativecommons.org/publicdomain/zero/1.0/

@@ -1,6 +1,6 @@
-import { show, done } from "../ui/dialog.js";
-import { playSignal, stopSignal } from "../audio/radio.js";
-import { signalTrace } from "../ui/signal.js";
+import { show, done } from "../ui/dialog.js?v=harbor-art-1";
+import { playSignal, stopSignal, playEffect } from "../audio/sound.js?v=harbor-art-1";
+import { signalTrace } from "../ui/signal.js?v=harbor-art-1";
 
 export function createRadioScene({ getState, mark }) {
   function open() {
@@ -34,6 +34,7 @@ AUTO-REPLY · ${test.automatic ? "ON" : "OFF"}</div>
       <p class="muted">Try a ping in both switch positions, then compare with the archive. The switch on the real Kestrel is still unknown.</p>`, [
         { text: `Turn auto-reply ${test.automatic ? "off" : "on"}`, run: () => {
           stopSignal();
+          playEffect("switch");
           test.automatic = !test.automatic;
           test.result = null;
           bench();

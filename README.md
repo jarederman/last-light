@@ -12,14 +12,17 @@ A short browser RPG set in a harbor radio station on a stormy night. Explore the
 | `src/data/station.js` | Interaction positions and collision geometry |
 | `src/data/story.js` | Chapter objectives and training dialogue data |
 | `src/ui/dialog.js` | Dialog rendering, action buttons and modal lifecycle |
-| `src/audio/radio.js` | Synthesized radio signals and sound settings |
+| `src/audio/sound.js` | Downloaded ambience and effects, muting and playback lifecycle |
 | `src/scenes/radio.js` | Receiver bench, recorded signals and comparison puzzle |
 | `src/scenes/call.js` | Nell’s live call, evidence reports and follow-up reactions |
 | `src/ui/signal.js` | Accessible waveform views |
 | `tests/game-flow.cjs` | Module-based interaction and branching regression checks |
 | `src/styles/game.css` | Scene, character and menu presentation |
-| `assets/scenes/` | Signal House background |
-| `assets/characters/` | Player and Mara sprite sheet |
+| `assets/scenes/` | Exported station background and editable tile layout |
+| `assets/characters/` | Downloaded four-direction character sheets |
+| `assets/tilesets/` | Original downloaded environment atlases |
+| `assets/props/` | Downloaded electronics sprites |
+| `assets/audio/` | Compressed rain, movement and device recordings |
 | `assets/ui/` | Game icon |
 
 The game uses native JavaScript modules. The entry module imports its dependencies explicitly. Relative module and asset paths support GitHub Pages project URLs.
@@ -44,4 +47,10 @@ Publish the `main` branch from `/(root)` under **Settings → Pages → Deploy f
 
 ## Assets
 
-The station map, sprite sheet and icon are original project SVGs. Radio clicks are synthesized locally with Web Audio. There are no external fonts, downloaded art packs or runtime services.
+See [ASSET_CREDITS.md](ASSET_CREDITS.md) for the source pages, authors, licenses and modifications. All downloaded assets used in this release are CC0. Their license notices are kept in `assets/licenses/`.
+
+The environment is assembled from downloaded Kenney tiles and Airos electronics. Rebuild the exported scene with `python3 tools/build_scene.py` after installing Pillow. Its authored layout is `assets/scenes/station.layout.json`. This tool arranges existing pixels and removes the source atlas's magenta color key.
+
+Fleurman character sheets contain four columns for down, left, up and right, and three rows of walk frames. They are used without image edits. Rain starts after Begin Night Shift, pauses when the page is hidden and stops on return to the title. Audio playback failures leave the game playable.
+
+Run `node --experimental-vm-modules tests/audio.cjs` to check audio mute, visibility and replay behavior.

@@ -1,4 +1,4 @@
-import { stopSignal } from "../audio/radio.js";
+import { stopSignal, playEffect } from "../audio/sound.js?v=harbor-art-1";
 
 export const byId = (id) => document.getElementById(id);
 export const dialog = byId("dialog");
@@ -28,7 +28,7 @@ export function show(label, title, body, actions) {
       button.append(tag);
     }
     button.append(text);
-    button.addEventListener("click", run);
+    button.addEventListener("click", () => { playEffect("button"); run(); });
     return button;
   }));
   if (!dialog.open) dialog.showModal();

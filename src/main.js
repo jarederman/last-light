@@ -1,11 +1,12 @@
-import { chapters, exercises } from "./data/story.js?v=signal-report-1";
-import { interactionPoints, obstacles } from "./data/station.js";
-import { distance, findRoute } from "./core/navigation.js";
-import { isSoundOn, toggleSound } from "./audio/radio.js";
-import { byId, dialog, show, close, done, configureDialog } from "./ui/dialog.js";
+import { chapters, exercises } from "./data/story.js?v=harbor-art-1";
+import { interactionPoints, obstacles } from "./data/station.js?v=harbor-art-1";
+import { distance, findRoute } from "./core/navigation.js?v=harbor-art-1";
+import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=harbor-art-1";
+import { creditsMarkup } from "./data/credits.js?v=harbor-art-1";
+import { byId, dialog, show, close, done, configureDialog } from "./ui/dialog.js?v=harbor-art-1";
 
-import { createRadioScene } from "./scenes/radio.js";
-import { createCallScene } from "./scenes/call.js";
+import { createRadioScene } from "./scenes/radio.js?v=harbor-art-1";
+import { createCallScene } from "./scenes/call.js?v=harbor-art-1";
 
 configureDialog(stopWalking);
 
@@ -28,6 +29,7 @@ const radioScene = createRadioScene({ getState: () => state, mark });
 const callScene = createCallScene({ getState: () => state, setPhase, replyOptions });
 
 function reset() {
+  stopAmbience();
   state = {
     phase: "arrival",
     evidence: new Set(),
@@ -151,6 +153,7 @@ function frame(now) {
     renderPlayer();
   }
   player.classList.toggle("walking", moving);
+  if (moving) footstep(now);
   requestAnimationFrame(frame);
 }
 
@@ -172,6 +175,10 @@ document.addEventListener("keydown", (event) => {
   const key = event.key.toLowerCase();
   if (dialog.open) {
     if (dialog.dataset.menu === "title" && key === "escape") event.preventDefault();
+    if (dialog.dataset.menu === "credits" && key === "escape") {
+      event.preventDefault();
+      titleScreen();
+    }
     return;
   }
   if (key === "escape" || key === "j") {
@@ -199,7 +206,8 @@ function gameMenu(kind, label, title, body, actions) {
 function titleScreen() {
   gameMenu("title", "SIGNAL HOUSE", "Last Light",
     '<p>The harbor is quiet. Your first night shift is about to begin.</p><p class="muted">WASD / arrows · Move<br>E · Interact<br>J · Field journal<br>Esc · Pause</p><p class="muted">You can also click the floor to walk or select an object marker.</p>',
-    [{ text: "Begin night shift", run: close, primary: true }]);
+    [{ text: "Begin night shift", run: () => { startAmbience(); close(); }, primary: true },
+      { text: "Credits", run: () => gameMenu("credits", "LAST LIGHT", "Made with care", creditsMarkup, [{ text: "Back to title", run: titleScreen }]) }]);
 }
 
 function pause() {
@@ -322,6 +330,7 @@ function archive() {
 }
 
 function archiveDocument(id, title, body) {
+  playEffect("paper");
   mark(id);
   const actions = [{ text: "Back to the file", run: archive }, done()];
   if (id === "manual") {

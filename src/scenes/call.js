@@ -1,4 +1,5 @@
-import { show, close, done } from "../ui/dialog.js";
+import { show, close, done } from "../ui/dialog.js?v=harbor-art-1";
+import { playEffect } from "../audio/sound.js?v=harbor-art-1";
 
 // Caller reactions and report delivery share one session state so closing a
 // panel never discards a sent reply or submits the same report twice.
@@ -101,6 +102,7 @@ WAITING FOR THE NEXT CALL</p>`, [done()]);
         <dt>Crew status</dt><dd>${state.rescueChecked ? "Rescue board checked · unconfirmed" : "Not verified by this station"}</dd>
       </dl><p class="muted">Send the recording and these notes to the search team?</p>`, [
         { text: "Send recording and report", primary: true, run: () => {
+          playEffect("receipt");
           state.reportSent = true;
           state.evidence.add("report");
           show("Dispatch · Receipt", "Report received",

@@ -2,6 +2,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
+const { pathToFileURL } = require("node:url");
 
 const root = path.resolve(__dirname, "..");
 
@@ -51,7 +52,7 @@ async function startGame() {
   };
   let animate;
   const context = vm.createContext({
-    document, window: new Element(),
+    document, window: new Element(), URL,
     requestAnimationFrame(callback) { animate = callback; },
   });
   const cache = new Map();
@@ -59,6 +60,7 @@ async function startGame() {
     if (!cache.has(filename)) {
       cache.set(filename, new vm.SourceTextModule(fs.readFileSync(filename, "utf8"), {
         context, identifier: filename,
+        initializeImportMeta(meta) { meta.url = pathToFileURL(filename).href; },
       }));
     }
     return cache.get(filename);
@@ -92,8 +94,12 @@ async function startGame() {
 }
 
 async function train(game) {
-  const { action, use, title, hasAction, elements } = game;
+  const { action, use, title, hasAction, elements, key } = game;
   assert.equal(title(), "Last Light");
+  action("Credits");
+  assert.equal(title(), "Made with care");
+  key("Escape");
+  assert.equal(title(), "Last Light", "Closing credits returns to the title");
   action("Begin night shift");
   use("Mara"); action("I'll take a look");
   use("Radio"); action("Back to the station");
