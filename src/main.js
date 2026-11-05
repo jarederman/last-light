@@ -1,4 +1,4 @@
-import { chapters, exercises } from "./data/story.js";
+import { chapters, exercises } from "./data/story.js?v=signal-report-1";
 import { interactionPoints, obstacles } from "./data/station.js";
 import { distance, findRoute } from "./core/navigation.js";
 import { isSoundOn, toggleSound } from "./audio/radio.js";

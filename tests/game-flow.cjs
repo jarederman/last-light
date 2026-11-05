@@ -64,7 +64,7 @@ async function startGame() {
     return cache.get(filename);
   }
   const main = load(path.join(root, "src/main.js"));
-  await main.link((specifier, parent) => load(path.resolve(path.dirname(parent.identifier), specifier)));
+  await main.link((specifier, parent) => load(path.resolve(path.dirname(parent.identifier), specifier.split("?")[0])));
   await main.evaluate();
   let clock = 0;
   const title = () => elements["panel-title"].textContent;
