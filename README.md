@@ -1,2 +1,37 @@
-# last-light
-A short narrative RPG set in a harbor radio station.
+# Last Light
+
+A short browser RPG set in a harbor radio station on a stormy night. Explore the room, review an old signal with Mara, and take a shift at the dispatch terminal.
+
+## Project structure
+
+| Path | Responsibility |
+| --- | --- |
+| `index.html` | Game surface and dialog containers |
+| `src/main.js` | Game startup, player input, chapter progression and scene interactions |
+| `src/core/navigation.js` | Collision-aware route search and spatial calculations |
+| `src/data/station.js` | Interaction positions and collision geometry |
+| `src/data/story.js` | Chapter objectives and training dialogue data |
+| `src/ui/dialog.js` | Dialog rendering, action buttons and modal lifecycle |
+| `src/audio/radio.js` | Synthesized radio signals and sound settings |
+| `src/styles/game.css` | Scene, character and menu presentation |
+| `assets/scenes/` | Signal House background |
+| `assets/characters/` | Player and Mara sprite sheet |
+| `assets/ui/` | Game icon |
+
+The game uses native JavaScript modules. The entry module imports its dependencies explicitly. Relative module and asset paths support GitHub Pages project URLs.
+
+Runtime state is owned by `src/main.js`. Closing a menu or interaction pauses movement, and returning to the title resets the shift. Progress lasts for the current page session.
+
+## Run locally
+
+Run `python3 -m http.server 8000` from the repository root, then open `http://localhost:8000`. JavaScript modules require an HTTP server for local play.
+
+Move with **WASD** or the **arrow keys**, and press **E** near an object or NPC. Click the floor to walk, or click an object marker to approach and interact. **J** opens the journal and **Esc** opens the pause menu or closes the current panel. Touch devices have small menu buttons.
+
+## GitHub Pages
+
+Publish the `main` branch from `/(root)` under **Settings → Pages → Deploy from a branch**. The root `.nojekyll` file keeps this a static deployment. No build step is required.
+
+## Assets
+
+The station map, sprite sheet and icon are original project SVGs. Radio clicks are synthesized locally with Web Audio. There are no external fonts, downloaded art packs or runtime services.

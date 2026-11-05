@@ -1,0 +1,89 @@
+:root {
+  color-scheme: dark;
+  --bg: #10191e;
+  --panel: #162228;
+  --line: #364346;
+  --text: #f1e8d7;
+  --sub: #b7bdb1;
+  --amber: #e9bd85;
+  --aqua: #a4ccc3;
+  --mono: ui-monospace, "Cascadia Mono", "Courier New", monospace;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: radial-gradient(ellipse at 40% 0, #233136, var(--bg) 62%); color: var(--text); font: 1rem/1.5 system-ui, sans-serif; min-height: 100vh; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--aqua); outline-offset: 4px; }
+h1, h2, p { margin: 0; }
+h1, h2 { font-family: Georgia, serif; font-weight: 400; line-height: 1.08; }
+.room { position: relative; aspect-ratio: 8 / 5; background: #101a22; border-block: 1px solid var(--line); overflow: hidden; touch-action: manipulation; isolation: isolate; cursor: crosshair; }
+.station, .rain, .objects { position: absolute; inset: 0; width: 100%; height: 100%; }
+.station, .rain, .objects { pointer-events: none; }
+.station { transition: filter 1.2s ease; }
+.live .station { filter: saturate(.82) hue-rotate(-7deg) brightness(1.07); }
+.rain { background: repeating-linear-gradient(114deg, transparent 0 44px, #9aaeb014 46px 47px, transparent 48px 83px); mask-image: linear-gradient(#000 1%, #000 14%, transparent 24%); animation: rain 2s linear infinite; }
+@keyframes rain { to { background-position: -25px 44px; } }
+.sprite { position: absolute; width: 7.5%; aspect-ratio: 1; translate: -50% -88%; background: url("../../assets/characters/crew.svg") no-repeat 0 0 / 800% 100%; pointer-events: none; z-index: 2; }
+.sprite::before { position: absolute; content: ""; inset: 80% 19% 1%; border-radius: 50%; background: #18191f8c; z-index: -1; }
+.player[data-dir="up"] { background-position-x: calc(100% / 7); }
+.player[data-dir="right"] { background-position-x: calc(200% / 7); }
+.player[data-dir="left"] { background-position-x: calc(300% / 7); }
+.player.walking { animation: step .24s steps(2, jump-none) infinite; }
+@keyframes step { to { transform: translateY(-5%); } }
+.mara { background-position-x: calc(400% / 7); }
+.lamp-signal { position: absolute; width: 1.05%; aspect-ratio: 1; left: 74.6%; top: 68.6%; translate: -50% -50%; background: #f5d399; border-radius: 50%; box-shadow: 0 0 12px 4px #ecc88a77; opacity: .66; }
+.live .lamp-signal { animation: glow 2.2s ease-in-out infinite alternate; }
+@keyframes glow { from { opacity: .37; } to { opacity: 1; } }
+.objects { z-index: 3; }
+.marker { pointer-events: auto; position: absolute; translate: -50% -100%; display: flex; align-items: center; gap: 5px; border: 1px solid #87765d; background: #23272bed; color: #f8ddb5; border-radius: 4px; padding: 4px 7px; white-space: nowrap; font: clamp(9px, 1.2vw, 12px)/1.2 var(--mono); box-shadow: 0 2px 6px #0e131aaa; }
+.marker::before { content: "◇"; color: var(--amber); }
+.marker:hover, .marker.near { background: #3f392e; border-color: var(--amber); }
+.marker.current::before { content: "◆"; }
+.marker.call { border-color: var(--aqua); color: var(--aqua); }
+.prompt { position: absolute; z-index: 4; bottom: 9px; left: 50%; translate: -50% 0; width: max-content; max-width: 93%; text-align: center; color: var(--amber); background: #131d23ed; border: 1px solid #846e53; padding: 4px 8px; border-radius: 4px; font-size: 11px; pointer-events: none; }
+.eyebrow { color: var(--amber); font-size: 11px; letter-spacing: .15em; margin: 19px 0 9px; text-transform: uppercase; }
+h2 { font-size: 31px; }
+.notes { list-style: none; padding: 0; margin: 18px 0; }
+.notes li { display: flex; gap: 8px; align-items: baseline; color: var(--sub); padding: 8px 0; border-top: 1px solid var(--line); font-size: 13px; }
+.notes li::before { content: "○"; color: var(--sub); }
+.notes li[data-done="true"]::before { content: "✓"; color: var(--aqua); }
+dialog { width: min(575px, calc(100% - 26px)); max-height: 90dvh; border: 1px solid #806b51; border-radius: 8px; padding: 0; background: #18252a; color: var(--text); box-shadow: 0 16px 75px #080d12cc; }
+dialog::backdrop { background: #0a1017a8; }
+.panel { position: relative; padding: 23px clamp(15px, 4vw, 30px) 24px; }
+.panel .eyebrow { margin: 0 30px 10px 0; }
+.close { position: absolute; right: 13px; top: 10px; border: 0; background: transparent; color: var(--sub); font-size: 26px; line-height: 1; padding: 4px; }
+#panel-body { margin: 13px 0 17px; }
+#panel-body p + p { margin-top: 10px; }
+.panel .muted { color: var(--sub); font-size: .9rem; }
+.panel .record { border-left: 2px solid #8e7556; padding: 6px 12px; color: #ead7b8; background: #202d31; }
+.panel .terminal { font: .81rem/1.6 var(--mono); color: var(--aqua); border: 1px solid #485e5b; background: #141e23; padding: 9px 12px; white-space: pre-line; }
+.wave { width: 100%; height: 47px; display: block; border: 1px solid var(--line); background: #121d22; margin: 10px 0; }
+.actions { display: grid; gap: 8px; }
+.action { padding: 9px 12px; text-align: left; border: 1px solid #52605e; border-radius: 4px; background: #232f33; line-height: 1.35; }
+.action:hover { background: #2b3a3e; border-color: var(--aqua); }
+.action.primary, .action.suggested { background: #363429; border-color: #9f835d; }
+.action .tag { display: block; color: var(--amber); font: 10px var(--mono); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 4px; }
+
+@media (max-width: 430px) {
+  .marker { padding: 5px 6px; min-height: 26px; }
+  .marker::before { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* The map fills the game surface. Menus are opened on demand. */
+body { overflow: hidden; background: #0d151d; }
+.game-screen { display: grid; place-items: center; width: 100%; height: 100dvh; }
+.room { width: min(100vw, 160dvh); border: 0; }
+.marker { padding: 4px 6px; font-size: 0; border-color: transparent; background: #171f2480; box-shadow: none; }
+.marker::before { display: block; font-size: 12px; }
+.marker:hover, .marker:focus-visible { font-size: clamp(9px, 1.2vw, 12px); }
+.touch-menu { display: none; }
+@media (pointer: coarse) {
+  .touch-menu { display: flex; gap: 8px; position: fixed; top: max(10px, env(safe-area-inset-top)); right: 10px; }
+  .touch-menu button { width: 44px; height: 44px; background: #162228db; border: 1px solid var(--line); border-radius: 5px; }
+}
+dialog[data-menu="title"] { text-align: center; background: #141f25ee; }
+dialog[data-menu="title"] .close { display: none; }
+dialog[data-menu="title"] h2 { font-size: clamp(3rem, 8vw, 5rem); }
+dialog[data-menu="title"] .action { text-align: center; }
+dialog[data-menu="title"]::backdrop { background: #0b141cbc; }
