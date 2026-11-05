@@ -1,6 +1,6 @@
 export const chapters = {
   arrival: ["01 / The Archive", "Night shift", "Find Mara by the window and speak with her."],
-  archive: ["01 / The Archive", "Three clicks", "Check the Radio and Archive. Bring your conclusion to Mara."],
+  archive: ["01 / The Archive", "Three clicks", "Read the archive notes. Test the spare receiver at the Radio, compare its reply with the tape, then return to Mara."],
   lesson: ["02 / The Lesson", "On the record", "Walk to the Terminal and practice a reply."],
   trial: ["03 / The Trial", "Different ears", "Finish the two trial calls at the Terminal."],
   ready: ["04 / The First Call", "A quiet handover", "Speak to Mara before taking over the night shift."],

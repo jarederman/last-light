@@ -1,8 +1,11 @@
 import { chapters, exercises } from "./data/story.js";
 import { interactionPoints, obstacles } from "./data/station.js";
 import { distance, findRoute } from "./core/navigation.js";
-import { playSignal, stopSignal, isSoundOn, toggleSound } from "./audio/radio.js";
+import { isSoundOn, toggleSound } from "./audio/radio.js";
 import { byId, dialog, show, close, done, configureDialog } from "./ui/dialog.js";
+
+import { createRadioScene } from "./scenes/radio.js";
+import { createCallScene } from "./scenes/call.js";
 
 configureDialog(stopWalking);
 
@@ -21,12 +24,17 @@ const position = { x: 320, y: 323 };
 let state;
 let path = [];
 let destination = null;
+const radioScene = createRadioScene({ getState: () => state, mark });
+const callScene = createCallScene({ getState: () => state, setPhase, replyOptions });
 
 function reset() {
   state = {
     phase: "arrival",
     evidence: new Set(),
     rescueChecked: false,
+    receiver: { automatic: false, result: null },
+    finalReply: null,
+    reportSent: false,
     trial: 0,
     lastTrait: null,
     instinct: { warmth: 0, caution: 0, confidence: 0 },
@@ -235,7 +243,7 @@ function renderWorld() {
   stations.terminal.marker.classList.toggle("call", state.phase === "live");
   const active = {
     mara: ["arrival", "archive", "ready"].includes(state.phase),
-    radio: ["archive", "investigation"].includes(state.phase) && !state.evidence.has(live ? "live" : "tape"),
+    radio: ["archive", "investigation"].includes(state.phase) && !state.evidence.has(live ? "live" : "comparison"),
     archive: (state.phase === "archive" && (!state.evidence.has("manual") || !state.evidence.has("letter")))
       || (state.phase === "investigation" && !state.evidence.has("rechecked")),
     terminal: ["lesson", "trial", "live", "investigation"].includes(state.phase),
@@ -249,10 +257,11 @@ function renderWorld() {
 function journalRecords() {
   const records = [
     ["tape", "Kestrel's three-click recording"], ["letter", "Nell's old letter"],
-    ["manual", "Automatic reply circuit"], ["live", "Tonight's three-click signal"],
-    ["rechecked", "Old receiver notes reviewed"],
+    ["manual", "Receiver manual"], ["bench", "Automatic receiver tested"],
+    ["comparison", "Two sources, one signal"], ["live", "Tonight’s recording · 00:17:06"],
+    ["rechecked", "Old receiver notes reviewed"], ["report", "Recording delivered to search team"],
   ];
-  return document.body.classList.contains("live") ? records : records.slice(0, 3);
+  return document.body.classList.contains("live") ? records : records.slice(0, 5);
 }
 
 function setPhase(phase) {
@@ -270,18 +279,18 @@ function talk() {
   if (state.phase === "arrival") {
     show("Mara · Station keeper", "First night?", `
       <p class="record">“Hang your coat wherever it fits. I left you an old case, the Kestrel. Three clicks came over the radio. Everybody thought they knew what they meant.”</p>
-      <p>“Listen to the tape. Check Nell’s letter and the equipment notes in the archive. Then tell me what you’d put in the log.”</p>`, [
+      <p>“Listen to the tape. Check Nell’s letter and the equipment notes in the archive. There’s a matching receiver on the radio bench if you want to try it.”</p>`, [
       { text: "I'll take a look", primary: true, run: () => { setPhase("archive"); close(); } },
     ]);
   } else if (state.phase === "archive") {
-    if (["tape", "letter", "manual"].every((id) => state.evidence.has(id))) {
+    if (["tape", "letter", "manual", "comparison"].every((id) => state.evidence.has(id))) {
       show("Mara · Case review", "What goes in the log?", "<p>“If the next operator could read only one line about those clicks, what should that line say?”</p>", [
         { text: "The skipper answered by hand.", run: () => review("We know what his signal sounds like. What else could have made it?") },
         { text: "The radio may be working. The source of the clicks is uncertain.", run: () => review("That’s what I’d write. Keep the observation and the conclusion separate.") },
         { text: "The automatic reply circuit sent the clicks.", run: () => review("Possible. But the manual tells us what the set can do. It doesn’t tell us what happened.") },
       ]);
     } else {
-      show("Mara · Case review", "Take another look", "<p>“There’s the tape at the radio, and two things in the archive. Bring me all three before we write the log.”</p>", [done()]);
+      show("Mara · Case review", "Take another look", "<p>“Read the two notes, then try the spare receiver beside the radio. Compare what it does with the tape. Its microphone is unplugged.”</p>", [done()]);
     }
   } else if (state.phase === "ready") {
     show("Mara · Station keeper", "Your turn", '<p class="record">“The kettle’s still warm. I’ll leave the next one to you.”</p>', [
@@ -299,21 +308,7 @@ function review(feedback) {
 }
 
 function radio() {
-  if (state.phase === "live") {
-    show("Radio · Channel 04", "Open line", "<p>The call is holding at the Terminal.</p>", [done()]);
-    return;
-  }
-  const live = ["investigation", "ending"].includes(state.phase);
-  mark(live ? "live" : "tape");
-  show(live ? "Radio · Channel 04" : "Radio · Archive tape 07", live ? "Tonight’s signal" : "Kestrel recording", `
-    <p class="muted">${live ? "Captured after the coast station’s relay ping." : "Captured after the coast station’s relay ping, eighteen months ago."}</p>
-    <svg class="wave" viewBox="0 0 300 42" role="img" aria-label="Three distinct waveform spikes">
-      <path d="M0 21H300" stroke="#40575a" stroke-dasharray="3 5"/>
-      <path d="M0 21h50l5-2 4-14 5 32 4-16h51l5-2 4-14 5 32 4-16h51l5-2 4-14 5 32 4-16h94" fill="none" stroke="#e9bd85" stroke-width="1.6"/>
-    </svg>
-    <p>Transcript · Three short clicks at even intervals. No voice follows.</p>`, [
-    { text: "Play three clicks", run: playSignal }, done(),
-  ]);
+  radioScene.open();
 }
 
 function archive() {
@@ -331,11 +326,10 @@ function archiveDocument(id, title, body) {
   const actions = [{ text: "Back to the file", run: archive }, done()];
   if (id === "manual") {
     if (state.phase === "investigation") mark("rechecked");
-    actions.unshift({ text: "Run an automatic reply test", run: () => {
-      show("Archive · Receiver self-test", "Bench result",
-        '<p class="terminal">RELAY PING RECEIVED\nOUTPUT · THREE EVENLY SPACED CLICKS\nSOURCE · AUTOMATIC REPLY CIRCUIT</p><p>The pattern matches the archived tape.</p>',
-        [{ text: "Play automatic reply", run: playSignal }, { text: "Back to the file", run: archive }, done()]);
-      playSignal();
+    actions.unshift({ text: "Find the receiver bench", run: () => {
+      show("Archive · Equipment note", "A matching set",
+        "<p>The spare receiver is beside the radio. Its microphone is unplugged. Try sending a relay ping with its automatic reply switch in each position.</p>",
+        [done("Go to the radio")]);
     } });
   }
   show("Archive · Drawer 07", title, body, actions);
@@ -396,73 +390,11 @@ function terminal() {
     exercise(0);
   } else if (state.phase === "trial") {
     exercise(state.trial + 1);
-  } else if (state.phase === "live") {
-    show("Live terminal · Channel 04", "Nell", `
-      <p class="record">“Signal House? This is Nell. The Kestrel missed its check-in. Dad was supposed to be inside the breakwater by now.”</p>
-      <p class="record">“I heard three clicks, just like before. Does that mean he’s okay?”</p>`, [
-      { text: "“I’m here, Nell. Give me a moment.”", primary: true, run: () => { setPhase("investigation"); close(); } },
-    ]);
-  } else if (state.phase === "investigation") {
-    show("Live terminal · Channel 04", "Nell is on the line", '<p class="record">“Are you still there?”</p>', [
-      { text: "Compose a reply", primary: true, run: compose },
-      { text: "Check the rescue board", run: rescueBoard }, done("Look around the station"),
-    ]);
-  } else if (state.phase === "ending") {
-    show("Live terminal · Channel 04", "Line open", '<p class="terminal">LAST CALL ENDED\nWAITING FOR THE NEXT CALL</p>', [done()]);
+  } else if (["live", "investigation", "ending"].includes(state.phase)) {
+    callScene.open();
   } else {
     show("Dispatch terminal", "Channel closed", "<p>The terminal is standing by.</p>", [done()]);
   }
-}
-
-function rescueBoard() {
-  state.rescueChecked = true;
-  show("Live terminal · Rescue board", "No confirmed sighting", `
-    <p class="terminal">KESTREL · CHECK-IN MISSED\nSEARCH TEAM · SWEEP IN PROGRESS\nCREW STATUS · UNCONFIRMED</p>
-    <p>The search team is accepting timestamps and recordings.</p>`, [
-    { text: "Back to Nell", run: terminal }, done(),
-  ]);
-}
-
-function compose() {
-  const options = [
-    { trait: "warmth", text: "I’m here, Nell. We can keep the line open while we wait." },
-    { trait: "caution", text: "I heard the clicks too. I can’t tell from those alone whether he’s safe." },
-    { trait: "confidence", text: "Three clicks sounds like your dad. I think he’s safe." },
-  ];
-  if (state.evidence.has("live") || state.rescueChecked) {
-    options.push({
-      trait: "help",
-      text: state.evidence.has("rechecked")
-        ? "The clicks could be automatic. I’ll send the recording time to the search team."
-        : "The radio may still be working. I’ll send the time of the signal to the search team.",
-    });
-  }
-  show("Live terminal · Reply draft", "What do you tell Nell?",
-    '<p class="muted">Choose a draft. You can review it before sending.</p>', [
-      ...replyOptions(options, previewReply), { text: "Back to the call", run: terminal },
-    ]);
-}
-
-function previewReply(option) {
-  show("Live terminal · Unsent", "Your reply", `<p class="record">“${option.text}”</p>`, [
-    { text: "Send reply", primary: true, run: () => finish(option.trait) },
-    { text: "Change reply", run: compose }, done("Keep Nell on hold"),
-  ]);
-}
-
-function finish(trait) {
-  const reactions = {
-    warmth: "Thanks. I’d been sitting here listening to the rain. It helps to hear somebody.",
-    caution: "I wish you knew. Thank you for telling me what you do know.",
-    confidence: "I want to believe that. But the search team just said they still don’t know.",
-    help: "Then they’ve still got a place to start looking. Thank you.",
-  };
-  setPhase("ending");
-  show("Live terminal · Channel 04", "A light in the window",
-    `<p class="record">“${reactions[trait]}”</p><p class="record">“Will you still be here if I call again?”</p>`, [
-      { text: "“I’ll be here.”", primary: true, run: terminal },
-      done("Leave the line open"),
-    ]);
 }
 
 reset();

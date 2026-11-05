@@ -87,3 +87,15 @@ dialog[data-menu="title"] .close { display: none; }
 dialog[data-menu="title"] h2 { font-size: clamp(3rem, 8vw, 5rem); }
 dialog[data-menu="title"] .action { text-align: center; }
 dialog[data-menu="title"]::backdrop { background: #0b141cbc; }
+
+.signal-trace { margin: 12px 0; }
+.signal-trace figcaption { color: var(--sub); font: 11px/1.5 var(--mono); }
+.trace-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.report { display: grid; grid-template-columns: 100px 1fr; gap: 10px 15px; padding: 14px; border: 1px solid var(--line); background: #121d22; }
+.report dt { color: var(--sub); font: 11px/1.5 var(--mono); text-transform: uppercase; }
+.report dd { margin: 0; font-size: 14px; }
+@media (max-width: 460px) {
+  .trace-pair { grid-template-columns: 1fr; gap: 0; }
+  .report { grid-template-columns: 1fr; gap: 4px; }
+  .report dd { margin-bottom: 10px; }
+}

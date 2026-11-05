@@ -13,6 +13,10 @@ A short browser RPG set in a harbor radio station on a stormy night. Explore the
 | `src/data/story.js` | Chapter objectives and training dialogue data |
 | `src/ui/dialog.js` | Dialog rendering, action buttons and modal lifecycle |
 | `src/audio/radio.js` | Synthesized radio signals and sound settings |
+| `src/scenes/radio.js` | Receiver bench, recorded signals and comparison puzzle |
+| `src/scenes/call.js` | Nell’s live call, evidence reports and follow-up reactions |
+| `src/ui/signal.js` | Accessible waveform views |
+| `tests/game-flow.cjs` | Module-based interaction and branching regression checks |
 | `src/styles/game.css` | Scene, character and menu presentation |
 | `assets/scenes/` | Signal House background |
 | `assets/characters/` | Player and Mara sprite sheet |
@@ -27,6 +31,12 @@ Runtime state is owned by `src/main.js`. Closing a menu or interaction pauses mo
 Run `python3 -m http.server 8000` from the repository root, then open `http://localhost:8000`. JavaScript modules require an HTTP server for local play.
 
 Move with **WASD** or the **arrow keys**, and press **E** near an object or NPC. Click the floor to walk, or click an object marker to approach and interact. **J** opens the journal and **Esc** opens the pause menu or closes the current panel. Touch devices have small menu buttons.
+
+## Check the game flow
+
+Run `node --experimental-vm-modules tests/game-flow.cjs` with Node.js. The checks load the real module graph with a minimal DOM and exercise player movement, the receiver comparison, all four acts, investigation-dependent replies, report delivery, menu reopening and shift reset.
+
+The receiver bench is an isolated local test. Sending a live signal report requires capturing tonight's recording first. Reports carry the observed timestamp and only the notes the player reviewed. The ending records whether a report was actually delivered.
 
 ## GitHub Pages
 
