@@ -1,6 +1,6 @@
-import { show, done } from "../ui/dialog.js?v=language-3";
-import { playSignal, stopSignal, playEffect } from "../audio/sound.js?v=language-3";
-import { signalTrace } from "../ui/signal.js?v=language-3";
+import { show, done } from "../ui/dialog.js?v=consequences-1";
+import { playSignal, stopSignal, playEffect } from "../audio/sound.js?v=consequences-1";
+import { signalTrace } from "../ui/signal.js?v=consequences-1";
 
 export function createRadioScene({ getState, mark }) {
   function open() {
@@ -12,7 +12,8 @@ export function createRadioScene({ getState, mark }) {
     const live = ["investigation", "ending"].includes(state.phase);
     mark(live ? "live" : "tape");
     const actions = [{ text: "Play recording", run: playSignal }];
-    if (state.evidence.has("manual")) {
+    if (live) actions.push({ text: "Read tonight’s relay log", run: relayLog });
+    {
       actions.push({ text: "Open receiver bench", run: bench });
     }
     actions.push(done());
@@ -22,6 +23,13 @@ export function createRadioScene({ getState, mark }) {
 Captured after the coast station’s relay ping.</p>
       ${signalTrace(live ? "Captured live recording" : "Archived recording")}
       ${live ? '<p class="muted">Recording and timestamp saved for the rescue team.</p>' : '<p class="muted">A matching receiver sits on the bench beside the set.</p>'}`, actions);
+  }
+
+  function relayLog() {
+    mark("coverage");
+    show("Radio · Relay log", "A place to check",
+      '<p class="terminal">00:17:04 · NORTH BREAKWATER RELAY PING\n00:17:06 · THREE-CLICK RETURN\nCOVERAGE · NORTH BREAKWATER / OUTER APPROACH</p><p>This route narrows where dispatch can check next. It cannot identify the sender or confirm anyone is safe.</p>',
+      [{ text: "Back to the radio", run: open }, done()]);
   }
 
   function bench() {

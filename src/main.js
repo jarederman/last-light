@@ -1,15 +1,15 @@
-import { chapters, exercises } from "./data/story.js?v=language-3";
-import { interactionPoints, playerStart } from "./data/station.js?v=language-3";
-import { canStand, actorScale } from "./core/world.js?v=language-3";
-import { distance, findRoute } from "./core/navigation.js?v=language-3";
-import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=language-3";
-import { creditsMarkup } from "./data/credits.js?v=language-3";
-import { byId, dialog, show, close, done, configureDialog } from "./ui/dialog.js?v=language-3";
+import { chapters, exercises } from "./data/story.js?v=consequences-1";
+import { interactionPoints, playerStart } from "./data/station.js?v=consequences-1";
+import { canStand, actorScale } from "./core/world.js?v=consequences-1";
+import { distance, findRoute } from "./core/navigation.js?v=consequences-1";
+import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=consequences-1";
+import { creditsMarkup } from "./data/credits.js?v=consequences-1";
+import { byId, dialog, show, close, done, configureDialog } from "./ui/dialog.js?v=consequences-1";
 
-import { createRadioScene } from "./scenes/radio.js?v=language-3";
-import { createCallScene } from "./scenes/call.js?v=language-3";
-import { createWeather } from "./scenes/weather.js?v=language-3";
-import { t, getLanguage, setLanguage, languages } from "./i18n/index.js?v=language-3";
+import { createRadioScene } from "./scenes/radio.js?v=consequences-1";
+import { createCallScene } from "./scenes/call.js?v=consequences-1";
+import { createWeather } from "./scenes/weather.js?v=consequences-1";
+import { t, getLanguage, setLanguage, languages } from "./i18n/index.js?v=consequences-1";
 
 configureDialog(stopWalking);
 
@@ -32,7 +32,7 @@ let path = [];
 let destination = null;
 let settingsOrigin = "title";
 const radioScene = createRadioScene({ getState: () => state, mark });
-const callScene = createCallScene({ getState: () => state, setPhase, replyOptions });
+const callScene = createCallScene({ getState: () => state, setPhase, replyOptions, recommendation });
 
 function reset() {
   stopAmbience();
@@ -42,6 +42,12 @@ function reset() {
     rescueChecked: false,
     receiver: { automatic: false, result: null },
     finalReply: null,
+    training: [],
+    accountability: null,
+    correction: null,
+    reportSnapshot: null,
+    stayed: false,
+    ending: null,
     reportSent: false,
     trial: 0,
     lastTrait: null,
@@ -341,7 +347,7 @@ function journalRecords() {
     ["tape", "Kestrel's three-click recording"], ["letter", "Nell's old letter"],
     ["manual", "Receiver manual"], ["bench", "Automatic receiver tested"],
     ["comparison", "Two sources, one signal"], ["live", "Tonight’s recording · 00:17:06"],
-    ["rechecked", "Old receiver notes reviewed"], ["report", "Recording delivered to search team"],
+    ["rechecked", "Old receiver notes reviewed"], ["coverage", "North-breakwater relay coverage checked"], ["report", "Recording delivered to search team"],
   ];
   return document.body.classList.contains("live") ? records : records.slice(0, 5);
 }
@@ -360,7 +366,7 @@ function mark(id) {
 function talk() {
   if (state.phase === "arrival") {
     show("Mara · Station keeper", "First night?", `
-      <p class="record">“Hang your coat wherever it fits. I left you an old case, the Kestrel. Three clicks came over the radio. Everybody thought they knew what they meant.”</p>
+      <p class="record">“Welcome to your first night shift. Before you take real calls, we’ll review an old case: the fishing boat Kestrel. Eighteen months ago, three clicks came over its radio. The boat came home, but nobody established who or what sent those clicks.”</p>
       <p>“Listen to the tape. Check Nell’s letter and the equipment notes in the archive. There’s a matching receiver on the radio bench if you want to try it.”</p>`, [
       { text: "I'll take a look", primary: true, run: () => { setPhase("archive"); close(); } },
     ]);
@@ -412,7 +418,7 @@ function archiveDocument(id, title, body) {
     actions.unshift({ text: "Find the receiver bench", run: () => {
       show("Archive · Equipment note", "A matching set",
         "<p>The spare receiver is beside the radio. Its microphone is unplugged. Try sending a relay ping with its automatic reply switch in each position.</p>",
-        [done("Go to the radio")]);
+        [done("Return to the station")]);
     } });
   }
   show("Archive · Drawer 07", title, body, actions);
@@ -424,6 +430,12 @@ function suggestion() {
   const scores = Object.entries(state.instinct);
   scores.sort((a, b) => b[1] - a[1] || Number(b[0] === state.lastTrait) - Number(a[0] === state.lastTrait));
   return scores[0][1] > 0 ? scores[0][0] : null;
+}
+
+function recommendation() {
+  const trait = suggestion();
+  const source = state.training.findLast((entry) => entry.trait === trait);
+  return { trait, basis: source ? exercises[source.index].feedback : null };
 }
 
 function replyOptions(options, send, recommend = suggestion()) {
@@ -447,11 +459,12 @@ function trainingFeedback(index, option) {
     ? t(call.feedback)
     : `${t(earnedApproval ? "Your reply was the caller’s favorite." : "The caller preferred a different reply.")} ${t(call.feedback)}`;
   show(call.label, index === 0 ? "Mara’s example" : "After the call",
-    `<p class="record">${feedback}</p>${index === 1 ? "<p>Mara glances at the draft field. “See? It’s getting easier.”</p>" : ""}`, [
+    `<p class="record">${feedback}</p>${index === 1 ? "<p>Mara glances at the draft field. “The caller’s feedback is being filed. Watch what the next draft suggests.”</p>" : ""}`, [
       {
         text: "File this call", primary: true, run: () => {
           state.instinct[option.trait] += earnedApproval ? 3 : 1;
           state.lastTrait = option.trait;
+          state.training.push({ index, trait: option.trait, earnedApproval });
           if (index === 0) setPhase("trial");
           else {
             state.trial += 1;
@@ -466,7 +479,7 @@ function trainingFeedback(index, option) {
 function reveal() {
   setPhase("live");
   show("Signal House · Handover", "ECHO-01",
-    '<p class="terminal">TRAINING SIMULATION COMPLETE\nARCHIVE CASES LOADED\nHUMAN FEEDBACK INTEGRATED\nLIVE CALLS HANDLED: 0\n\nCHANNEL 04 · INCOMING</p>',
+    '<p class="terminal">TRAINING SIMULATION COMPLETE\nARCHIVE CASES LOADED\nHUMAN FEEDBACK INTEGRATED\nLIVE CALLS HANDLED: 0\n\nCHANNEL 04 · INCOMING</p><p>The figure you move is ECHO-01’s station avatar. Mara was the recorded training guide; her session has ended. The room remains your interface. The next voice comes from the real harbor line.</p>',
     [{ text: "Return to the station", primary: true, run: close }]);
 }
 

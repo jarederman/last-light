@@ -196,9 +196,9 @@ async function testGroundedReport() {
   action("Back to the station"); use("Live terminal");
   assert.equal(title(), "Something they can check");
   assert.ok(!game.hasAction("Prepare a signal report"), "A receipt cannot be submitted twice");
-  action("Stay with Nell"); action("I’ll be here"); assert.equal(title(), "Line open");
+  action("Stay with Nell"); action("I’ll be here"); assert.equal(title(), "The words you leave behind");
   assert.match(elements["panel-body"].innerHTML, /REPORT · RECEIVED/);
-  action("Back to the station");
+  action("Return to the station");
   key("j"); assert.match(elements["panel-body"].innerHTML, /Recording delivered/);
   action("Close journal"); key("Escape"); action("Return to title"); action("Return to title");
   assert.equal(title(), "Last Light");
@@ -321,8 +321,8 @@ async function testBilingualShift() {
   action("Back to Nell"); action("Prepare a signal report"); action("Send recording and report");
   assert.equal(title(), "报告已收到");
   action("Tell Nell the report arrived"); action("Stay with Nell"); action("I’ll be here");
-  assert.equal(title(), "线路仍然接通");
-  action("Back to the station"); key("j");
+  assert.equal(title(), "留下的话语");
+  action("Return to the station"); key("j");
   assert.ok(elements["panel-body"].innerHTML.includes(t("Recording delivered to search team")));
   action("Close journal");
   assert.equal(locale.missingTranslations().length, 0,
@@ -347,6 +347,102 @@ async function testBilingualShift() {
   assert.equal(otherBrowser.locale.getLanguage(), "en", "Other browser languages fall back to English");
 }
 
+
+async function testConsequences() {
+  // Exercise the acceptance routes in both languages, including report-first,
+  // reply-first, no reply, deferred accountability and post-ending exploration.
+  for (const language of ["en-US", "zh-CN"]) {
+    for (const route of ["corrected", "insisted", "avoided", "silent", "available", "full"]) {
+      const game = await startGame({ browserLanguage: language });
+      await train(game);
+      const { use, action, elements, t, title } = game;
+      const body = () => elements["panel-body"].innerHTML;
+      if (route === "full" || route === "insisted") {
+        use("Radio"); action("Read tonight’s relay log"); action("Back to the station");
+        if (route === "full") {
+          use("Archive"); action("Read the receiver"); action("Back to the station");
+          use("Live terminal"); action("Check the rescue board"); action("Back to Nell"); action("Look around the station");
+        }
+        use("Live terminal"); action("Prepare a signal report"); action("Send recording and report");
+        action("Tell Nell the report arrived");
+        assert.ok(game.hasAction("Compose a reply"), "Report-first leaves the reply choice available");
+      } else { use("Live terminal"); }
+      if (!["silent", "available"].includes(route)) {
+        action("Compose a reply");
+        assert.ok(body().includes(t("Draft basis")));
+        assert.ok(body().includes(t("Caller feedback · “I liked having something definite to do. ‘Wait for a report’ is hard to work with.”")));
+        action(route === "full" ? "The team has the recording" : "I think he’s safe"); action("Send reply");
+        if (route !== "full") {
+          assert.equal(title(), t("What are you sure of?"));
+          if (route === "corrected") {
+            action("Correct my assurance"); action("Back to Nell’s question");
+            assert.equal(title(), t("What are you sure of?"), "Unsent correction cannot change Nell’s response");
+            action("Correct my assurance"); action("Send correction");
+          }
+          if (route === "insisted") { assert.ok(body().includes(t("The team has your recording, but they still say his status is unconfirmed. When you say he’s safe, do you know something they don’t?"))); action("Stand by my assurance"); }
+          if (route === "avoided") action("Leave the question unanswered");
+        }
+      }
+      action("Stay with Nell"); action(route === "available" ? "Keep the channel available and end the watch" : "I’ll be here");
+      assert.equal(title(), t("The words you leave behind"));
+      const summary = body();
+      assert.ok(summary.includes(t(["silent", "available"].includes(route) ? "No answer about his safety was sent." : route === "full" ? "The team has the recording and timestamp. We still don’t know who sent the clicks." : "Three clicks sounds like your dad. I think he’s safe.")));
+      if (route === "corrected") assert.ok(summary.includes(t("I need to correct what I said. I don’t know that he’s safe. The clicks don’t establish that.")));
+      action("Return to the station");
+      use("Radio"); action("Read tonight’s relay log"); action("Back to the station");
+      use("Live terminal"); action("Review this shift");
+      assert.equal(body(), summary, "Post-ending investigation cannot rewrite the completed shift");
+      assert.equal(game.locale.missingTranslations().length, 0, JSON.stringify(game.locale.missingTranslations()));
+    }
+  }
+}
+
+
+async function testReportSnapshot() {
+  const game = await startGame();
+  await train(game);
+  const { use, action, elements } = game;
+  use("Radio"); action("Back to the station");
+  use("Live terminal"); action("Prepare a signal report"); action("Send recording and report"); action("Back to the station");
+  use("Archive"); action("Read the receiver"); action("Back to the station");
+  use("Radio"); action("Read tonight’s relay log"); action("Back to the station");
+  use("Live terminal"); action("Stay with Nell"); action("I’ll be here");
+  const text = elements["panel-body"].innerHTML;
+  assert.match(text, /Attached note: source unknown; no voice captured/);
+  assert.match(text, /request the relay coverage log/);
+  assert.doesNotMatch(text, /smaller area to check/,
+    "Investigation after delivery must not be silently attached to an old report");
+}
+
+async function testEpilogueMatrix() {
+  const module = new vm.SourceTextModule(fs.readFileSync(path.join(root, "src/data/epilogue.js"), "utf8"));
+  await module.link(() => { throw Error("Epilogue must remain independent of UI"); });
+  await module.evaluate();
+  const game = await startGame({ browserLanguage: "zh-CN" });
+  let combinations = 0;
+  const searchTexts = new Set(), companyTexts = new Set(), trustTexts = new Set();
+  for (const report of [null, { coverage: false }, { coverage: true }]) {
+    for (const stayed of [false, true]) {
+      for (const reply of [null, "warmth", "caution", "help", "confidence"]) {
+        for (const accountability of reply === "confidence" ? ["corrected", "insisted", "avoided"] : [null]) {
+          const state = { reportSent: !!report, reportSnapshot: report, stayed, finalReply: reply ? { trait: reply } : null, accountability };
+          const ending = module.namespace.epilogue(state);
+          for (const text of Object.values(ending)) assert.notEqual(game.t(text), text, "Every epilogue variation has Chinese text");
+          searchTexts.add(ending.search); companyTexts.add(ending.company); trustTexts.add(ending.trust);
+          // Each consequence responds only to its own axis.
+          const opposite = module.namespace.epilogue({ ...state, stayed: !stayed });
+          assert.equal(opposite.search, ending.search); assert.equal(opposite.trust, ending.trust);
+          assert.notEqual(opposite.company, ending.company);
+          combinations++;
+        }
+      }
+    }
+  }
+  assert.equal(combinations, 42);
+  assert.equal(searchTexts.size, 3); assert.equal(companyTexts.size, 2); assert.equal(trustTexts.size, 5);
+  assert.equal(game.locale.missingTranslations().length, 0);
+}
+
 (async () => {
   await testMovement();
   await testGroundedReport();
@@ -355,5 +451,8 @@ async function testBilingualShift() {
   await testReplySurvivesLaterInvestigation();
   await testInformedCaution();
   await testBilingualShift();
-  console.log("PASS: four acts in English/Chinese, saved language, mid-shift switching, reply/report history, storage fallback, movement, restart");
+  await testConsequences();
+  await testEpilogueMatrix();
+  await testReportSnapshot();
+  console.log("PASS: bilingual four-act flows, 12 consequence routes, 42 epilogue combinations, immutable history, language, movement, restart");
 })().catch((error) => { console.error(error); process.exitCode = 1; });

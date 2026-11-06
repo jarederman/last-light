@@ -12,6 +12,7 @@ A short browser RPG set in a harbor radio station on a stormy night. Explore the
 | `src/core/world.js` | Floor collision checks and perspective scale |
 | `src/data/station.js` | Interaction positions and collision geometry |
 | `src/data/story.js` | Chapter objectives and training dialogue data |
+| `src/data/epilogue.js` | Independent search, companionship and trust consequences |
 | `src/ui/dialog.js` | Dialog rendering, action buttons and modal lifecycle |
 | `src/i18n/` | Language preference, presentation translation and Simplified Chinese message catalog |
 | `src/audio/sound.js` | Downloaded ambience and effects, muting and playback lifecycle |
@@ -67,6 +68,30 @@ when an opener disappears, focus returns to the game area. A portrait-phone
 orientation hint appears only in the title and pause menus.
 
 The receiver bench is an isolated local test. Sending a live signal report requires capturing tonight's recording first. Reports carry the observed timestamp and only the notes the player reviewed. The ending records whether a report was actually delivered.
+
+## Spoken words and consequences
+
+Live drafts show the training feedback behind the learned suggestion. Sending
+freezes the actual wording, then-current suggested wording, training source and
+evidence context. A confident assurance prompts Nell to ask what supports it;
+the player may send a correction, stand by it, or leave the question unanswered
+and return to it later. An unsent correction has no effect. Reports can precede
+a verbal reply, and staying without answering is supported.
+
+Tonight’s relay log narrows a possible search area without proving the sender
+or anyone’s safety. Reports freeze the attached notes at delivery; subsequent
+investigation cannot add facts to an already-sent report.
+
+Ending the watch opens an in-game chapter recap with the original words, any
+sent correction, the historical suggestion and its source. Independent search,
+companionship and trust paragraphs respond to actual choices, without moral
+scores or a guaranteed rescue. The avatar remains controllable after completion;
+the terminal can reopen the frozen recap. Starting a new shift resets it.
+
+The game-flow suite covers the four acceptance routes in both languages, the
+unanswered-question route, report-first ordering, unsent corrections and recap
+stability after exploration. It also checks all 42 modular epilogue combinations
+and their Chinese translations.
 
 ## GitHub Pages
 

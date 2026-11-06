@@ -6,7 +6,7 @@ export const chapters = {
   ready: ["04 / The First Call", "A quiet handover", "Speak to Mara before taking over the night shift."],
   live: ["04 / The First Call", "Incoming", "Pick up the live call at the Terminal."],
   investigation: ["04 / The First Call", "A familiar signal", "Use the Radio, Archive or rescue board if you want to investigate. Return to the Terminal to reply."],
-  ending: ["04 / The First Call", "Still here", "The line is open. Nell knows where to find you."],
+  ending: ["04 / The First Call", "Still here", "Your watch is complete. Explore the station or review the shift at the Terminal."],
 };
 
 
