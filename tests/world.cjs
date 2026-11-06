@@ -43,7 +43,7 @@ const vm = require("node:vm");
     "Conversation does not merge the actors' foot positions");
   assert.ok(maraRoute.path.every((point) => point.x === 320 && point.y > 268),
     "The approach stops in front of Mara without a detour behind her");
-  assert.ok(actorScale(369) > actorScale(243) * 1.3);
+  assert.ok(actorScale(369) > actorScale(243) * 1.2);
   assert.ok(actorScale(400) === actorScale(377), "Depth scaling is clamped at the floor edge");
   console.log("PASS: archive corridor, desk/chair footprints, NPC clearance, front approach, perspective scale");
 })().catch((error) => { console.error(error); process.exitCode = 1; });

@@ -1,6 +1,6 @@
 import { chapters, exercises } from "./data/story.js?v=room-polish-1";
 import { interactionPoints, playerStart } from "./data/station.js?v=room-polish-1";
-import { canStand, actorScale } from "./core/world.js?v=room-polish-1";
+import { canStand, actorScale } from "./core/world.js?v=room-polish-3";
 import { distance, findRoute } from "./core/navigation.js?v=room-polish-1";
 import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=room-polish-1";
 import { creditsMarkup } from "./data/credits.js?v=room-polish-1";

@@ -12,5 +12,5 @@ export function canStand({ x, y }, maraPresent = true) {
 export function actorScale(y) {
   // Match the painted room's perspective. Scale around the feet, not the head.
   const depth = Math.max(0, Math.min(1, (y - walkBounds.top) / (walkBounds.bottom - walkBounds.top)));
-  return .92 + depth * .48;
+  return 1 + depth * .4;
 }

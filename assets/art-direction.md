@@ -20,7 +20,7 @@ figure is taller than the desks, unlike the previous miniature chibi actors.
 Collision geometry follows the final image, rather than the requested generation
 coordinates: `src/data/station.js` is authoritative.
 
-Runtime actor size varies with floor depth, from 0.92 at the back to 1.40 at the
+Runtime actor size varies with floor depth, from 1.00 at the back to 1.40 at the
 front, scaling around the foot baseline. The desktop and chair use distinct
 foreground silhouette masks and depth values. Their artwork comes from the same
 background, retaining identical textures and lighting. The large rug is placed
