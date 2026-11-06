@@ -342,7 +342,7 @@ async function testBilingualShift() {
   session.action("Settings"); chooseLanguage(session, "zh-CN");
   assert.equal(session.title(), "设置", "Language switching still works if storage is blocked");
   const browserDefault = await startGame({ browserLanguage: "zh-Hans" });
-  assert.equal(browserDefault.locale.getLanguage(), "zh-CN");
+  assert.equal(browserDefault.locale.getLanguage(), "en", "First visits default to English even with a Chinese browser");
 }
 
 (async () => {

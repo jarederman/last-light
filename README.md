@@ -40,7 +40,7 @@ Move with **WASD** or the **arrow keys**, and press **E** near an object or NPC.
 
 Open **Settings** from the title or pause menu to select **English** or **简体中文**
 and toggle sound. The browser remembers the language choice. On a first visit,
-Chinese browser languages use Simplified Chinese; other languages use English.
+the game defaults to English regardless of browser language.
 If browser storage is blocked, switching still works for the current session.
 Changing language does not reset the current shift, evidence, learned preferences
 or a sent reply. Escape returns from Settings to its originating menu.
