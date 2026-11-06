@@ -1,6 +1,6 @@
-import { show, done } from "../ui/dialog.js?v=consequences-1";
-import { playSignal, stopSignal, playEffect } from "../audio/sound.js?v=consequences-1";
-import { signalTrace } from "../ui/signal.js?v=consequences-1";
+import { show, done } from "../ui/dialog.js?v=understanding-1";
+import { playSignal, stopSignal, playEffect } from "../audio/sound.js?v=understanding-1";
+import { signalTrace } from "../ui/signal.js?v=understanding-1";
 
 export function createRadioScene({ getState, mark }) {
   function open() {
@@ -13,9 +13,7 @@ export function createRadioScene({ getState, mark }) {
     mark(live ? "live" : "tape");
     const actions = [{ text: "Play recording", run: playSignal }];
     if (live) actions.push({ text: "Read tonight’s relay log", run: relayLog });
-    {
-      actions.push({ text: "Open receiver bench", run: bench });
-    }
+    actions.push({ text: "Open receiver bench", run: bench });
     actions.push(done());
     show(live ? "Radio · Channel 04" : "Radio · Archive tape 07",
       live ? "Tonight’s signal" : "Kestrel recording",
@@ -61,6 +59,12 @@ AUTO-REPLY · ${test.automatic ? "ON" : "OFF"}</div>
   }
 
   function compare() {
+    if (!getState().evidence.has("letter")) {
+      show("Radio · Signal comparison", "One source tested",
+        '<p>The unplugged receiver can produce the recorded pattern. That shows an automatic source is possible. Read Nell’s letter in the archive before comparing it with the skipper’s signal.</p>',
+        [{ text: "Back to the bench", run: bench }, done()]);
+      return;
+    }
     show("Radio · Signal comparison", "Two sources, one pattern",
       `<div class="trace-pair">${signalTrace("Archive 07 · source unknown")}${signalTrace("Bench · automatic, microphone unplugged")}</div>
       <p>What can the match establish about the old recording?</p>`, [

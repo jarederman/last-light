@@ -10,7 +10,9 @@ export function epilogue(state) {
     ? "You stay through the next stretch of silence. Nell stops filling every pause. Before lowering the volume, she asks which channel will reach you tomorrow."
     : "You leave the channel available. Nell can call again, but tonight's conversation ends before you wait together.";
   const trust = state.finalReply?.trait !== "confidence"
-    ? state.finalReply
+    ? state.finalReply?.trait === "warmth"
+      ? "Nell heard an offer of company, not an explanation of the signal. Whether you know more about her father remains an open question between you."
+      : state.finalReply
       ? "Nell leaves with no promise that her father is safe. She knows what you could tell her, and what you could not."
       : "You never answer the question about her father's safety. Your presence is real; what she should believe about the clicks remains unsaid."
     : state.accountability === "corrected"

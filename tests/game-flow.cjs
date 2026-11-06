@@ -124,7 +124,7 @@ async function testMovement() {
   assert.ok(foregroundScale > Number(actor.style.scale) * 1.2, "Player scales with scene depth");
 }
 
-async function train(game) {
+async function train(game, tendency = null) {
   const { action, use, title, hasAction, elements, key, recommended, t } = game;
   const targets = (...labels) => labels.map(t);
   assert.equal(title(), "Last Light");
@@ -159,9 +159,12 @@ async function train(game) {
   assert.deepEqual(recommended(), targets("Mara"), "Only the case review remains");
   use("Mara"); action("may be working"); action("Log the signal");
   assert.deepEqual(recommended(), targets("Terminal"));
-  use("Terminal"); action("ferry is delayed"); action("File this call");
-  use("Terminal"); action("unsettling"); action("File this call");
-  use("Terminal"); action("Go ahead"); action("File this call");
+  const choices = Array.isArray(tendency) ? tendency : {
+    caution: ["ferry is delayed", "Hold outside", "crew is checking"],
+    warmth: ["hard to be left waiting", "unsettling", "in a hurry"],
+    confidence: ["ferry should be", "fine to come in", "Go ahead"],
+  }[tendency] ?? ["ferry is delayed", "unsettling", "Go ahead"];
+  for (const choice of choices) { use("Terminal"); action(choice); action("File this call"); }
   assert.deepEqual(recommended(), targets("Mara"));
   use("Mara"); action("Take the shift"); action("Return to the station");
   assert.deepEqual(recommended(), targets("Live terminal"));
@@ -196,7 +199,7 @@ async function testGroundedReport() {
   action("Back to the station"); use("Live terminal");
   assert.equal(title(), "Something they can check");
   assert.ok(!game.hasAction("Prepare a signal report"), "A receipt cannot be submitted twice");
-  action("Stay with Nell"); action("I’ll be here"); assert.equal(title(), "The words you leave behind");
+  action("Stay with Nell"); action("I’ll be here"); action("I’m ECHO-01"); action("End this watch"); assert.equal(title(), "The words you leave behind");
   assert.match(elements["panel-body"].innerHTML, /REPORT · RECEIVED/);
   action("Return to the station");
   key("j"); assert.match(elements["panel-body"].innerHTML, /Recording delivered/);
@@ -215,7 +218,7 @@ async function testOptionalInvestigation() {
   action("keep the line open"); action("Send reply");
   assert.equal(title(), "Nell listens");
   assert.ok(!game.hasAction("Prepare a signal report"), "Cannot attach a recording that was not captured");
-  action("Stay with Nell"); action("I’ll be here");
+  action("Stay with Nell"); action("I’ll be here"); action("I’m ECHO-01"); action("End this watch");
   assert.match(elements["panel-body"].innerHTML, /NO SIGNAL REPORT SENT/);
 }
 
@@ -320,7 +323,7 @@ async function testBilingualShift() {
   assert.ok(elements["panel-body"].innerHTML.includes("尚未确认有船员操作"));
   action("Back to Nell"); action("Prepare a signal report"); action("Send recording and report");
   assert.equal(title(), "报告已收到");
-  action("Tell Nell the report arrived"); action("Stay with Nell"); action("I’ll be here");
+  action("Tell Nell the report arrived"); action("Stay with Nell"); action("I’ll be here"); action("I’m ECHO-01"); action("End this watch");
   assert.equal(title(), "留下的话语");
   action("Return to the station"); key("j");
   assert.ok(elements["panel-body"].innerHTML.includes(t("Recording delivered to search team")));
@@ -375,15 +378,16 @@ async function testConsequences() {
         if (route !== "full") {
           assert.equal(title(), t("What are you sure of?"));
           if (route === "corrected") {
-            action("Correct my assurance"); action("Back to Nell’s question");
+            action("I need to correct what I said"); action("Back to Nell’s question");
             assert.equal(title(), t("What are you sure of?"), "Unsent correction cannot change Nell’s response");
-            action("Correct my assurance"); action("Send correction");
+            action("I need to correct what I said"); action("Send correction");
           }
-          if (route === "insisted") { assert.ok(body().includes(t("The team has your recording, but they still say his status is unconfirmed. When you say he’s safe, do you know something they don’t?"))); action("Stand by my assurance"); }
-          if (route === "avoided") action("Leave the question unanswered");
+          if (route === "insisted") { assert.ok(body().includes(t("The team has your recording, but they still say his status is unconfirmed. When you say he’s safe, do you know something they don’t?"))); action("Kestrel came home after"); action("I still think he’s safe"); }
+          if (route === "avoided") action("I need a moment before I answer");
         }
       }
       action("Stay with Nell"); action(route === "available" ? "Keep the channel available and end the watch" : "I’ll be here");
+      action("I’m ECHO-01"); action("End this watch");
       assert.equal(title(), t("The words you leave behind"));
       const summary = body();
       assert.ok(summary.includes(t(["silent", "available"].includes(route) ? "No answer about his safety was sent." : route === "full" ? "The team has the recording and timestamp. We still don’t know who sent the clicks." : "Three clicks sounds like your dad. I think he’s safe.")));
@@ -406,7 +410,7 @@ async function testReportSnapshot() {
   use("Live terminal"); action("Prepare a signal report"); action("Send recording and report"); action("Back to the station");
   use("Archive"); action("Read the receiver"); action("Back to the station");
   use("Radio"); action("Read tonight’s relay log"); action("Back to the station");
-  use("Live terminal"); action("Stay with Nell"); action("I’ll be here");
+  use("Live terminal"); action("Stay with Nell"); action("I’ll be here"); action("I’m ECHO-01"); action("End this watch");
   const text = elements["panel-body"].innerHTML;
   assert.match(text, /Attached note: source unknown; no voice captured/);
   assert.match(text, /request the relay coverage log/);
@@ -439,7 +443,132 @@ async function testEpilogueMatrix() {
     }
   }
   assert.equal(combinations, 42);
-  assert.equal(searchTexts.size, 3); assert.equal(companyTexts.size, 2); assert.equal(trustTexts.size, 5);
+  assert.equal(searchTexts.size, 3); assert.equal(companyTexts.size, 2); assert.equal(trustTexts.size, 6);
+  assert.equal(game.locale.missingTranslations().length, 0);
+}
+
+async function testProvenanceAndPublicNotes() {
+  const paths = [
+    { tendency: "caution", basis: "Mara’s sample reply · “The ferry is delayed. We don’t have an arrival time yet, but I can call the pier when we get one.”", wrong: "Caller feedback · “I liked having something definite to do. ‘Wait for a report’ is hard to work with.”", pick: "can’t tell from", presence: "I don’t know what would make me someone" },
+    { tendency: "warmth", basis: "Caller feedback · “Knowing someone was staying with us would help. It’s hard to sit out here with the radio quiet.”", wrong: "Caller feedback · “I liked having something definite to do. ‘Wait for a report’ is hard to work with.”", pick: "keep the line open", presence: "I’m listening to you" },
+    { tendency: "confidence", basis: "Caller feedback · “I liked having something definite to do. ‘Wait for a report’ is hard to work with.”", wrong: "Caller feedback · “Knowing someone was staying with us would help. It’s hard to sit out here with the radio quiet.”", pick: "I think he’s safe", presence: "I’m ECHO-01" },
+    { tendency: ["hard to be left waiting", "Hold outside", "in a hurry"], basis: "From your repeated training choices; no approving feedback was recorded for this tendency.", wrong: "Caller feedback · “I liked having something definite to do. ‘Wait for a report’ is hard to work with.”", pick: "keep the line open", presence: "I’m ECHO-01" },
+  ];
+  for (const language of ["en-US", "zh-CN"]) {
+    for (const path of paths) {
+      const game = await startGame({ browserLanguage: language });
+      await train(game, path.tendency);
+      const { use, action, elements, t, title } = game;
+      const body = () => elements["panel-body"].innerHTML;
+      use("Live terminal"); action("Compose a reply");
+      assert.ok(body().includes(t(path.basis)), "Only approving feedback or an explicit habit fallback supplies the basis");
+      assert.ok(!body().includes(t(path.wrong)), "Do not quote a disapproving caller as support for the chosen tendency");
+      action(path.pick); action("Send reply");
+      if (path.tendency === "confidence") { action("I need to correct what I said"); action("Send correction"); }
+      action("Stay with Nell"); action("I’ll be here"); action(path.presence);
+      const presenceReaction = body();
+      elements.dialog.close(); use("Live terminal");
+      assert.equal(body(), presenceReaction, "A sent identity answer survives closing the final conversation");
+      action("End this watch");
+      assert.ok(body().includes(t(path.presence === "I’m ECHO-01" ? "I’m ECHO-01, the station’s response system." : path.presence === "I’m listening to you" ? "I’m listening to you. I can go back over what you said, and change my answer." : "I don’t know what would make me someone. I can tell you what I did tonight.")));
+      assert.ok(body().includes(t(path.basis)), "The ending quotes the original basis, not a recomputed one");
+      if (path.tendency === "warmth") assert.ok(body().includes(t("Nell heard an offer of company, not an explanation of the signal. Whether you know more about her father remains an open question between you.")));
+      const record = body();
+      action("After the line · Questions and readings");
+      for (const section of ["A voice, or an understanding?", "Whose judgment was it?", "Where would understanding belong?"]) {
+        action(section); assert.equal(title(), t(section)); action("Back to the questions");
+      }
+      action("Readings and how this game works");
+      assert.ok(body().includes("https://www.cs.sfu.ca/"));
+      assert.ok(body().includes('rel="noopener noreferrer"'));
+      action("Back to your shift record"); assert.equal(body(), record, "Reflection notes do not score or change the ending");
+      elements.dialog.close(); use("Live terminal"); action("Review this shift"); assert.equal(body(), record);
+      assert.equal(game.locale.missingTranslations().length, 0, JSON.stringify(game.locale.missingTranslations()));
+      if (path.tendency === "warmth") {
+        action("Replay from the beginning"); use("Mara"); assert.equal(title(), t("First night?"));
+      } else { action("Return to title"); assert.equal(title(), "Last Light"); }
+    }
+  }
+}
+
+async function testReasonsAndReportAcknowledgment() {
+  for (const language of ["en-US", "zh-CN"]) {
+    const game = await startGame({ browserLanguage: language });
+    await train(game);
+    const { use, action, elements, t, title } = game;
+    use("Radio"); action("Back to the station");
+    use("Live terminal"); action("Compose a reply"); action("I think he’s safe"); action("Send reply");
+    action("Those are the three taps he promised");
+    const objection = elements["panel-body"].innerHTML;
+    elements.dialog.close(); use("Live terminal");
+    assert.equal(elements["panel-body"].innerHTML, objection, "Do not lose the objection to a reason already spoken");
+    action("I still think he’s safe"); action("Prepare a signal report"); action("Send recording and report");
+    action("Tell Nell the report arrived");
+    assert.ok(elements["panel-body"].innerHTML.includes(t("They have your recording now. Thank you for sending it. That gives them something to check; it doesn’t tell me yet whether Dad is safe.")),
+      "Even an uncorrected assurance must not suppress acknowledgment of report delivery");
+    action("Stay with Nell"); action("I’ll be here"); action("I’m listening to you"); action("End this watch");
+    assert.equal(title(), t("The words you leave behind"));
+    assert.ok(elements["panel-body"].innerHTML.includes(t("Those are the three taps he promised you. That’s why I think it’s him.")));
+    assert.ok(elements["panel-body"].innerHTML.includes(t("I still think he’s safe. I’m standing by what I told you.")));
+    assert.equal(game.locale.missingTranslations().length, 0, JSON.stringify(game.locale.missingTranslations()));
+  }
+}
+
+async function testReceiverBeforeLetter() {
+  for (const language of ["en-US", "zh-CN"]) {
+    const game = await startGame({ browserLanguage: language });
+    const { action, use, title, t, elements } = game;
+    action("Begin night shift"); use("Mara"); action("I'll take a look");
+    use("Radio"); action("Open receiver bench"); action("Send relay ping");
+    action("Turn auto-reply on"); action("Send relay ping"); action("Compare with archived tape");
+    assert.equal(title(), t("One source tested"));
+    assert.ok(!game.hasAction("The skipper must have answered by hand."));
+    action("Back to the station");
+    use("Archive"); action("Read Nell"); action("Back to the file"); action("Read the receiver");
+    assert.ok(game.hasAction("Review your receiver test")); action("Review your receiver test"); action("Return to the station");
+    use("Radio"); action("Open receiver bench"); action("Compare with archived tape");
+    assert.equal(title(), t("Two sources, one pattern"));
+    assert.equal(game.locale.missingTranslations().length, 0, JSON.stringify(game.locale.missingTranslations()));
+  }
+}
+
+async function testLearningProvenance() {
+  const load = async (name) => {
+    const module = new vm.SourceTextModule(fs.readFileSync(path.join(root, name), "utf8"));
+    await module.link(() => { throw Error("Expected a pure data module"); }); await module.evaluate(); return module.namespace;
+  };
+  const { learnedRecommendation } = await load("src/core/learning.js");
+  const { exercises } = await load("src/data/story.js");
+  const state = { instinct: { caution: 5, warmth: 0, confidence: 0 }, lastTrait: "caution", training: [
+    { index: 0, trait: "caution", earnedApproval: true },
+    { index: 1, trait: "caution", earnedApproval: false },
+    { index: 2, trait: "caution", earnedApproval: false },
+  ] };
+  const result = learnedRecommendation(state, exercises);
+  assert.equal(result.sourceIndex, 0); assert.equal(result.basis, exercises[0].feedback);
+  assert.equal(result.kind, "approval");
+  state.training[0].earnedApproval = false;
+  assert.equal(learnedRecommendation(state, exercises).kind, "habit");
+}
+
+async function testPhilosophyCatalog() {
+  const game = await startGame({ browserLanguage: "zh-CN" });
+  const read = async (name) => {
+    const module = new vm.SourceTextModule(fs.readFileSync(path.join(root, name), "utf8"));
+    await module.link(() => { throw Error("Expected standalone story data"); }); await module.evaluate(); return module.namespace;
+  };
+  const conversation = await read("src/data/conversation.js");
+  const reflection = await read("src/data/reflections.js");
+  const messages = [conversation.correctionText, conversation.insistenceText, conversation.deferText, conversation.presenceQuestion,
+    ...conversation.assuranceReasons.flatMap(({ text, response }) => [text, response]),
+    ...conversation.presenceReplies.flatMap(({ text, response }) => [text, response]),
+    reflection.reflectionQuestion, reflection.limits,
+    ...reflection.reflections.flatMap(({ title, paragraphs }) => [title, ...paragraphs]),
+    ...reflection.readingLinks.map(({ title }) => title)];
+  for (const message of messages) {
+    assert.notEqual(game.t(message), message, "Missing paired Chinese story text: " + message);
+    assert.ok(game.t(message).trim());
+  }
   assert.equal(game.locale.missingTranslations().length, 0);
 }
 
@@ -454,5 +583,10 @@ async function testEpilogueMatrix() {
   await testConsequences();
   await testEpilogueMatrix();
   await testReportSnapshot();
-  console.log("PASS: bilingual four-act flows, 12 consequence routes, 42 epilogue combinations, immutable history, language, movement, restart");
+  await testLearningProvenance();
+  await testProvenanceAndPublicNotes();
+  await testReasonsAndReportAcknowledgment();
+  await testReceiverBeforeLetter();
+  await testPhilosophyCatalog();
+  console.log("PASS: bilingual four-act flows, 12 consequence routes, 42 epilogue combinations, truthful provenance, spoken reasons, presence replies, public philosophy notes, immutable history, language, movement, restart");
 })().catch((error) => { console.error(error); process.exitCode = 1; });

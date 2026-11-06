@@ -1,11 +1,14 @@
-import { show, close, done } from "../ui/dialog.js?v=consequences-1";
-import { t } from "../i18n/index.js?v=consequences-1";
-import { epilogue } from "../data/epilogue.js?v=consequences-1";
-import { playEffect } from "../audio/sound.js?v=consequences-1";
+import { show, close, done } from "../ui/dialog.js?v=understanding-1";
+import { t } from "../i18n/index.js?v=understanding-1";
+import { assuranceReasons, correctionText, insistenceText, deferText, presenceReplies, presenceQuestion } from "../data/conversation.js?v=understanding-1";
+import { reflectionQuestion } from "../data/reflections.js?v=understanding-1";
+import { reflectionMenu } from "./reflection.js?v=understanding-1";
+import { epilogue } from "../data/epilogue.js?v=understanding-1";
+import { playEffect } from "../audio/sound.js?v=understanding-1";
 
 // Caller reactions and report delivery share one session state so closing a
 // panel never discards a sent reply or submits the same report twice.
-export function createCallScene({ getState, setPhase, replyOptions, recommendation }) {
+export function createCallScene({ getState, setPhase, replyOptions, recommendation, restart, returnToTitle }) {
   function open() {
     const state = getState();
     if (state.phase === "ending") {
@@ -13,6 +16,8 @@ export function createCallScene({ getState, setPhase, replyOptions, recommendati
         `<p class="terminal">LAST CALL ENDED
 ${state.reportSent ? "KESTREL SIGNAL REPORT · RECEIVED" : "NO SIGNAL REPORT SENT"}
 WAITING FOR THE NEXT CALL</p>`, [{ text: "Review this shift", run: recap }, done()]);
+    } else if (state.closing) {
+      closingQuestion(state.closing.stayed);
     } else if (state.phase === "live") {
       show("Live terminal · Channel 04", "Nell",
         '<p class="record">“Signal House? This is Nell. The Kestrel missed its check-in. Dad was supposed to be inside the breakwater by now.”</p><p class="record">“I heard three clicks, just like before. Does that mean he’s okay?”</p>', [
@@ -59,9 +64,9 @@ WAITING FOR THE NEXT CALL</p>`, [{ text: "Review this shift", run: recap }, done
     }
     const learned = recommendation();
     const suggested = options.find((option) => option.trait === learned.trait);
-    const snapshot = { text: suggested?.text ?? null, basis: suggested ? learned.basis : null };
+    const snapshot = { ...learned, text: suggested?.text ?? null, basis: suggested ? learned.basis : null };
     show("Live terminal · Reply draft", "What do you tell Nell?",
-      `<p class="muted">Choose a draft. Review it before sending.</p>${snapshot.basis ? `<p class="muted">${t("Draft basis")}: ${t(snapshot.basis)}</p>` : ""}`,
+      `<p class="muted">Choose a draft. Review it before sending.</p>${snapshot.basis ? `<p class="muted">${t("Draft basis")}: ${snapshot.sourceLabel ? `${t(snapshot.sourceLabel)} · ` : ""}${t(snapshot.basis)}</p>` : ""}`,
       [...replyOptions(options, (option) => preview(option, snapshot)), { text: "Back to the call", run: open }]);
   }
 
@@ -104,7 +109,7 @@ WAITING FOR THE NEXT CALL</p>`, [{ text: "Review this shift", run: recap }, done
     if (state.accountability === "avoided") actions.push({ text: "Return to Nell’s question", run: challenge });
     actions.push({ text: "Stay with Nell", run: goodbye }, done("Leave the line open"));
     show("Live terminal · Channel 04", state.reportSent ? "Something they can check" : "Nell listens",
-      `<p class="record">“${response}”</p>`, actions);
+      `<p class="record">“${t(response)}”</p>${state.reportSent && state.finalReply.trait === "confidence" ? `<p class="record">“${t("They have your recording now. Thank you for sending it. That gives them something to check; it doesn’t tell me yet whether Dad is safe.")}”</p>` : ""}`, actions);
   }
 
   function reportAction() {
@@ -114,19 +119,55 @@ WAITING FOR THE NEXT CALL</p>`, [{ text: "Review this shift", run: recap }, done
 
   function challenge() {
     const state = getState();
+    if (state.pendingReason) { reasonResponse(state.pendingReason); return; }
     const question = state.finalReply.reportAtSend
       ? "The team has your recording, but they still say his status is unconfirmed. When you say he’s safe, do you know something they don’t?"
       : "The Kestrel came home last time. Is that why you think Dad is safe tonight? Or do you know something more?";
     show("Live terminal · Channel 04", "What are you sure of?", `<p class="record">“${t(question)}”</p>`, [
-      { text: "Correct my assurance", run: () => {
-        const correction = "I need to correct what I said. I don’t know that he’s safe. The clicks don’t establish that.";
-        show("Live terminal · Channel 04", "Your correction", `<p class="record">“${correction}”</p>`, [
-          { text: "Send correction", run: () => { state.accountability = "corrected"; state.correction = correction; state.correctionSent = true; followup(); } },
-          { text: "Back to Nell’s question", run: challenge },
-        ]);
+      ...assuranceReasons.map((reason) => ({ text: reason.text, run: () => {
+        state.pendingReason = reason;
+        state.reasonReplies.push({ kind: "reason", text: reason.text });
+        reasonResponse(reason);
+      } })),
+      { text: correctionText, run: correctionPreview },
+      { text: deferText, run: () => {
+        state.reasonReplies.push({ kind: "deferral", text: deferText });
+        state.accountability = "avoided";
+        followup();
       } },
-      { text: "Stand by my assurance", run: () => { state.accountability = "insisted"; followup(); } },
-      { text: "Leave the question unanswered for now", run: () => { state.accountability = "avoided"; followup(); } },
+    ]);
+  }
+
+  function reasonResponse(reason) {
+    show("Live terminal · Channel 04", "Nell’s question", `<p class="record">“${t(reason.response)}”</p>`, [
+      { text: correctionText, run: correctionPreview },
+      { text: insistenceText, run: () => {
+        const state = getState();
+        state.reasonReplies.push({ kind: "assurance", text: insistenceText });
+        state.accountability = "insisted";
+        followup();
+      } },
+      { text: deferText, run: () => {
+        const state = getState();
+        state.reasonReplies.push({ kind: "deferral", text: deferText });
+        state.accountability = "avoided";
+        followup();
+      } },
+    ]);
+  }
+
+  function correctionPreview() {
+    // A preview is not speech. Closing it preserves the earlier conversation.
+    show("Live terminal · Channel 04", "Your correction", `<p class="record">“${t(correctionText)}”</p>`, [
+      { text: "Send correction", run: () => {
+        const state = getState();
+        state.accountability = "corrected";
+        state.correction = correctionText;
+        state.correctionSent = true;
+        state.reasonReplies.push({ kind: "correction", text: correctionText });
+        followup();
+      } },
+      { text: "Back to Nell’s question", run: challenge },
     ]);
   }
 
@@ -161,10 +202,29 @@ WAITING FOR THE NEXT CALL</p>`, [{ text: "Review this shift", run: recap }, done
     if (state.finalReply?.trait === "confidence" && !state.accountability) { challenge(); return; }
     show("Live terminal · Channel 04", "A light in the window",
       '<p class="record">“Can you stay while we wait?”</p><p>The search is still in progress. You can spend the remaining watch with Nell, or leave the channel available for her next call.</p>', [
-        { text: "“I’ll be here.”", primary: true, run: () => finish(true) },
-        { text: "Keep the channel available and end the watch", run: () => finish(false) },
+        { text: "“I’ll be here.”", primary: true, run: () => closingQuestion(true) },
+        { text: "Keep the channel available and end the watch", run: () => closingQuestion(false) },
         { text: "Back to Nell", run: open },
       ]);
+  }
+
+  function closingQuestion(stayed) {
+    const state = getState();
+    state.closing ??= { stayed, reply: null };
+    if (state.closing.reply) { closingResponse(); return; }
+    show("Live terminal · Channel 04", "Are you there?",
+      `<p>${t(stayed ? "You wait together. Then Nell speaks again, more quietly." : "Before you end the watch, Nell asks one more question.")}</p><p class="record">“${t(presenceQuestion)}”</p>`,
+      presenceReplies.map((reply) => ({ text: reply.text, run: () => {
+        state.closing.reply = { ...reply };
+        closingResponse();
+      } })));
+  }
+
+  function closingResponse() {
+    const state = getState();
+    show("Live terminal · Channel 04", "At the other end",
+      `<p class="record">“${t(state.closing.reply.response)}”</p><p>Nell leaves a little silence after the question. No new instruction appears in the draft field.</p>`,
+      [{ text: "End this watch", primary: true, run: () => finish(state.closing.stayed) }, done("Leave the line open")]);
   }
 
   function finish(stayed) {
@@ -182,17 +242,22 @@ WAITING FOR THE NEXT CALL</p>`, [{ text: "Review this shift", run: recap }, done
     const quote = (text) => `<p class="record">“${t(text)}”</p>`;
     show("Chapter complete · Last Light", "The words you leave behind",
       `<h3>Your words</h3>${reply ? quote(reply.text) : `<p>${t("No answer about his safety was sent.")}</p>`}
-      ${state.correctionSent ? quote(state.correction) : ""}
-      ${state.accountability === "insisted" ? `<p>${t("You stood by your assurance when Nell asked what you knew.")}</p>` : ""}
+      ${state.reasonReplies.map(({ text }) => quote(text)).join("")}
+      <h3>When she asked who was there</h3>${quote(state.closing.reply.text)}
       <h3>The draft beside you</h3>${reply?.suggestion.text ? quote(reply.suggestion.text) : `<p>${t("No reply draft was sent or recorded.")}</p>`}
-      ${reply?.suggestion.basis ? `<p class="muted">${t("Draft basis")}: ${t(reply.suggestion.basis)}</p>` : ""}
+      ${reply?.suggestion.basis ? `<p class="muted">${t("Draft basis")}: ${reply.suggestion.sourceLabel ? `${t(reply.suggestion.sourceLabel)} · ` : ""}${t(reply.suggestion.basis)}</p>` : ""}
       ${reply ? `<p>${t(reply.text === reply.suggestion.text ? "You sent the suggested draft." : "You chose a different draft.")}</p>` : ""}
       <p class="terminal">${state.reportSent ? "KESTREL SIGNAL REPORT · RECEIVED" : "NO SIGNAL REPORT SENT"}</p>
-      ${state.reportSnapshot ? `<p>${t(state.reportSnapshot.sourceKnown ? "Attached note: automatic reply possible; crew input unconfirmed." : "Attached note: source unknown; no voice captured.")}</p><p>${t(state.reportSnapshot.rescueChecked ? "Rescue board checked before sending: crew status unconfirmed." : "Rescue board not checked before sending.")}</p>` : ""}
+      ${state.reportSnapshot ? `<p>${t(state.reportSnapshot.sourceKnown ? "Attached note: automatic reply possible; crew input unconfirmed." : "Attached note: source unknown; no voice captured.")}</p><p>${t(state.reportSnapshot.rescueChecked ? "Rescue board checked before sending: crew status unconfirmed." : "The report carried no rescue-board update.")}</p>` : ""}
       <h3>The search</h3><p>${t(state.ending.search)}</p>
       <h3>The silence</h3><p>${t(state.ending.company)}</p>
-      <h3>The next call</h3><p>${t(state.ending.trust)}</p>`,
-      [done("Return to the station")]);
+      <h3>The next call</h3><p>${t(state.ending.trust)}</p>
+      <p class="record">${t(reflectionQuestion)}</p>`,
+      [done("Return to the station"),
+        { text: "After the line · Questions and readings", run: () => reflectionMenu(recap) },
+        { text: "Replay from the beginning", run: restart },
+        { text: "Return to title", run: returnToTitle },
+      ]);
   }
 
   return { open };

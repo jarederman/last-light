@@ -13,6 +13,10 @@ A short browser RPG set in a harbor radio station on a stormy night. Explore the
 | `src/data/station.js` | Interaction positions and collision geometry |
 | `src/data/story.js` | Chapter objectives and training dialogue data |
 | `src/data/epilogue.js` | Independent search, companionship and trust consequences |
+| `src/core/learning.js` | Learned tendency and truthful approval/habit provenance |
+| `src/data/conversation.js` | Spoken reasons, objections and final presence replies |
+| `src/data/reflections.js` | Public philosophy questions, primary readings and scope limits |
+| `src/scenes/reflection.js` | Optional post-story notes |
 | `src/ui/dialog.js` | Dialog rendering, action buttons and modal lifecycle |
 | `src/i18n/` | Language preference, presentation translation and Simplified Chinese message catalog |
 | `src/audio/sound.js` | Downloaded ambience and effects, muting and playback lifecycle |
@@ -74,9 +78,17 @@ The receiver bench is an isolated local test. Sending a live signal report requi
 Live drafts show the training feedback behind the learned suggestion. Sending
 freezes the actual wording, then-current suggested wording, training source and
 evidence context. A confident assurance prompts Nell to ask what supports it;
-the player may send a correction, stand by it, or leave the question unanswered
-and return to it later. An unsent correction has no effect. Reports can precede
-a verbal reply, and staying without answering is supported.
+the player can give a concrete reason (the previous safe return or the agreed
+three taps), hear Nell challenge that reason, then send a correction, stand by
+the assurance, or defer. The transcript retains the words actually sent. An unsent correction has no effect. Reports can precede
+a verbal reply, and staying without answering the safety question is supported.
+
+At sign-off, Nell asks what ECHO means by “I’m here.” Three unscored replies
+receive different responses; no answer certifies consciousness. The handover
+identifies the player’s own trial choices as ECHO’s training history. Draft
+provenance quotes an approving feedback event for the recommended tendency;
+when there was no approval, it explicitly credits repeated choice rather than
+misrepresenting a caller’s criticism as support.
 
 Tonight’s relay log narrows a possible search area without proving the sender
 or anyone’s safety. Reports freeze the attached notes at delivery; subsequent
@@ -91,7 +103,22 @@ the terminal can reopen the frozen recap. Starting a new shift resets it.
 The game-flow suite covers the four acceptance routes in both languages, the
 unanswered-question route, report-first ordering, unsent corrections and recap
 stability after exploration. It also checks all 42 modular epilogue combinations
-and their Chinese translations.
+and their Chinese translations. Additional regressions cover all three learned
+tendencies, unapproved habits, reason-specific objections, closing identity
+answers, report acknowledgment after an uncorrected assurance, receiver-before-
+letter ordering, reflection navigation and replay.
+
+## Public philosophy
+
+The sign-off returns the old signal’s ambiguity to ECHO’s own voice. Optional
+post-story notes explain conversational evidence, the Chinese Room, learning
+and the systems reply in plain language, with links to the original papers.
+They also state the limits of a scripted game controlled by a human player.
+The notes do not change the ending or award a philosophical score.
+
+See [docs/philosophy.md](docs/philosophy.md) for the bilingual course explanation,
+mechanism-to-question mapping and primary readings. The course requires an advance proposal
+to the instructor or TA; this explanation does not record whether approval has been obtained.
 
 ## GitHub Pages
 

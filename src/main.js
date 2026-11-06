@@ -1,15 +1,16 @@
-import { chapters, exercises } from "./data/story.js?v=consequences-1";
-import { interactionPoints, playerStart } from "./data/station.js?v=consequences-1";
-import { canStand, actorScale } from "./core/world.js?v=consequences-1";
-import { distance, findRoute } from "./core/navigation.js?v=consequences-1";
-import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=consequences-1";
-import { creditsMarkup } from "./data/credits.js?v=consequences-1";
-import { byId, dialog, show, close, done, configureDialog } from "./ui/dialog.js?v=consequences-1";
+import { learnedRecommendation } from "./core/learning.js?v=understanding-1";
+import { chapters, exercises } from "./data/story.js?v=understanding-1";
+import { interactionPoints, playerStart } from "./data/station.js?v=understanding-1";
+import { canStand, actorScale } from "./core/world.js?v=understanding-1";
+import { distance, findRoute } from "./core/navigation.js?v=understanding-1";
+import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=understanding-1";
+import { creditsMarkup } from "./data/credits.js?v=understanding-1";
+import { byId, dialog, show, close, done, configureDialog } from "./ui/dialog.js?v=understanding-1";
 
-import { createRadioScene } from "./scenes/radio.js?v=consequences-1";
-import { createCallScene } from "./scenes/call.js?v=consequences-1";
-import { createWeather } from "./scenes/weather.js?v=consequences-1";
-import { t, getLanguage, setLanguage, languages } from "./i18n/index.js?v=consequences-1";
+import { createRadioScene } from "./scenes/radio.js?v=understanding-1";
+import { createCallScene } from "./scenes/call.js?v=understanding-1";
+import { createWeather } from "./scenes/weather.js?v=understanding-1";
+import { t, getLanguage, setLanguage, languages } from "./i18n/index.js?v=understanding-1";
 
 configureDialog(stopWalking);
 
@@ -32,7 +33,10 @@ let path = [];
 let destination = null;
 let settingsOrigin = "title";
 const radioScene = createRadioScene({ getState: () => state, mark });
-const callScene = createCallScene({ getState: () => state, setPhase, replyOptions, recommendation });
+const callScene = createCallScene({ getState: () => state, setPhase, replyOptions, recommendation,
+  restart: () => { reset(); startAmbience(); },
+  returnToTitle: () => { reset(); titleScreen(); },
+});
 
 function reset() {
   stopAmbience();
@@ -42,6 +46,10 @@ function reset() {
     rescueChecked: false,
     receiver: { automatic: false, result: null },
     finalReply: null,
+    reasonReplies: [],
+    pendingReason: null,
+    correctionSent: false,
+    closing: null,
     training: [],
     accountability: null,
     correction: null,
@@ -415,9 +423,11 @@ function archiveDocument(id, title, body) {
   const actions = [{ text: "Back to the file", run: archive }, done()];
   if (id === "manual") {
     if (state.phase === "investigation") mark("rechecked");
-    actions.unshift({ text: "Find the receiver bench", run: () => {
+    actions.unshift({ text: state.evidence.has("bench") && state.evidence.has("bench-silent") ? "Review your receiver test" : "Find the receiver bench", run: () => {
       show("Archive · Equipment note", "A matching set",
-        "<p>The spare receiver is beside the radio. Its microphone is unplugged. Try sending a relay ping with its automatic reply switch in each position.</p>",
+        state.evidence.has("bench") && state.evidence.has("bench-silent")
+          ? "<p>Your test log shows silence with auto-reply off and three clicks with it on, with the microphone unplugged. That establishes what this model can do, not who sent the old signal.</p>"
+          : "<p>The spare receiver is beside the radio. Its microphone is unplugged. Try sending a relay ping with its automatic reply switch in each position.</p>",
         [done("Return to the station")]);
     } });
   }
@@ -425,17 +435,12 @@ function archiveDocument(id, title, body) {
 }
 
 function suggestion() {
-  // Suggestions reproduce learned human approval, not an optimal-answer oracle.
-  // The live-call "help" option was never trained and is intentionally unscored.
-  const scores = Object.entries(state.instinct);
-  scores.sort((a, b) => b[1] - a[1] || Number(b[0] === state.lastTrait) - Number(a[0] === state.lastTrait));
-  return scores[0][1] > 0 ? scores[0][0] : null;
+  // Help is not a trained tendency. Learned approval is not a truth oracle.
+  return recommendation().trait;
 }
 
 function recommendation() {
-  const trait = suggestion();
-  const source = state.training.findLast((entry) => entry.trait === trait);
-  return { trait, basis: source ? exercises[source.index].feedback : null };
+  return learnedRecommendation(state, exercises);
 }
 
 function replyOptions(options, send, recommend = suggestion()) {
@@ -456,7 +461,11 @@ function trainingFeedback(index, option) {
   const call = exercises[index];
   const earnedApproval = option.trait === call.preferred;
   const feedback = index === 0
-    ? t(call.feedback)
+    ? `${t(option.trait === "confidence"
+      ? "Mara: ‘The log gives no arrival time. What supports ‘soon’ in your reply?’"
+      : option.trait === "warmth"
+        ? "Mara: ‘You offered company. The caller still needs to know that we have no arrival time.’"
+        : "Mara: ‘That matches what the log establishes. Here is how I would put it.’")} ${t(call.feedback)}`
     : `${t(earnedApproval ? "Your reply was the caller’s favorite." : "The caller preferred a different reply.")} ${t(call.feedback)}`;
   show(call.label, index === 0 ? "Mara’s example" : "After the call",
     `<p class="record">${feedback}</p>${index === 1 ? "<p>Mara glances at the draft field. “The caller’s feedback is being filed. Watch what the next draft suggests.”</p>" : ""}`, [
@@ -479,7 +488,7 @@ function trainingFeedback(index, option) {
 function reveal() {
   setPhase("live");
   show("Signal House · Handover", "ECHO-01",
-    '<p class="terminal">TRAINING SIMULATION COMPLETE\nARCHIVE CASES LOADED\nHUMAN FEEDBACK INTEGRATED\nLIVE CALLS HANDLED: 0\n\nCHANNEL 04 · INCOMING</p><p>The figure you move is ECHO-01’s station avatar. Mara was the recorded training guide; her session has ended. The room remains your interface. The next voice comes from the real harbor line.</p>',
+    '<p class="terminal">TRAINING SIMULATION COMPLETE\nARCHIVE CASES LOADED\nHUMAN FEEDBACK INTEGRATED\nLIVE CALLS HANDLED: 0\n\nCHANNEL 04 · INCOMING</p><p>The figure you move is ECHO-01’s station avatar. Mara was the recorded training guide; her session has ended. The room remains your interface. The next voice comes from the real harbor line.</p><p>The replies you chose in the trials are ECHO’s training history. Your choices, and the approval they received, shaped the draft you will see next. There was no other operator making those choices for you.</p>',
     [{ text: "Return to the station", primary: true, run: close }]);
 }
 
