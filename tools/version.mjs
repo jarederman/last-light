@@ -21,9 +21,9 @@ async function filesIn(directory) {
   }
   return files;
 }
-const html = path.join(root, "index.html");
-const files = [html, ...await filesIn(path.join(root, "src"))];
-const entry = (await readFile(html, "utf8")).match(/src="\.\/src\/main\.js\?v=([^"&]+)"/);
+const html = path.join(root, "player.html");
+const files = [path.join(root, "index.html"), path.join(root, "dev.html"), html, ...await filesIn(path.join(root, "src"))];
+const entry = (await readFile(html, "utf8")).match(/src="\.\/src\/player\.js\?v=([^"&]+)"/);
 if (!entry) throw new Error("The entry module must have a cache version");
 const version = argument === "--check" ? entry[1] : argument;
 let changed = 0;

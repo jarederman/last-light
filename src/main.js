@@ -1,16 +1,17 @@
-import { learnedRecommendation } from "./core/learning.js?v=understanding-1";
-import { chapters, exercises } from "./data/story.js?v=understanding-1";
-import { interactionPoints, playerStart } from "./data/station.js?v=understanding-1";
-import { canStand, actorScale } from "./core/world.js?v=understanding-1";
-import { distance, findRoute } from "./core/navigation.js?v=understanding-1";
-import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=understanding-1";
-import { creditsMarkup } from "./data/credits.js?v=understanding-1";
-import { byId, dialog, show, close, done, configureDialog } from "./ui/dialog.js?v=understanding-1";
+import { initialState } from "./core/state.js?v=workbench-1";
+import { learnedRecommendation } from "./core/learning.js?v=workbench-1";
+import { chapters, exercises } from "./data/story.js?v=workbench-1";
+import { interactionPoints, playerStart } from "./data/station.js?v=workbench-1";
+import { canStand, actorScale } from "./core/world.js?v=workbench-1";
+import { distance, findRoute } from "./core/navigation.js?v=workbench-1";
+import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=workbench-1";
+import { creditsMarkup } from "./data/credits.js?v=workbench-1";
+import { byId, dialog, show, close, done, configureDialog, capturePanel } from "./ui/dialog.js?v=workbench-1";
 
-import { createRadioScene } from "./scenes/radio.js?v=understanding-1";
-import { createCallScene } from "./scenes/call.js?v=understanding-1";
-import { createWeather } from "./scenes/weather.js?v=understanding-1";
-import { t, getLanguage, setLanguage, languages } from "./i18n/index.js?v=understanding-1";
+import { createRadioScene } from "./scenes/radio.js?v=workbench-1";
+import { createCallScene } from "./scenes/call.js?v=workbench-1";
+import { createWeather } from "./scenes/weather.js?v=workbench-1";
+import { t, getLanguage, setLanguage, languages } from "./i18n/index.js?v=workbench-1";
 
 configureDialog(stopWalking);
 
@@ -40,27 +41,7 @@ const callScene = createCallScene({ getState: () => state, setPhase, replyOption
 
 function reset() {
   stopAmbience();
-  state = {
-    phase: "arrival",
-    evidence: new Set(),
-    rescueChecked: false,
-    receiver: { automatic: false, result: null },
-    finalReply: null,
-    reasonReplies: [],
-    pendingReason: null,
-    correctionSent: false,
-    closing: null,
-    training: [],
-    accountability: null,
-    correction: null,
-    reportSnapshot: null,
-    stayed: false,
-    ending: null,
-    reportSent: false,
-    trial: 0,
-    lastTrait: null,
-    instinct: { warmth: 0, caution: 0, confidence: 0 },
-  };
+  state = initialState();
   Object.assign(position, playerStart);
   player.dataset.dir = "up";
   stopWalking();
@@ -508,3 +489,77 @@ applyLanguage();
 reset();
 titleScreen();
 requestAnimationFrame(frame);
+
+// Only the separate development frame asks for this adapter. Authored callback
+// references stay inside that frame; cross-window messages contain data only.
+export function createDevelopmentAdapter() {
+  const snapshot = () => ({
+    schema: 1,
+    state: JSON.parse(JSON.stringify({ ...state, evidence: [...state.evidence] })),
+    position: { ...position }, direction: player.dataset.dir, language: getLanguage(), panelOpen: dialog.open,
+  });
+  function open(target = "current") {
+    if (dialog.open) close();
+    if (target === "current") target = ["arrival", "archive", "ready"].includes(state.phase) ? "mara" : "terminal";
+    if (target === "reveal") reveal();
+    else if (target === "recap") callScene.recap();
+    else if (target === "journal") journal();
+    else if (target === "pause") pause();
+    else if (target === "title") titleScreen();
+    else if (Object.hasOwn(handlers, target)) handlers[target]();
+    else throw Error("Unknown interaction");
+  }
+  function merge(target, source) {
+    for (const key of Object.keys(target)) if (!Object.hasOwn(source, key)) delete target[key];
+    for (const [key, value] of Object.entries(source)) {
+      if (key === "evidence") {
+        if (!(target[key] instanceof Set)) target[key] = new Set();
+        target[key].clear(); for (const id of value) target[key].add(id);
+      } else if (key === "receiver" && target.receiver) {
+        Object.assign(target.receiver, value);
+      } else target[key] = value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value;
+    }
+  }
+  return {
+    capture: () => ({ snapshot: snapshot(), liveState: state, panel: capturePanel(), menu: dialog.dataset.menu, settingsOrigin }),
+    view: () => ({ snapshot: snapshot(), title: byId("panel-title").textContent,
+      recommendation: recommendation(), actions: dialog.open ? (capturePanel()?.actions ?? []).map(({ text, suggested }) => ({ text, label: t(text), suggested: !!suggested })) : [],
+    }),
+    restore(record) {
+      stopWalking(); if (dialog.open) close();
+      // Reuse the original root and receiver objects for callbacks that captured
+      // them before a later reset. Replacing every object breaks bench undo.
+      state = record.liveState ?? state;
+      merge(state, record.snapshot.state);
+      Object.assign(position, record.snapshot.position);
+      player.dataset.dir = record.snapshot.direction;
+      setLanguage(record.snapshot.language); applyLanguage(); renderWorld();
+      if (!record.snapshot.panelOpen) return;
+      settingsOrigin = record.settingsOrigin ?? "pause";
+      if (record.menu === "settings") settings(settingsOrigin);
+      else if (record.menu === "title") titleScreen();
+      else if (record.menu === "pause") pause();
+      else if (record.menu === "journal") journal();
+      else if (record.panel) {
+        const { label, title, body, actions } = record.panel;
+        show(label, title, body, actions); dialog.dataset.menu = record.menu ?? "";
+      } else open();
+    },
+    loadFixture(next) {
+      stopWalking(); if (dialog.open) close();
+      state = next.state;
+      Object.assign(position, playerStart); player.dataset.dir = "up";
+      renderWorld(); open(next.open);
+    },
+    open,
+    choose(index) {
+      if (!Number.isInteger(index) || index < 0) throw Error("Invalid choice index");
+      const action = dialog.open && capturePanel()?.actions[index];
+      if (!action) throw Error("That choice is no longer available");
+      playEffect("button"); action.run();
+    },
+    setEvidence(ids) { state.evidence = new Set(ids); renderWorld(); },
+    setLanguage(value) { setLanguage(value); applyLanguage(); renderWorld(); },
+    close,
+  };
+}

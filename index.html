@@ -1,41 +1,7 @@
 <!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#111a20">
-  <meta name="description" content="A short narrative RPG about the night a harbor signal station goes live.">
-  <title>Last Light · Signal House</title>
-  <link rel="icon" href="./assets/ui/icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./src/styles/game.css?v=understanding-1">
-  <script type="module" src="./src/main.js?v=understanding-1"></script>
-</head>
-<body>
-  <main id="game-screen" class="game-screen" aria-label="Signal House game">
-        <div id="room" class="room" tabindex="-1" role="group" aria-label="Signal House game area">
-          <img class="station" src="./assets/scenes/station-night.webp?v=understanding-1" alt="" draggable="false">
-          <img class="station terminal-foreground" src="./assets/scenes/station-night.webp?v=understanding-1" alt="" aria-hidden="true" draggable="false">
-          <img class="station chair-foreground" src="./assets/scenes/station-night.webp?v=understanding-1" alt="" aria-hidden="true" draggable="false">
-          <canvas id="weather" class="rain" width="1280" height="800" aria-hidden="true"></canvas>
-          <div class="sprite player" id="player" aria-hidden="true"></div>
-          <div class="sprite mara" id="mara-sprite" aria-hidden="true"></div>
-          <div class="lamp-signal" aria-hidden="true"></div>
-          <div id="objects" class="objects"></div>
-          <div id="prompt" class="prompt" hidden></div>
-        </div>
-    <nav id="game-menu" class="touch-menu" aria-label="Game menus">
-      <button id="journal-key" type="button" aria-label="Field journal">▤</button>
-      <button id="pause-key" type="button" aria-label="Pause game">Ⅱ</button>
-    </nav>
-  </main>
-  <dialog id="dialog" aria-labelledby="panel-title">
-    <article class="panel">
-      <button type="button" class="close" aria-label="Close panel">×</button>
-      <p class="eyebrow" id="panel-label"></p>
-      <h2 id="panel-title" tabindex="-1"></h2>
-      <div id="panel-body"></div>
-      <div id="panel-actions" class="actions"></div>
-    </article>
-  </dialog>
-</body>
-</html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="refresh" content="0;url=./dev.html">
+<title>Last Light</title><link rel="icon" href="./assets/ui/icon.svg" type="image/svg+xml">
+<script>location.replace(new URL("./dev.html", location.href).href);</script>
+</head><body><p><a href="./dev.html">进入 Last Light</a></p><p><a href="./player.html">玩家版</a> · <a href="./dev.html">开发工作台</a></p></body></html>

@@ -6,7 +6,12 @@ A short browser RPG set in a harbor radio station on a stormy night. Explore the
 
 | Path | Responsibility |
 | --- | --- |
-| `index.html` | Game surface and dialog containers |
+| `index.html` | Switchable default-entry redirect |
+| `player.html` | Clean game surface and dialog containers |
+| `dev.html` | Development workbench surrounding the game frame |
+| `src/player.js` | Player bootstrap; loads debug bridge only in an explicitly requested frame |
+| `src/dev/` | Development presets, state snapshots, history and same-origin workbench bridge |
+| `src/core/state.js` | Initial game state and stable state IDs |
 | `src/main.js` | Game startup, player input, chapter progression and scene interactions |
 | `src/core/navigation.js` | Collision-aware route search and spatial calculations |
 | `src/core/world.js` | Floor collision checks and perspective scale |
@@ -36,6 +41,41 @@ A short browser RPG set in a harbor radio station on a stormy night. Explore the
 The game uses native JavaScript modules. The entry module imports its dependencies explicitly. Relative module and asset paths support GitHub Pages project URLs.
 
 Runtime state is owned by `src/main.js`. Closing a menu or interaction pauses movement, and returning to the title resets the shift. Progress lasts for the current page session.
+
+## Development entry
+
+The default page currently redirects to `dev.html`. The clean player entry is
+always `player.html`; it contains no development controls. Only the workbench
+frame (`player.html?dev=1`) loads the message bridge. It accepts commands from
+its same-origin parent only. No credentials or server are needed.
+
+The workbench offers phase jumps with five training profiles, four ending
+fixtures, direct station interactions, live dialogue choices, evidence switches,
+language switching, undo/redo, 20 named checkpoints and validated JSON snapshot
+import/export/editing. Clicking a choice invokes the real game callback.
+Stage fixtures are labelled test states, not a second story implementation.
+
+State and dialogue changes create an undo point (up to 120); movement does not.
+In-memory undo/checkpoints restore the original panel, callbacks, actor position
+and state, including across a reset. Repeated choices after undo create a new
+history branch. `Ctrl/Cmd+Z` and `Ctrl/Cmd+Shift+Z` work in the workbench outside
+text inputs.
+
+The latest snapshot and named checkpoints are retained in browser storage.
+Reloading code restores state and re-enters the current phase; executable
+callbacks and exact panels are intentionally not serialized across reloads.
+A blocked/full storage API leaves session controls usable. Export a JSON file
+for a portable checkpoint. Import validation rejects invalid positions, HTML
+text and inconsistent report/ending states.
+
+To return the default homepage to the professor/player experience, run
+`node tools/entry.mjs player` and commit `index.html`. To enable development
+again, run `node tools/entry.mjs dev`. Both entries remain available.
+
+Run `node --experimental-vm-modules tests/development.cjs` for fixture consistency,
+snapshot validation, entry switching, message isolation and history regressions.
+The game-flow suite additionally checks restoration of real dialogue callbacks
+across a reset.
 
 ## Run locally
 

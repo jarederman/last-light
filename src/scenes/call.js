@@ -1,10 +1,10 @@
-import { show, close, done } from "../ui/dialog.js?v=understanding-1";
-import { t } from "../i18n/index.js?v=understanding-1";
-import { assuranceReasons, correctionText, insistenceText, deferText, presenceReplies, presenceQuestion } from "../data/conversation.js?v=understanding-1";
-import { reflectionQuestion } from "../data/reflections.js?v=understanding-1";
-import { reflectionMenu } from "./reflection.js?v=understanding-1";
-import { epilogue } from "../data/epilogue.js?v=understanding-1";
-import { playEffect } from "../audio/sound.js?v=understanding-1";
+import { show, close, done } from "../ui/dialog.js?v=workbench-1";
+import { t } from "../i18n/index.js?v=workbench-1";
+import { assuranceReasons, correctionText, insistenceText, deferText, presenceReplies, presenceQuestion } from "../data/conversation.js?v=workbench-1";
+import { reflectionQuestion } from "../data/reflections.js?v=workbench-1";
+import { reflectionMenu } from "./reflection.js?v=workbench-1";
+import { epilogue } from "../data/epilogue.js?v=workbench-1";
+import { playEffect } from "../audio/sound.js?v=workbench-1";
 
 // Caller reactions and report delivery share one session state so closing a
 // panel never discards a sent reply or submits the same report twice.
@@ -260,5 +260,5 @@ WAITING FOR THE NEXT CALL</p>`, [{ text: "Review this shift", run: recap }, done
       ]);
   }
 
-  return { open };
+  return { open, recap };
 }

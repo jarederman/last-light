@@ -1,10 +1,14 @@
-import { stopSignal, playEffect } from "../audio/sound.js?v=understanding-1";
-import { t, translateHtml } from "../i18n/index.js?v=understanding-1";
+import { stopSignal, playEffect } from "../audio/sound.js?v=workbench-1";
+import { t, translateHtml } from "../i18n/index.js?v=workbench-1";
 
 export const byId = (id) => document.getElementById(id);
 export const dialog = byId("dialog");
 let beforeOpen = () => {};
 let returnFocus = null;
+let currentPanel = null;
+
+// Development history retains authored callbacks only in memory, never in JSON.
+export const capturePanel = () => dialog.open ? currentPanel : null;
 
 export function configureDialog(onOpen) { beforeOpen = onOpen; }
 
@@ -25,6 +29,7 @@ dialog.addEventListener("cancel", (event) => {
 });
 
 export function show(label, title, body, actions) {
+  currentPanel = { label, title, body, actions };
   beforeOpen();
   if (!dialog.open) returnFocus = document.activeElement;
   dialog.dataset.menu = "";

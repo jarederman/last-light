@@ -1,6 +1,6 @@
-import { show } from "../ui/dialog.js?v=understanding-1";
-import { t } from "../i18n/index.js?v=understanding-1";
-import { reflections, readingLinks, reflectionQuestion, limits } from "../data/reflections.js?v=understanding-1";
+import { show } from "../ui/dialog.js?v=workbench-1";
+import { t } from "../i18n/index.js?v=workbench-1";
+import { reflections, readingLinks, reflectionQuestion, limits } from "../data/reflections.js?v=workbench-1";
 
 export function reflectionMenu(back) {
   function menu() {

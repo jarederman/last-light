@@ -40,7 +40,7 @@ class Element {
 }
 
 async function startGame({ storage, browserLanguage = "en-US" } = {}) {
-  const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
+  const html = fs.readFileSync(path.join(root, "player.html"), "utf8");
   const elements = Object.fromEntries([...html.matchAll(/id="([^"]+)"/g)]
     .map((match) => [match[1], new Element()]));
   const document = new Element();
@@ -101,7 +101,7 @@ async function startGame({ storage, browserLanguage = "en-US" } = {}) {
     for (let index = 0; index < frames; index += 1) animate(clock += 16);
     document.emit("keyup", { key });
   }
-  return { elements, action, use, title, hasAction, key, hold, recommended, t, locale, document };
+  return { elements, action, use, title, hasAction, key, hold, recommended, t, locale, document, development: main.namespace.createDevelopmentAdapter() };
 }
 
 async function testMovement() {
@@ -572,6 +572,33 @@ async function testPhilosophyCatalog() {
   assert.equal(game.locale.missingTranslations().length, 0);
 }
 
+async function testDevelopmentRestoration() {
+  const game = await startGame();
+  const { action, use, development: dev, elements } = game;
+  const title = dev.capture();
+  action("Begin night shift"); use("Mara"); action("I'll take a look");
+  use("Radio"); action("Open receiver bench");
+  const before = dev.capture();
+  action("Turn auto-reply on");
+  const after = dev.capture();
+  dev.restore(before); action("Send relay ping");
+  assert.match(elements["panel-body"].innerHTML, /No reply after the relay ping/);
+  dev.restore(after); action("Send relay ping");
+  assert.match(elements["panel-body"].innerHTML, /Three short clicks/);
+  dev.restore(title); assert.equal(game.title(), "Last Light");
+  action("Begin night shift");
+  dev.restore(before); action("Send relay ping");
+  assert.match(elements["panel-body"].innerHTML, /No reply after the relay ping/,
+    "Bench callback retains its receiver after restoring across a reset");
+  const exported = JSON.parse(JSON.stringify(dev.capture().snapshot));
+  dev.restore({ snapshot: exported });
+  assert.equal(game.title(), "Take another look", "Imported state reopens the phase without serializing callbacks");
+  dev.restore(after); action("Turn auto-reply off");
+  assert.equal(dev.capture().snapshot.state.receiver.automatic, false);
+  assert.equal(before.snapshot.state.receiver.automatic, false, "Recorded snapshots remain immutable");
+  assert.equal(after.snapshot.state.receiver.automatic, true);
+}
+
 (async () => {
   await testMovement();
   await testGroundedReport();
@@ -588,5 +615,6 @@ async function testPhilosophyCatalog() {
   await testReasonsAndReportAcknowledgment();
   await testReceiverBeforeLetter();
   await testPhilosophyCatalog();
+  await testDevelopmentRestoration();
   console.log("PASS: bilingual four-act flows, 12 consequence routes, 42 epilogue combinations, truthful provenance, spoken reasons, presence replies, public philosophy notes, immutable history, language, movement, restart");
 })().catch((error) => { console.error(error); process.exitCode = 1; });

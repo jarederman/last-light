@@ -1,4 +1,4 @@
-import { t } from "../i18n/index.js?v=understanding-1";
+import { t } from "../i18n/index.js?v=workbench-1";
 
 export function signalTrace(label, clicks = true) {
   const trace = clicks

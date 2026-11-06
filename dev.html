@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Last Light · 开发工作台</title>
+  <link rel="icon" href="./assets/ui/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./src/styles/development.css?v=workbench-1">
+  <script type="module" src="./src/dev/workbench.js?v=workbench-1"></script>
+</head>
+<body>
+  <header><div><strong>Last Light</strong><span class="badge">开发工作台</span></div><a href="./player.html" target="_blank" rel="noopener">打开纯玩家版 ↗</a></header>
+  <main class="workspace">
+    <aside aria-label="调试控制">
+      <p id="status" role="status" aria-live="polite">正在连接游戏…</p>
+      <div class="row"><button id="undo" disabled>← 撤销</button><button id="redo" disabled>重做 →</button><button id="reload" disabled>重载代码</button></div>
+      <p class="hint" id="history-status">对话与状态变化会自动记录；移动不单独增加记录。</p>
+      <section><h2>阶段与路线</h2>
+        <label>训练历史<select id="profile"></select></label>
+        <label>跳转位置<select id="preset"></select></label>
+        <button id="jump" disabled>载入预设并打开交互</button>
+        <p class="hint">载入的是可继续游玩的状态预设，会补齐前置线索。可撤销。</p>
+      </section>
+      <section><h2>快捷交互</h2><div class="targets">
+        <button data-target="mara" disabled>Mara</button><button data-target="radio" disabled>电台</button>
+        <button data-target="archive" disabled>档案</button><button data-target="terminal" disabled>终端</button>
+        <button data-target="current" disabled>本阶段入口</button><button data-target="journal" disabled>手记</button>
+        <button data-target="pause" disabled>暂停 / 设置</button><button id="close" disabled>关闭面板</button>
+      </div><label>游戏语言<select id="language"><option value="en">English</option><option value="zh-CN">简体中文</option></select></label><p class="hint">切换语言会重开本阶段入口。</p></section>
+      <section><h2>当前选项</h2><p id="dialog-title" class="hint">等待游戏</p><div id="choices" class="choices"></div></section>
+      <details><summary>线索开关</summary><div id="evidence" class="evidence"></div><p class="hint">报告只能通过剧情发送；已发送报告的原始录音不能取消。</p></details>
+      <details open><summary>检查点与回溯</summary>
+        <div class="row"><input id="checkpoint-name" aria-label="检查点名称" maxlength="80" placeholder="例如：保证前"><button id="save-checkpoint" disabled>保存</button></div>
+        <div id="checkpoints"></div>
+        <p class="hint">同一次运行中恢复原对话和选项。刷新后保留状态快照，重新进入相应阶段。</p>
+      </details>
+      <details><summary>状态 JSON / 导入导出</summary>
+        <p id="state-summary"></p><pre id="state-view"></pre>
+        <div class="row"><button id="export" disabled>导出快照</button><label class="file-button">导入文件<input id="import-file" type="file" accept=".json,application/json"></label></div>
+        <label>编辑快照<textarea id="snapshot-editor" rows="10" spellcheck="false" placeholder="点“复制当前状态到编辑区”后修改"></textarea></label>
+        <button id="edit" disabled>复制当前状态到编辑区</button><button id="apply" disabled>校验并应用编辑</button>
+        <p class="hint">导入和手工修改会校验结构、人物位置与关键剧情依赖；应用后可撤销。</p>
+      </details>
+      <details><summary>入口与使用说明</summary><p>默认首页暂时进入本工作台。玩家版始终位于 <a href="./player.html" target="_blank" rel="noopener">player.html</a>。</p><p>正式演示时运行 <code>node tools/entry.mjs player</code>，提交后首页切回玩家版。重新启用：<code>node tools/entry.mjs dev</code>。</p><p>游戏中仍可正常移动和互动。侧栏选项调用同一条剧情代码，不另写调试剧情。</p></details>
+    </aside>
+    <section class="game-pane" aria-label="游戏预览"><iframe id="game-frame" src="./player.html?dev=1" title="Last Light 游戏调试画面" allow="autoplay"></iframe></section>
+  </main>
+</body>
+</html>
