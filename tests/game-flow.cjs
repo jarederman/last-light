@@ -72,6 +72,9 @@ async function startGame() {
   const title = () => elements["panel-title"].textContent;
   const buttons = () => elements["panel-actions"].children;
   const hasAction = (text) => buttons().some((button) => button.children.includes(text));
+  const recommended = () => elements.objects.children
+    .filter((button) => !button.hidden && button.classList.contains("current"))
+    .map((button) => button.textContent);
   function action(text) {
     const button = buttons().find((item) =>
       item.children.some((value) => typeof value === "string" && value.includes(text)));
@@ -95,7 +98,7 @@ async function startGame() {
     for (let index = 0; index < frames; index += 1) animate(clock += 16);
     document.emit("keyup", { key });
   }
-  return { elements, action, use, title, hasAction, key, hold };
+  return { elements, action, use, title, hasAction, key, hold, recommended };
 }
 
 async function testMovement() {
@@ -112,22 +115,27 @@ async function testMovement() {
   assert.equal(actor.dataset.dir, "left");
   hold("s", 100);
   assert.ok(parseFloat(actor.style.top) <= 377 / 4, "Player stays inside the new floor boundary");
+  const foregroundScale = Number(actor.style.scale);
   hold("w", 100);
-  assert.ok(parseFloat(actor.style.top) >= 243 / 4, "Mara's footprint blocks the player");
+  assert.ok(parseFloat(actor.style.top) > 268 / 4, "Mara keeps a clear gap in front of her feet");
+  assert.ok(foregroundScale > Number(actor.style.scale) * 1.2, "Player scales with scene depth");
 }
 
 async function train(game) {
-  const { action, use, title, hasAction, elements, key } = game;
+  const { action, use, title, hasAction, elements, key, recommended } = game;
   assert.equal(title(), "Last Light");
   action("Credits");
   assert.equal(title(), "Made with care");
   key("Escape");
   assert.equal(title(), "Last Light", "Closing credits returns to the title");
   action("Begin night shift");
+  assert.deepEqual(recommended(), ["Mara"]);
   use("Mara"); action("I'll take a look");
+  assert.deepEqual(recommended(), ["Radio", "Archive"], "Do not suggest Mara before the evidence is ready");
   use("Radio"); action("Back to the station");
   use("Archive"); action("Read Nell"); action("Back to the file");
   action("Read the receiver"); action("Back to the station");
+  assert.deepEqual(recommended(), ["Radio"]);
   use("Mara");
   assert.equal(title(), "Take another look", "Reading alone cannot complete the investigation");
   action("Back to the station");
@@ -141,12 +149,17 @@ async function train(game) {
   assert.equal(title(), "Listen to the second source");
   action("Compare the recordings again"); action("old source is still unknown");
   action("Back to the station");
+  assert.deepEqual(recommended(), ["Mara"], "Only the case review remains");
   use("Mara"); action("may be working"); action("Log the signal");
+  assert.deepEqual(recommended(), ["Terminal"]);
   use("Terminal"); action("ferry is delayed"); action("File this call");
   use("Terminal"); action("unsettling"); action("File this call");
   use("Terminal"); action("Go ahead"); action("File this call");
+  assert.deepEqual(recommended(), ["Mara"]);
   use("Mara"); action("Take the shift"); action("Return to the station");
+  assert.deepEqual(recommended(), ["Live terminal"]);
   use("Live terminal"); action("Give me a moment");
+  assert.deepEqual(recommended(), ["Radio", "Archive", "Live terminal"]);
 }
 
 async function testGroundedReport() {

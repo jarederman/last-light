@@ -1,4 +1,4 @@
-import { stopSignal, playEffect } from "../audio/sound.js?v=night-station-1";
+import { stopSignal, playEffect } from "../audio/sound.js?v=room-polish-1";
 
 export const byId = (id) => document.getElementById(id);
 export const dialog = byId("dialog");

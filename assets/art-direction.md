@@ -20,6 +20,12 @@ figure is taller than the desks, unlike the previous miniature chibi actors.
 Collision geometry follows the final image, rather than the requested generation
 coordinates: `src/data/station.js` is authoritative.
 
+Runtime actor size varies with floor depth, from 0.92 at the back to 1.40 at the
+front, scaling around the foot baseline. The desktop and chair use distinct
+foreground silhouette masks and depth values. Their artwork comes from the same
+background, retaining identical textures and lighting. The large rug is placed
+under the terminal workstation and chair; the small entrance mat stays at the door.
+
 All three visuals used the built-in OpenAI image-generation tool. Echo and Mara
 used the new background as their style/palette reference. Downloaded CC0 audio is
 retained; its sources are in `ASSET_CREDITS.md`.
@@ -110,6 +116,29 @@ Genuinely transparent background. No floor, no objects, no text, no labels, no
 grid. Include generous transparent margin on all sides.
 
 ## Packing
+
+### Rug correction prompt
+
+Use case: precise-object-edit. Edit target: the supplied EXISTING GAME BACKGROUND.
+Make ONE localized correction to the large reddish rug at the LOWER RIGHT
+workstation. It is currently floating awkwardly out to the LEFT of the computer
+desk. Move that same rug to sit squarely UNDER the computer desk AND chair, with
+its long edges parallel to the desk and floor planks. Its left edge should be
+underneath the left desk pedestal, not sticking out into the central walking area;
+its visible near edge should lie just in front of the chair's front feet. Restore
+the rug's former exposed position to matching uninterrupted dark wooden floor
+planks. Keep the SMALL existing entrance doormat at bottom center exactly unchanged.
+CRITICAL INVARIANTS: preserve camera, entire room composition, canvas aspect 8:5,
+exact window/wall/door geometry, all furniture positions and sizes, exact CRT
+monitor shape and position, radio, lamps, chair, chest, sea, lighthouse, rain, wood
+texture, every other object, lighting and color grade. Do NOT redesign the scene.
+Do not move or resize the desk or chair. No people, no UI. Only reposition the one
+larger rug and restore the exposed boards.
+
+This correction also used the built-in image-generation tool. Use the corrected
+background as the first input when repacking the current release.
+
+### Runtime export
 
 The final game scale was increased after visual inspection to match desk height.
 `tools/prepare_art.py` performs technical resizing, alpha fringe cleanup and

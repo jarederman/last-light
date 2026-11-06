@@ -9,6 +9,7 @@ A short browser RPG set in a harbor radio station on a stormy night. Explore the
 | `index.html` | Game surface and dialog containers |
 | `src/main.js` | Game startup, player input, chapter progression and scene interactions |
 | `src/core/navigation.js` | Collision-aware route search and spatial calculations |
+| `src/core/world.js` | Floor collision checks and perspective scale |
 | `src/data/station.js` | Interaction positions and collision geometry |
 | `src/data/story.js` | Chapter objectives and training dialogue data |
 | `src/ui/dialog.js` | Dialog rendering, action buttons and modal lifecycle |
@@ -18,7 +19,7 @@ A short browser RPG set in a harbor radio station on a stormy night. Explore the
 | `src/ui/signal.js` | Accessible waveform views |
 | `tests/game-flow.cjs` | Module-based interaction and branching regression checks |
 | `src/styles/game.css` | Scene, character and menu presentation |
-| `assets/scenes/` | Unified rainy-night signal-house background |
+| `assets/scenes/` | Unified rainy-night background and desk/chair occlusion masks |
 | `assets/characters/` | Matching adult player walk sheet and Mara sprite |
 | `assets/audio/` | Compressed rain, movement and device recordings |
 | `assets/ui/` | Game icon |
@@ -53,6 +54,11 @@ The environment and actors were generated together around a dark timber coastal 
 
 Echo's sheet has four columns, **down / right / up / left**, and three rows, **idle / first stride / second stride**. Each cell is 112 × 168, with feet at pixel 156. Mara uses one cell with the same scale and baseline. Characters are sorted by foot position so the foreground actor covers the one behind. See `assets/art-direction.md` for source prompts and the optional asset packing command. The packer only processes existing artwork; it does not draw the scene or characters.
 
+Actors grow gradually toward the foreground, anchored at their feet. The terminal desk and chair are rendered again through separate SVG silhouette masks at their own floor depths, allowing them to cover actors walking behind them. These layers reuse the same cached background artwork. Desk, chair and Mara have separate collision footprints; the terminal can be used from its left or front approaches.
+
+Only recommended targets show a centered, glowing gold beacon. Unrecommended props remain interactive through proximity and E, clicking their hotspot, or focusing their accessible button. The archive phase suggests Mara only after the required evidence has been collected.
+
 Rain starts after Begin Night Shift, pauses when the page is hidden and stops on return to the title. Audio playback failures leave the game playable.
 
 Run `node --experimental-vm-modules tests/audio.cjs` to check audio mute, visibility and replay behavior.
+Run `node --experimental-vm-modules tests/world.cjs` to check the archive passage, desk/chair footprints, NPC clearance and perspective scale. The game-flow checks also verify which targets are recommended at each stage.

@@ -1,12 +1,13 @@
-import { chapters, exercises } from "./data/story.js?v=night-station-1";
-import { interactionPoints, obstacles, maraObstacle, walkBounds, playerStart } from "./data/station.js?v=night-station-1";
-import { distance, findRoute } from "./core/navigation.js?v=night-station-1";
-import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=night-station-1";
-import { creditsMarkup } from "./data/credits.js?v=night-station-1";
-import { byId, dialog, show, close, done, configureDialog } from "./ui/dialog.js?v=night-station-1";
+import { chapters, exercises } from "./data/story.js?v=room-polish-1";
+import { interactionPoints, playerStart } from "./data/station.js?v=room-polish-1";
+import { canStand, actorScale } from "./core/world.js?v=room-polish-1";
+import { distance, findRoute } from "./core/navigation.js?v=room-polish-1";
+import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=room-polish-1";
+import { creditsMarkup } from "./data/credits.js?v=room-polish-1";
+import { byId, dialog, show, close, done, configureDialog } from "./ui/dialog.js?v=room-polish-1";
 
-import { createRadioScene } from "./scenes/radio.js?v=night-station-1";
-import { createCallScene } from "./scenes/call.js?v=night-station-1";
+import { createRadioScene } from "./scenes/radio.js?v=room-polish-1";
+import { createCallScene } from "./scenes/call.js?v=room-polish-1";
 
 configureDialog(stopWalking);
 
@@ -56,6 +57,7 @@ for (const [id, station] of Object.entries(stations)) {
   marker.style.left = `${(station.markerX ?? station.x) / 6.4}%`;
   marker.style.top = `${station.markerY / 4}%`;
   marker.textContent = station.label;
+  marker.ariaLabel = station.label;
   marker.addEventListener("click", () => walkTo(station, station.use));
   byId("objects").append(marker);
   station.marker = marker;
@@ -66,15 +68,15 @@ function place(element, point) {
   element.style.left = `${point.x / 6.4}%`;
   element.style.top = `${point.y / 4}%`;
   element.style.zIndex = Math.round(point.y);
+  element.style.scale = actorScale(point.y).toFixed(3);
 }
 
 function walkable({ x, y }) {
-  const inside = ([left, top, right, bottom]) =>
-    x >= left && x <= right && y >= top && y <= bottom;
-  return x >= walkBounds.left && x <= walkBounds.right
-    && y >= walkBounds.top && y <= walkBounds.bottom
-    && !obstacles.some(inside)
-    && (byId("mara-sprite").hidden || !inside(maraObstacle));
+  return canStand({ x, y }, !byId("mara-sprite").hidden);
+}
+
+function interactionDistance(point, station) {
+  return Math.min(...(station.approaches ?? [station]).map((target) => distance(point, target)));
 }
 
 function stopWalking() {
@@ -86,8 +88,8 @@ function stopWalking() {
 
 function nearStation() {
   return Object.values(stations)
-    .filter((station) => !station.marker.hidden && distance(position, station) <= interactRange)
-    .sort((a, b) => distance(position, a) - distance(position, b))[0];
+    .filter((station) => !station.marker.hidden && interactionDistance(position, station) <= interactRange)
+    .sort((a, b) => interactionDistance(position, a) - interactionDistance(position, b))[0];
 }
 
 function renderPlayer() {
@@ -103,11 +105,14 @@ function renderPlayer() {
 function walkTo(target, use) {
   if (dialog.open) return;
   stopWalking();
-  if (use && distance(position, target) <= interactRange) {
+  if (use && interactionDistance(position, target) <= interactRange) {
     use();
     return;
   }
-  const route = findRoute(position, target, walkable, use ? interactRange - 4 : 6);
+  const routes = (use ? target.approaches ?? [target] : [target])
+    .map((point) => findRoute(position, point, walkable, use ? interactRange - 4 : 6));
+  const route = routes.filter((candidate) => candidate.reached)
+    .sort((a, b) => a.path.length - b.path.length)[0] ?? routes[0];
   path = route.path;
   if (use && route.reached) destination = use;
 }
@@ -251,9 +256,11 @@ function renderWorld() {
   byId("mara-sprite").hidden = live;
   stations.mara.marker.hidden = live;
   stations.terminal.marker.textContent = live ? "Live terminal" : "Terminal";
-  stations.terminal.marker.classList.toggle("call", state.phase === "live");
+  stations.terminal.marker.ariaLabel = stations.terminal.marker.textContent;
+  const archiveReady = ["tape", "letter", "manual", "comparison"]
+    .every((id) => state.evidence.has(id));
   const active = {
-    mara: ["arrival", "archive", "ready"].includes(state.phase),
+    mara: ["arrival", "ready"].includes(state.phase) || (state.phase === "archive" && archiveReady),
     radio: ["archive", "investigation"].includes(state.phase) && !state.evidence.has(live ? "live" : "comparison"),
     archive: (state.phase === "archive" && (!state.evidence.has("manual") || !state.evidence.has("letter")))
       || (state.phase === "investigation" && !state.evidence.has("rechecked")),
