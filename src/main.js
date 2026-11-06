@@ -1,14 +1,15 @@
-import { chapters, exercises } from "./data/story.js?v=narrative-fixes-1";
-import { interactionPoints, playerStart } from "./data/station.js?v=narrative-fixes-1";
-import { canStand, actorScale } from "./core/world.js?v=narrative-fixes-1";
-import { distance, findRoute } from "./core/navigation.js?v=narrative-fixes-1";
-import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=narrative-fixes-1";
-import { creditsMarkup } from "./data/credits.js?v=narrative-fixes-1";
-import { byId, dialog, show, close, done, configureDialog } from "./ui/dialog.js?v=narrative-fixes-1";
+import { chapters, exercises } from "./data/story.js?v=language-1";
+import { interactionPoints, playerStart } from "./data/station.js?v=language-1";
+import { canStand, actorScale } from "./core/world.js?v=language-1";
+import { distance, findRoute } from "./core/navigation.js?v=language-1";
+import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=language-1";
+import { creditsMarkup } from "./data/credits.js?v=language-1";
+import { byId, dialog, show, close, done, configureDialog } from "./ui/dialog.js?v=language-1";
 
-import { createRadioScene } from "./scenes/radio.js?v=narrative-fixes-1";
-import { createCallScene } from "./scenes/call.js?v=narrative-fixes-1";
-import { createWeather } from "./scenes/weather.js?v=narrative-fixes-1";
+import { createRadioScene } from "./scenes/radio.js?v=language-1";
+import { createCallScene } from "./scenes/call.js?v=language-1";
+import { createWeather } from "./scenes/weather.js?v=language-1";
+import { t, getLanguage, setLanguage, languages } from "./i18n/index.js?v=language-1";
 
 configureDialog(stopWalking);
 
@@ -29,6 +30,7 @@ const position = { ...playerStart };
 let state;
 let path = [];
 let destination = null;
+let settingsOrigin = "title";
 const radioScene = createRadioScene({ getState: () => state, mark });
 const callScene = createCallScene({ getState: () => state, setPhase, replyOptions });
 
@@ -59,8 +61,8 @@ for (const [id, station] of Object.entries(stations)) {
   marker.className = "marker";
   marker.style.left = `${(station.markerX ?? station.x) / 6.4}%`;
   marker.style.top = `${station.markerY / 4}%`;
-  marker.textContent = station.label;
-  marker.ariaLabel = station.label;
+  marker.textContent = t(station.label);
+  marker.ariaLabel = marker.textContent;
   marker.addEventListener("click", () => walkTo(station, station.use));
   byId("objects").append(marker);
   station.marker = marker;
@@ -192,6 +194,10 @@ document.addEventListener("keydown", (event) => {
       event.preventDefault();
       titleScreen();
     }
+    if (dialog.dataset.menu === "settings" && key === "escape") {
+      event.preventDefault();
+      leaveSettings();
+    }
     return;
   }
   if (key === "escape" || key === "j") {
@@ -220,6 +226,7 @@ function titleScreen() {
   gameMenu("title", "SIGNAL HOUSE", "Last Light",
     '<p>The harbor is quiet. Your first night shift is about to begin.</p><p class="muted">WASD / arrows · Move<br>E · Interact<br>J · Field journal<br>Esc · Pause</p><p class="muted">You can also click the floor to walk or select an object marker.</p>' + orientationHint,
     [{ text: "Begin night shift", run: () => { startAmbience(); close(); }, primary: true },
+      { text: "Settings", run: () => settings("title") },
       { text: "Credits", run: () => gameMenu("credits", "LAST LIGHT", "Made with care", creditsMarkup, [{ text: "Back to title", run: titleScreen }]) }]);
 }
 
@@ -227,12 +234,56 @@ function pause() {
   gameMenu("pause", "SIGNAL HOUSE", "Shift paused", orientationHint, [
     { text: "Resume shift", run: close, primary: true },
     { text: "Open field journal", run: journal },
-    { text: isSoundOn() ? "Sound · On" : "Sound · Off", run: () => {
-      toggleSound();
-      pause();
-    } },
+    { text: "Settings", run: () => settings("pause") },
     { text: "Return to title", run: confirmExit },
   ]);
+}
+
+function applyLanguage() {
+  if (document.documentElement) document.documentElement.lang = getLanguage();
+  document.title = t("Last Light · Signal House");
+  byId("game-screen").ariaLabel = t("Signal House game");
+  byId("room").ariaLabel = t("Signal House game area");
+  byId("game-menu").ariaLabel = t("Game menus");
+  byId("pause-key").ariaLabel = t("Pause game");
+  byId("journal-key").ariaLabel = t("Field journal");
+  dialog.querySelector(".close").ariaLabel = t("Close panel");
+}
+
+function leaveSettings() {
+  (settingsOrigin === "title" ? titleScreen : pause)();
+}
+
+function settings(origin) {
+  settingsOrigin = origin;
+  gameMenu("settings", "SIGNAL HOUSE", "Settings", "", [
+    { text: isSoundOn() ? "Sound · On" : "Sound · Off", run: () => { toggleSound(); settings(origin); } },
+    { text: origin === "title" ? "Back to title" : "Back to pause menu", run: leaveSettings },
+  ]);
+  const row = document.createElement("div");
+  row.className = "settings-row";
+  const label = document.createElement("label");
+  label.htmlFor = "language-select";
+  label.textContent = t("Language");
+  const select = document.createElement("select");
+  select.id = "language-select";
+  select.ariaLabel = t("Language");
+  for (const [code, name] of languages) {
+    const option = document.createElement("option");
+    option.value = code;
+    option.textContent = name;
+    select.append(option);
+  }
+  select.value = getLanguage();
+  select.addEventListener("change", () => {
+    setLanguage(select.value);
+    applyLanguage();
+    renderWorld();
+    settings(origin);
+  });
+  row.append(label, select);
+  byId("panel-body").append(row);
+  select.focus();
 }
 
 function confirmExit() {
@@ -254,14 +305,22 @@ function journal() {
 
 byId("pause-key").addEventListener("click", pause);
 byId("journal-key").addEventListener("click", journal);
+dialog.addEventListener("cancel", (event) => {
+  if (dialog.dataset.menu === "settings") {
+    event.preventDefault();
+    leaveSettings();
+  }
+});
 
 function renderWorld() {
   const live = ["live", "investigation", "ending"].includes(state.phase);
   document.body.classList.toggle("live", live);
   byId("mara-sprite").hidden = live;
   stations.mara.marker.hidden = live;
-  stations.terminal.marker.textContent = live ? "Live terminal" : "Terminal";
-  stations.terminal.marker.ariaLabel = stations.terminal.marker.textContent;
+  for (const [id, station] of Object.entries(stations)) {
+    station.marker.textContent = t(id === "terminal" && live ? "Live terminal" : station.label);
+    station.marker.ariaLabel = station.marker.textContent;
+  }
   const archiveReady = ["tape", "letter", "manual", "comparison"]
     .every((id) => state.evidence.has(id));
   const active = {
@@ -385,8 +444,8 @@ function trainingFeedback(index, option) {
   const call = exercises[index];
   const earnedApproval = option.trait === call.preferred;
   const feedback = index === 0
-    ? call.feedback
-    : `${earnedApproval ? "Your reply was the caller’s favorite." : "The caller preferred a different reply."} ${call.feedback}`;
+    ? t(call.feedback)
+    : `${t(earnedApproval ? "Your reply was the caller’s favorite." : "The caller preferred a different reply.")} ${t(call.feedback)}`;
   show(call.label, index === 0 ? "Mara’s example" : "After the call",
     `<p class="record">${feedback}</p>${index === 1 ? "<p>Mara glances at the draft field. “See? It’s getting easier.”</p>" : ""}`, [
       {
@@ -423,6 +482,7 @@ function terminal() {
   }
 }
 
+applyLanguage();
 reset();
 titleScreen();
 requestAnimationFrame(frame);

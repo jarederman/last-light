@@ -90,6 +90,13 @@ body { overflow: hidden; background: #0d151d; }
 }
 dialog[data-menu="title"] { text-align: center; background: #141f25ee; }
 dialog[data-menu="title"] .close, dialog[data-menu="credits"] .close { display: none; }
+dialog[data-menu="settings"] .close { display: none; }
+.settings-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 18px 0 22px; }
+.settings-row select { width: 160px; min-width: 0; max-width: 65%; padding: 9px 12px; border: 1px solid #806b51; border-radius: 4px; background: #121d22; color: var(--text); font: inherit; cursor: pointer; }
+.settings-row select:focus-visible { outline: 2px solid var(--aqua); outline-offset: 3px; }
+html[lang="zh-CN"] body { font-family: system-ui, "PingFang SC", "Microsoft YaHei", sans-serif; line-height: 1.7; }
+html[lang="zh-CN"] h1, html[lang="zh-CN"] h2 { font-family: "Songti SC", "Noto Serif CJK SC", SimSun, serif; line-height: 1.25; }
+html[lang="zh-CN"] .action { line-height: 1.6; }
 dialog[data-menu="title"] h2 { font-size: clamp(3rem, 8vw, 5rem); }
 dialog[data-menu="title"] .action { text-align: center; }
 dialog[data-menu="title"]::backdrop { background: #0b141cbc; }

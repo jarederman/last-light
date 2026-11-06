@@ -13,6 +13,7 @@ A short browser RPG set in a harbor radio station on a stormy night. Explore the
 | `src/data/station.js` | Interaction positions and collision geometry |
 | `src/data/story.js` | Chapter objectives and training dialogue data |
 | `src/ui/dialog.js` | Dialog rendering, action buttons and modal lifecycle |
+| `src/i18n/` | Language preference, presentation translation and Simplified Chinese message catalog |
 | `src/audio/sound.js` | Downloaded ambience and effects, muting and playback lifecycle |
 | `src/scenes/radio.js` | Receiver bench, recorded signals and comparison puzzle |
 | `src/scenes/call.js` | Nell’s live call, evidence reports and follow-up reactions |
@@ -36,6 +37,20 @@ Runtime state is owned by `src/main.js`. Closing a menu or interaction pauses mo
 Run `python3 -m http.server 8000` from the repository root, then open `http://localhost:8000`. JavaScript modules require an HTTP server for local play.
 
 Move with **WASD** or the **arrow keys**, and press **E** near an object or NPC. Click the floor to walk, or click an object marker to approach and interact. **J** opens the journal and **Esc** opens the pause menu or closes the current panel. Touch devices have small menu buttons.
+
+Open **Settings** from the title or pause menu to select **English** or **简体中文**
+and toggle sound. The browser remembers the language choice. On a first visit,
+Chinese browser languages use Simplified Chinese; other languages use English.
+If browser storage is blocked, switching still works for the current session.
+Changing language does not reset the current shift, evidence, learned preferences
+or a sent reply. Escape returns from Settings to its originating menu.
+
+The English story messages remain canonical state values. Translation happens
+when presenting menus, dialogue, choices, journal entries, recordings, reports
+and accessibility labels. `src/i18n/zh-CN.js` stores plain-text translations;
+HTML structure, URLs, SVG paths and internal game IDs are preserved. Proper names
+such as Last Light and ECHO-01 retain their original branding. The Chinese flow
+test checks rendered-message coverage and language changes during Nell's call.
 
 ## Check the game flow
 

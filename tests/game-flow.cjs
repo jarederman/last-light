@@ -39,12 +39,13 @@ class Element {
   close() { this.open = false; this.emit("close"); }
 }
 
-async function startGame() {
+async function startGame({ storage, browserLanguage = "en-US" } = {}) {
   const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
   const elements = Object.fromEntries([...html.matchAll(/id="([^"]+)"/g)]
     .map((match) => [match[1], new Element()]));
   const document = new Element();
   document.body = new Element();
+  document.documentElement = new Element();
   document.createElement = () => new Element();
   document.getElementById = (id) => {
     assert.ok(elements[id], "HTML must contain " + id);
@@ -52,7 +53,7 @@ async function startGame() {
   };
   let animate;
   const context = vm.createContext({
-    document, window: new Element(), URL,
+    document, window: new Element(), URL, localStorage: storage, navigator: { language: browserLanguage },
     requestAnimationFrame(callback) { animate = callback; },
   });
   const cache = new Map();
@@ -68,22 +69,24 @@ async function startGame() {
   const main = load(path.join(root, "src/main.js"));
   await main.link((specifier, parent) => load(path.resolve(path.dirname(parent.identifier), specifier.split("?")[0])));
   await main.evaluate();
+  const locale = cache.get(path.join(root, "src/i18n/index.js")).namespace;
+  const t = locale.t;
   let clock = 0;
   const title = () => elements["panel-title"].textContent;
   const buttons = () => elements["panel-actions"].children;
-  const hasAction = (text) => buttons().some((button) => button.children.includes(text));
+  const hasAction = (text) => buttons().some((button) => button.dataset.message === text || button.children.includes(t(text)));
   const recommended = () => elements.objects.children
     .filter((button) => !button.hidden && button.classList.contains("current"))
     .map((button) => button.textContent);
   function action(text) {
-    const button = buttons().find((item) =>
-      item.children.some((value) => typeof value === "string" && value.includes(text)));
+    const button = buttons().find((item) => item.dataset.message?.includes(text)
+      || item.children.some((value) => typeof value === "string" && value.includes(text)));
     assert.ok(button, "Expected action " + text + " in " + title());
     button.emit("click");
   }
   function use(label) {
     assert.ok(!elements.dialog.open);
-    const marker = elements.objects.children.find((button) => button.textContent.endsWith(label));
+    const marker = elements.objects.children.find((button) => button.textContent.endsWith(t(label)));
     assert.ok(marker, "Expected interactable " + label);
     marker.emit("click");
     for (let index = 0; index < 500 && !elements.dialog.open; index += 1) animate(clock += 16);
@@ -98,7 +101,7 @@ async function startGame() {
     for (let index = 0; index < frames; index += 1) animate(clock += 16);
     document.emit("keyup", { key });
   }
-  return { elements, action, use, title, hasAction, key, hold, recommended };
+  return { elements, action, use, title, hasAction, key, hold, recommended, t, locale, document };
 }
 
 async function testMovement() {
@@ -122,47 +125,48 @@ async function testMovement() {
 }
 
 async function train(game) {
-  const { action, use, title, hasAction, elements, key, recommended } = game;
+  const { action, use, title, hasAction, elements, key, recommended, t } = game;
+  const targets = (...labels) => labels.map(t);
   assert.equal(title(), "Last Light");
   action("Credits");
-  assert.equal(title(), "Made with care");
+  assert.equal(title(), t("Made with care"));
   key("Escape");
   assert.equal(title(), "Last Light", "Closing credits returns to the title");
   action("Begin night shift");
-  assert.deepEqual(recommended(), ["Mara"]);
+  assert.deepEqual(recommended(), targets("Mara"));
   use("Mara");
   assert.ok(parseFloat(elements.player.style.top) > 268 / 4,
     "The first conversation stops in front of Mara instead of routing behind her");
   action("I'll take a look");
-  assert.deepEqual(recommended(), ["Radio", "Archive"], "Do not suggest Mara before the evidence is ready");
+  assert.deepEqual(recommended(), targets("Radio", "Archive"), "Do not suggest Mara before the evidence is ready");
   use("Radio"); action("Back to the station");
   use("Archive"); action("Read Nell"); action("Back to the file");
   action("Read the receiver"); action("Back to the station");
-  assert.deepEqual(recommended(), ["Radio"]);
+  assert.deepEqual(recommended(), targets("Radio"));
   use("Mara");
-  assert.equal(title(), "Take another look", "Reading alone cannot complete the investigation");
+  assert.equal(title(), t("Take another look"), "Reading alone cannot complete the investigation");
   action("Back to the station");
   use("Radio"); action("Open receiver bench");
   action("Send relay ping");
-  assert.match(elements["panel-body"].innerHTML, /No reply after/);
+  assert.ok(elements["panel-body"].innerHTML.includes(t("No reply after the relay ping.")));
   assert.ok(!hasAction("Compare with archived tape"));
   action("Turn auto-reply on"); action("Send relay ping");
-  assert.match(elements["panel-body"].innerHTML, /Three short clicks/);
+  assert.ok(elements["panel-body"].innerHTML.includes(t("Three short clicks. No voice follows.")));
   action("Compare with archived tape"); action("definitely automatic");
-  assert.equal(title(), "Listen to the second source");
+  assert.equal(title(), t("Listen to the second source"));
   action("Compare the recordings again"); action("old source is still unknown");
   action("Back to the station");
-  assert.deepEqual(recommended(), ["Mara"], "Only the case review remains");
+  assert.deepEqual(recommended(), targets("Mara"), "Only the case review remains");
   use("Mara"); action("may be working"); action("Log the signal");
-  assert.deepEqual(recommended(), ["Terminal"]);
+  assert.deepEqual(recommended(), targets("Terminal"));
   use("Terminal"); action("ferry is delayed"); action("File this call");
   use("Terminal"); action("unsettling"); action("File this call");
   use("Terminal"); action("Go ahead"); action("File this call");
-  assert.deepEqual(recommended(), ["Mara"]);
+  assert.deepEqual(recommended(), targets("Mara"));
   use("Mara"); action("Take the shift"); action("Return to the station");
-  assert.deepEqual(recommended(), ["Live terminal"]);
+  assert.deepEqual(recommended(), targets("Live terminal"));
   use("Live terminal"); action("Give me a moment");
-  assert.deepEqual(recommended(), ["Radio", "Archive", "Live terminal"]);
+  assert.deepEqual(recommended(), targets("Radio", "Archive", "Live terminal"));
 }
 
 async function testGroundedReport() {
@@ -270,6 +274,77 @@ async function testInformedCaution() {
   assert.equal(elements["panel-body"].innerHTML, originalReaction);
 }
 
+function chooseLanguage(game, language) {
+  const row = game.elements["panel-body"].children.at(-1);
+  const select = row?.children.find((child) => child.id === "language-select");
+  assert.ok(select, "Settings contains a language selector");
+  assert.deepEqual(select.children.map((option) => option.value), ["en", "zh-CN"]);
+  select.value = language;
+  select.emit("change");
+}
+
+async function testBilingualShift() {
+  const preferences = new Map();
+  const storage = { getItem: (key) => preferences.get(key), setItem: (key, value) => preferences.set(key, value) };
+  const game = await startGame({ storage });
+  const { action, use, elements, key, title, locale, t } = game;
+  action("Settings");
+  chooseLanguage(game, "zh-CN");
+  assert.equal(title(), "设置");
+  assert.equal(game.document.documentElement.lang, "zh-CN");
+  assert.equal(preferences.get("last-light.language"), "zh-CN");
+  key("Escape");
+  assert.equal(elements["panel-label"].textContent, "信号站", "Settings opened from title returns to title");
+  await train(game);
+  use("Radio");
+  assert.ok(elements["panel-body"].innerHTML.includes('aria-label="三声等间隔的短响"'));
+  assert.ok(elements["panel-body"].innerHTML.includes('viewBox="0 0 300 42"'), "Translation preserves waveform markup");
+  action("Back to the station");
+  use("Archive"); action("Read the receiver"); action("Back to the station");
+  use("Live terminal"); action("Check the rescue board"); action("Back to Nell");
+  action("Compose a reply"); action("It could be automatic"); action("Send reply");
+  assert.equal(title(), "内尔听着");
+  assert.ok(elements["panel-body"].innerHTML.includes("你保存下来了"));
+  action("Leave the line open");
+
+  key("Escape"); action("Settings"); chooseLanguage(game, "en"); key("Escape");
+  assert.equal(title(), "Shift paused", "Settings opened during a shift returns to pause");
+  action("Resume shift"); use("Live terminal");
+  assert.equal(title(), "Nell listens", "Changing language preserves the phase and sent reply");
+  assert.match(elements["panel-body"].innerHTML, /You saved it/);
+  assert.ok(game.hasAction("Prepare a signal report"), "Evidence survives language changes");
+  action("Leave the line open");
+
+  key("Escape"); action("Settings"); chooseLanguage(game, "zh-CN"); key("Escape"); action("Resume shift");
+  use("Live terminal"); action("Prepare a signal report");
+  assert.ok(elements["panel-body"].innerHTML.includes("尚未确认有船员操作"));
+  action("Back to Nell"); action("Prepare a signal report"); action("Send recording and report");
+  assert.equal(title(), "报告已收到");
+  action("Tell Nell the report arrived"); action("Stay with Nell"); action("I’ll be here");
+  assert.equal(title(), "线路仍然接通");
+  action("Back to the station"); key("j");
+  assert.ok(elements["panel-body"].innerHTML.includes(t("Recording delivered to search team")));
+  action("Close journal");
+  assert.equal(locale.missingTranslations().length, 0,
+    "Chinese four-act flow has no untranslated messages: " + JSON.stringify(locale.missingTranslations()));
+
+  const restored = await startGame({ storage, browserLanguage: "en-US" });
+  assert.equal(restored.locale.getLanguage(), "zh-CN", "Saved choice takes priority over browser language");
+  assert.equal(restored.elements["panel-label"].textContent, "信号站");
+  restored.action("Settings"); chooseLanguage(restored, "en"); restored.key("Escape");
+  const english = await startGame({ storage, browserLanguage: "zh-CN" });
+  assert.equal(english.elements["panel-label"].textContent, "SIGNAL HOUSE", "English preference also persists");
+  english.locale.setLanguage("unsupported");
+  assert.equal(english.locale.getLanguage(), "en");
+
+  const unavailableStorage = { getItem() { throw Error("blocked"); }, setItem() { throw Error("blocked"); } };
+  const session = await startGame({ storage: unavailableStorage });
+  session.action("Settings"); chooseLanguage(session, "zh-CN");
+  assert.equal(session.title(), "设置", "Language switching still works if storage is blocked");
+  const browserDefault = await startGame({ browserLanguage: "zh-Hans" });
+  assert.equal(browserDefault.locale.getLanguage(), "zh-CN");
+}
+
 (async () => {
   await testMovement();
   await testGroundedReport();
@@ -277,5 +352,6 @@ async function testInformedCaution() {
   await testUnverifiedReport();
   await testReplySurvivesLaterInvestigation();
   await testInformedCaution();
-  console.log("PASS: movement, four acts, report navigation, immutable sent replies, later evidence, informed caution, restart");
+  await testBilingualShift();
+  console.log("PASS: four acts in English/Chinese, saved language, mid-shift switching, reply/report history, storage fallback, movement, restart");
 })().catch((error) => { console.error(error); process.exitCode = 1; });

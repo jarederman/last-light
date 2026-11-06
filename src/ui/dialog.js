@@ -1,4 +1,5 @@
-import { stopSignal, playEffect } from "../audio/sound.js?v=narrative-fixes-1";
+import { stopSignal, playEffect } from "../audio/sound.js?v=language-1";
+import { t, translateHtml } from "../i18n/index.js?v=language-1";
 
 export const byId = (id) => document.getElementById(id);
 export const dialog = byId("dialog");
@@ -27,20 +28,21 @@ export function show(label, title, body, actions) {
   beforeOpen();
   if (!dialog.open) returnFocus = document.activeElement;
   dialog.dataset.menu = "";
-  byId("panel-label").textContent = label;
-  byId("panel-title").textContent = title;
-  byId("panel-body").innerHTML = body;
+  byId("panel-label").textContent = t(label);
+  byId("panel-title").textContent = t(title);
+  byId("panel-body").innerHTML = translateHtml(body);
   byId("panel-actions").replaceChildren(...actions.map(({ text, run, primary, suggested }) => {
     const button = document.createElement("button");
     button.type = "button";
     button.className = `action${primary ? " primary" : ""}${suggested ? " suggested" : ""}`;
+    button.dataset.message = text;
     if (suggested) {
       const tag = document.createElement("span");
       tag.className = "tag";
-      tag.textContent = "Suggested reply";
+      tag.textContent = t("Suggested reply");
       button.append(tag);
     }
-    button.append(text);
+    button.append(t(text));
     button.addEventListener("click", () => { playEffect("button"); run(); });
     return button;
   }));
