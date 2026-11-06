@@ -130,7 +130,10 @@ async function train(game) {
   assert.equal(title(), "Last Light", "Closing credits returns to the title");
   action("Begin night shift");
   assert.deepEqual(recommended(), ["Mara"]);
-  use("Mara"); action("I'll take a look");
+  use("Mara");
+  assert.ok(parseFloat(elements.player.style.top) > 268 / 4,
+    "The first conversation stops in front of Mara instead of routing behind her");
+  action("I'll take a look");
   assert.deepEqual(recommended(), ["Radio", "Archive"], "Do not suggest Mara before the evidence is ready");
   use("Radio"); action("Back to the station");
   use("Archive"); action("Read Nell"); action("Back to the file");

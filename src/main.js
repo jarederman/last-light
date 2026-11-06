@@ -110,7 +110,7 @@ function walkTo(target, use) {
     return;
   }
   const routes = (use ? target.approaches ?? [target] : [target])
-    .map((point) => findRoute(position, point, walkable, use ? interactRange - 4 : 6));
+    .map((point) => findRoute(position, point, walkable, use ? interactRange : 6));
   const route = routes.filter((candidate) => candidate.reached)
     .sort((a, b) => a.path.length - b.path.length)[0] ?? routes[0];
   path = route.path;

@@ -37,10 +37,12 @@ const vm = require("node:vm");
     assert.ok(!canStand(point), "Mara blocks overlapping feet from every side");
     assert.ok(canStand(point, false), "Her collision disappears after handover");
   }
-  const maraRoute = findRoute({ x: 319, y: 355 }, { x: 319, y: 243 }, canStand, 25);
+  const maraRoute = findRoute({ x: 320, y: 355 }, { x: 319, y: 243 }, canStand, 29);
   assert.ok(maraRoute.reached, "The expanded NPC collision still permits conversation");
   assert.ok(distance(maraRoute.path.at(-1), { x: 319, y: 243 }) > 25,
     "Conversation does not merge the actors' foot positions");
+  assert.ok(maraRoute.path.every((point) => point.x === 320 && point.y > 268),
+    "The approach stops in front of Mara without a detour behind her");
   assert.ok(actorScale(369) > actorScale(243) * 1.3);
   assert.ok(actorScale(400) === actorScale(377), "Depth scaling is clamped at the floor edge");
   console.log("PASS: archive corridor, desk/chair footprints, NPC clearance, front approach, perspective scale");
