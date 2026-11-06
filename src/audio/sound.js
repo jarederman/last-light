@@ -10,7 +10,8 @@ const clips = {
 };
 let enabled = true;
 let started = false;
-let ambience;
+const ambientTracks = [["harbor-rain.ogg", .24], ["harbor-waves.ogg", .18]];
+let ambience = [];
 let signal;
 let lastStep = 0;
 let stepSide = false;
@@ -26,23 +27,28 @@ function play(clip) {
 }
 
 function updateAmbience() {
-  if (!ambience) return;
-  if (enabled && started && !document.hidden) play(ambience);
-  else ambience.pause();
+  for (const clip of ambience) {
+    if (enabled && started && !document.hidden) {
+      if (clip.paused) play(clip);
+    } else clip.pause();
+  }
 }
 
 export function startAmbience() {
   if (!supported()) return;
   started = true;
-  ambience ??= new Audio(new URL("rain.ogg", audioRoot).href);
-  ambience.loop = true;
-  ambience.volume = .19;
+  if (!ambience.length) ambience = ambientTracks.map(([filename, volume]) => {
+    const clip = new Audio(new URL(filename, audioRoot).href);
+    clip.loop = true;
+    clip.volume = volume;
+    return clip;
+  });
   updateAmbience();
 }
 
 export function stopAmbience() {
   started = false;
-  ambience?.pause();
+  for (const clip of ambience) clip.pause();
   stopSignal();
   for (const clip of playing) clip.pause();
   playing.clear();

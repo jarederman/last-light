@@ -1,8 +1,0 @@
-Rain on Window Loop
-alxl
-https://opengameart.org/content/rain-on-window-loop
-The author explicitly offers CC0. This project selects CC0 1.0 Universal.
-Converted from the original WAV to mono Ogg Vorbis at 22050 Hz for web delivery.
-
-CC0 1.0 Universal
-https://creativecommons.org/publicdomain/zero/1.0/

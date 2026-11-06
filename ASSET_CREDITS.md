@@ -1,10 +1,11 @@
 # Last Light asset credits
 
-All downloaded assets used in this release are licensed CC0. We credit their creators in the game even where attribution is optional.
+Rain and sea ambience use the Pixabay Content License. Interface and movement effects use CC0. We credit all creators in the game.
 
 | Asset | Creator | Source | Files used and modifications |
 | --- | --- | --- | --- |
-| Rain on Window Loop | alxl | https://opengameart.org/content/rain-on-window-loop | Author explicitly offers CC0. Original `rain_on_window_loop.wav` converted to mono Ogg Vorbis at 22050 Hz for web delivery. |
+| Ocean Waves | DRAGON-STUDIO | https://pixabay.com/zh/sound-effects/nature-ocean-waves-584733/ | Pixabay Content License. `harbor-waves.ogg`: source 0–58s, 2s wraparound crossfade → 56s loop, interior filtering, loudness normalization, stereo 32kHz Ogg. Mixed below the closer rain. |
+| CALMING RAIN | Liecio | https://pixabay.com/zh/sound-effects/nature-calming-rain-257596/ | Pixabay Content License. `harbor-rain.ogg`: source 10–80s, 2s wraparound crossfade → 68s loop, interior filtering, loudness normalization, stereo 32kHz Ogg. |
 | Interface Sounds | Kenney | https://opengameart.org/content/interface-sounds | `click_003.ogg` → button, `switch_005.ogg` → receiver switch, `confirmation_001.ogg` → receipt. `tick_002.ogg` trimmed and arranged as three clicks at 280ms intervals → radio signal. |
 | 50 RPG sound effects | Kenney | https://opengameart.org/content/50-rpg-sound-effects | `bookOpen.ogg` → paper. `footstep01.ogg` and `footstep02.ogg` → alternating movement sounds. Unmodified Ogg files. |
 
@@ -14,4 +15,4 @@ The rainy-night station background (`assets/scenes/station-night.webp`), Echo’
 
 The prior Kenney/Fleurman/Airos visual assets have been replaced and are no longer shipped. The UI, collision layout and signal waveform diagrams are project code. The small SVG favicon is original project UI artwork.
 
-The packaged originals' license notices and supplemental source notices are in `assets/licenses/`. CC0 reference is https://creativecommons.org/publicdomain/zero/1.0/.
+Source and license notices are in `assets/licenses/`. The ambient recordings are integrated into the game and are not offered as standalone stock audio. Original MP3 downloads are not included. Pixabay license: https://pixabay.com/service/terms/ . CC0 reference: https://creativecommons.org/publicdomain/zero/1.0/ .

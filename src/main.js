@@ -1,18 +1,20 @@
-import { chapters, exercises } from "./data/story.js?v=room-polish-1";
-import { interactionPoints, playerStart } from "./data/station.js?v=room-polish-1";
-import { canStand, actorScale } from "./core/world.js?v=room-polish-3";
-import { distance, findRoute } from "./core/navigation.js?v=room-polish-1";
-import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=room-polish-1";
-import { creditsMarkup } from "./data/credits.js?v=room-polish-1";
-import { byId, dialog, show, close, done, configureDialog } from "./ui/dialog.js?v=room-polish-1";
+import { chapters, exercises } from "./data/story.js?v=storm-audio-1";
+import { interactionPoints, playerStart } from "./data/station.js?v=storm-audio-1";
+import { canStand, actorScale } from "./core/world.js?v=storm-audio-1";
+import { distance, findRoute } from "./core/navigation.js?v=storm-audio-1";
+import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=storm-audio-1";
+import { creditsMarkup } from "./data/credits.js?v=storm-audio-1";
+import { byId, dialog, show, close, done, configureDialog } from "./ui/dialog.js?v=storm-audio-1";
 
-import { createRadioScene } from "./scenes/radio.js?v=room-polish-1";
-import { createCallScene } from "./scenes/call.js?v=room-polish-1";
+import { createRadioScene } from "./scenes/radio.js?v=storm-audio-1";
+import { createCallScene } from "./scenes/call.js?v=storm-audio-1";
+import { createWeather } from "./scenes/weather.js?v=storm-audio-1";
 
 configureDialog(stopWalking);
 
 const room = byId("room");
 const player = byId("player");
+const weather = createWeather(byId("weather"));
 const held = new Set();
 const movement = {
   w: [0, -1], arrowup: [0, -1], a: [-1, 0], arrowleft: [-1, 0],
@@ -119,8 +121,10 @@ function walkTo(target, use) {
 
 let previousFrame = 0;
 function frame(now) {
-  const step = Math.min(32, now - previousFrame) * .158;
+  const elapsed = Math.max(0, Math.min(50, now - previousFrame));
+  const step = Math.min(32, elapsed) * .158;
   previousFrame = now;
+  weather.update(elapsed / 1000, now / 1000);
   let moving = false;
   if (!dialog.open) {
     const pressed = (letter, arrow) => Number(held.has(letter) || held.has(arrow));

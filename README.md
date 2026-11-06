@@ -16,6 +16,7 @@ A short browser RPG set in a harbor radio station on a stormy night. Explore the
 | `src/audio/sound.js` | Downloaded ambience and effects, muting and playback lifecycle |
 | `src/scenes/radio.js` | Receiver bench, recorded signals and comparison puzzle |
 | `src/scenes/call.js` | Nell’s live call, evidence reports and follow-up reactions |
+| `src/scenes/weather.js` | Layered wind-driven rain and slow window droplets |
 | `src/ui/signal.js` | Accessible waveform views |
 | `tests/game-flow.cjs` | Module-based interaction and branching regression checks |
 | `src/styles/game.css` | Scene, character and menu presentation |
@@ -48,7 +49,7 @@ Publish the `main` branch from `/(root)` under **Settings → Pages → Deploy f
 
 ## Assets
 
-See [ASSET_CREDITS.md](ASSET_CREDITS.md) for the source pages, authors, licenses and modifications. All downloaded assets used in this release are CC0. Their license notices are kept in `assets/licenses/`.
+See [ASSET_CREDITS.md](ASSET_CREDITS.md) for the source pages, authors, licenses and modifications. The Pixabay ambience uses the Pixabay Content License; Kenney interface/movement effects use CC0. Notices are in `assets/licenses/`.
 
 The environment and actors were generated together around a dark timber coastal station, navy sea, rain and small amber practical lights. The terminal is front-facing and the actors have subdued adult silhouettes. Furniture is baked into one coherent background; collision and approach positions live in `src/data/station.js` in a 640 × 400 coordinate space. The WebP background is 1280 × 800.
 
@@ -58,7 +59,9 @@ Actors grow gradually toward the foreground, anchored at their feet. The termina
 
 Only recommended targets show a centered, glowing gold beacon. Unrecommended props remain interactive through proximity and E, clicking their hotspot, or focusing their accessible button. The archive phase suggests Mara only after the required evidence has been collected.
 
-Rain starts after Begin Night Shift, pauses when the page is hidden and stops on return to the title. Audio playback failures leave the game playable.
+Two ambient tracks start after Begin Night Shift: closer rain and quieter distant surf. Both pause when the page is hidden, follow the sound toggle and stop on return to the title. The locally packaged, filtered recordings use wraparound crossfades to soften loop seams, with different 68s and 56s periods. Audio playback failures leave the game playable. Rebuild them with `python3 tools/prepare_ambience.py ocean-waves.mp3 calming-rain.mp3`; original source downloads stay outside the published repository.
+
+Weather uses independently varied rain streaks, wind gusts and slow glass droplets, clipped to the exterior and individual window panes. Frames and furniture stay dry. The static painting remains visible when reduced motion is requested or Canvas is unavailable.
 
 Run `node --experimental-vm-modules tests/audio.cjs` to check audio mute, visibility and replay behavior.
 Run `node --experimental-vm-modules tests/world.cjs` to check the archive passage, desk/chair footprints, NPC clearance and perspective scale. The game-flow checks also verify which targets are recommended at each stage.
