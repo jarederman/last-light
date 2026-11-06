@@ -1,6 +1,6 @@
-import { show, done } from "../ui/dialog.js?v=harbor-art-1";
-import { playSignal, stopSignal, playEffect } from "../audio/sound.js?v=harbor-art-1";
-import { signalTrace } from "../ui/signal.js?v=harbor-art-1";
+import { show, done } from "../ui/dialog.js?v=night-station-1";
+import { playSignal, stopSignal, playEffect } from "../audio/sound.js?v=night-station-1";
+import { signalTrace } from "../ui/signal.js?v=night-station-1";
 
 export function createRadioScene({ getState, mark }) {
   function open() {

@@ -90,7 +90,30 @@ async function startGame() {
     document.emit("keydown", { key, preventDefault() {} });
     document.emit("keyup", { key });
   }
-  return { elements, action, use, title, hasAction, key };
+  function hold(key, frames) {
+    document.emit("keydown", { key, preventDefault() {} });
+    for (let index = 0; index < frames; index += 1) animate(clock += 16);
+    document.emit("keyup", { key });
+  }
+  return { elements, action, use, title, hasAction, key, hold };
+}
+
+async function testMovement() {
+  const { elements, action, hold } = await startGame();
+  action("Begin night shift");
+  const actor = elements.player;
+  const left = () => parseFloat(actor.style.left);
+  const start = left();
+  hold("d", 8);
+  assert.ok(left() > start, "D moves right");
+  assert.equal(actor.dataset.dir, "right");
+  hold("a", 8);
+  assert.ok(left() < start + .1, "A moves back left");
+  assert.equal(actor.dataset.dir, "left");
+  hold("s", 100);
+  assert.ok(parseFloat(actor.style.top) <= 377 / 4, "Player stays inside the new floor boundary");
+  hold("w", 100);
+  assert.ok(parseFloat(actor.style.top) >= 243 / 4, "Mara's footprint blocks the player");
 }
 
 async function train(game) {
@@ -184,8 +207,9 @@ async function testUnverifiedReport() {
 }
 
 (async () => {
+  await testMovement();
   await testGroundedReport();
   await testOptionalInvestigation();
   await testUnverifiedReport();
-  console.log("PASS: receiver comparison, four-act flow, report branches, retry, suggestion, restart");
+  console.log("PASS: movement directions, new floor collisions, receiver comparison, four-act flow, report branches, restart");
 })().catch((error) => { console.error(error); process.exitCode = 1; });

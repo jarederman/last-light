@@ -18,12 +18,12 @@ A short browser RPG set in a harbor radio station on a stormy night. Explore the
 | `src/ui/signal.js` | Accessible waveform views |
 | `tests/game-flow.cjs` | Module-based interaction and branching regression checks |
 | `src/styles/game.css` | Scene, character and menu presentation |
-| `assets/scenes/` | Exported station background and editable tile layout |
-| `assets/characters/` | Downloaded four-direction character sheets |
-| `assets/tilesets/` | Original downloaded environment atlases |
-| `assets/props/` | Downloaded electronics sprites |
+| `assets/scenes/` | Unified rainy-night signal-house background |
+| `assets/characters/` | Matching adult player walk sheet and Mara sprite |
 | `assets/audio/` | Compressed rain, movement and device recordings |
 | `assets/ui/` | Game icon |
+| `assets/art-direction.md` | Visual constraints, generation prompts and sprite format |
+| `tools/prepare_art.py` | Asset resizing, transparent-frame packing and WebP export |
 
 The game uses native JavaScript modules. The entry module imports its dependencies explicitly. Relative module and asset paths support GitHub Pages project URLs.
 
@@ -49,8 +49,10 @@ Publish the `main` branch from `/(root)` under **Settings → Pages → Deploy f
 
 See [ASSET_CREDITS.md](ASSET_CREDITS.md) for the source pages, authors, licenses and modifications. All downloaded assets used in this release are CC0. Their license notices are kept in `assets/licenses/`.
 
-The environment is assembled from downloaded Kenney tiles and Airos electronics. Rebuild the exported scene with `python3 tools/build_scene.py` after installing Pillow. Its authored layout is `assets/scenes/station.layout.json`. This tool arranges existing pixels and removes the source atlas's magenta color key.
+The environment and actors were generated together around a dark timber coastal station, navy sea, rain and small amber practical lights. The terminal is front-facing and the actors have subdued adult silhouettes. Furniture is baked into one coherent background; collision and approach positions live in `src/data/station.js` in a 640 × 400 coordinate space. The WebP background is 1280 × 800.
 
-Fleurman character sheets contain four columns for down, left, up and right, and three rows of walk frames. They are used without image edits. Rain starts after Begin Night Shift, pauses when the page is hidden and stops on return to the title. Audio playback failures leave the game playable.
+Echo's sheet has four columns, **down / right / up / left**, and three rows, **idle / first stride / second stride**. Each cell is 112 × 168, with feet at pixel 156. Mara uses one cell with the same scale and baseline. Characters are sorted by foot position so the foreground actor covers the one behind. See `assets/art-direction.md` for source prompts and the optional asset packing command. The packer only processes existing artwork; it does not draw the scene or characters.
+
+Rain starts after Begin Night Shift, pauses when the page is hidden and stops on return to the title. Audio playback failures leave the game playable.
 
 Run `node --experimental-vm-modules tests/audio.cjs` to check audio mute, visibility and replay behavior.

@@ -1,12 +1,12 @@
-import { chapters, exercises } from "./data/story.js?v=harbor-art-1";
-import { interactionPoints, obstacles } from "./data/station.js?v=harbor-art-1";
-import { distance, findRoute } from "./core/navigation.js?v=harbor-art-1";
-import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=harbor-art-1";
-import { creditsMarkup } from "./data/credits.js?v=harbor-art-1";
-import { byId, dialog, show, close, done, configureDialog } from "./ui/dialog.js?v=harbor-art-1";
+import { chapters, exercises } from "./data/story.js?v=night-station-1";
+import { interactionPoints, obstacles, maraObstacle, walkBounds, playerStart } from "./data/station.js?v=night-station-1";
+import { distance, findRoute } from "./core/navigation.js?v=night-station-1";
+import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=night-station-1";
+import { creditsMarkup } from "./data/credits.js?v=night-station-1";
+import { byId, dialog, show, close, done, configureDialog } from "./ui/dialog.js?v=night-station-1";
 
-import { createRadioScene } from "./scenes/radio.js?v=harbor-art-1";
-import { createCallScene } from "./scenes/call.js?v=harbor-art-1";
+import { createRadioScene } from "./scenes/radio.js?v=night-station-1";
+import { createCallScene } from "./scenes/call.js?v=night-station-1";
 
 configureDialog(stopWalking);
 
@@ -21,7 +21,7 @@ const handlers = { mara: talk, radio, archive, terminal };
 const stations = Object.fromEntries(Object.entries(interactionPoints).map(([id, point]) =>
   [id, { ...point, use: handlers[id] }]));
 const interactRange = 29;
-const position = { x: 320, y: 323 };
+const position = { ...playerStart };
 let state;
 let path = [];
 let destination = null;
@@ -41,7 +41,7 @@ function reset() {
     lastTrait: null,
     instinct: { warmth: 0, caution: 0, confidence: 0 },
   };
-  Object.assign(position, { x: 320, y: 323 });
+  Object.assign(position, playerStart);
   player.dataset.dir = "up";
   stopWalking();
   if (dialog.open) dialog.close();
@@ -53,7 +53,7 @@ for (const [id, station] of Object.entries(stations)) {
   const marker = document.createElement("button");
   marker.type = "button";
   marker.className = "marker";
-  marker.style.left = `${station.x / 6.4}%`;
+  marker.style.left = `${(station.markerX ?? station.x) / 6.4}%`;
   marker.style.top = `${station.markerY / 4}%`;
   marker.textContent = station.label;
   marker.addEventListener("click", () => walkTo(station, station.use));
@@ -65,13 +65,16 @@ place(byId("mara-sprite"), stations.mara);
 function place(element, point) {
   element.style.left = `${point.x / 6.4}%`;
   element.style.top = `${point.y / 4}%`;
+  element.style.zIndex = Math.round(point.y);
 }
 
 function walkable({ x, y }) {
-  return x >= 70 && x <= 570 && y >= 154 && y <= 343
-    && !obstacles.some(([left, top, right, bottom], index) =>
-      (index !== 4 || !byId("mara-sprite").hidden) &&
-      x >= left && x <= right && y >= top && y <= bottom);
+  const inside = ([left, top, right, bottom]) =>
+    x >= left && x <= right && y >= top && y <= bottom;
+  return x >= walkBounds.left && x <= walkBounds.right
+    && y >= walkBounds.top && y <= walkBounds.bottom
+    && !obstacles.some(inside)
+    && (byId("mara-sprite").hidden || !inside(maraObstacle));
 }
 
 function stopWalking() {
