@@ -1,6 +1,6 @@
-import { show, done } from "../ui/dialog.js?v=storm-audio-1";
-import { playSignal, stopSignal, playEffect } from "../audio/sound.js?v=storm-audio-1";
-import { signalTrace } from "../ui/signal.js?v=storm-audio-1";
+import { show, done } from "../ui/dialog.js?v=narrative-fixes-1";
+import { playSignal, stopSignal, playEffect } from "../audio/sound.js?v=narrative-fixes-1";
+import { signalTrace } from "../ui/signal.js?v=narrative-fixes-1";
 
 export function createRadioScene({ getState, mark }) {
   function open() {

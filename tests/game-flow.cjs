@@ -175,6 +175,8 @@ async function testGroundedReport() {
   use("Live terminal"); action("Check the rescue board"); action("Back to Nell");
   action("Compose a reply");
   assert.ok(elements["panel-actions"].children[2].className.includes("suggested"));
+  assert.ok(!elements["panel-actions"].children[3].className.includes("suggested"),
+    "The new help option is deliberately outside the learned training preferences");
   action("It could be automatic"); action("Change reply");
   action("It could be automatic"); action("Send reply");
   assert.equal(title(), "Nell listens");
@@ -183,7 +185,9 @@ async function testGroundedReport() {
   action("Prepare a signal report");
   assert.match(elements["panel-body"].innerHTML, /Automatic reply is possible/);
   assert.match(elements["panel-body"].innerHTML, /Rescue board checked/);
-  action("Review before sending"); action("Prepare a signal report");
+  action("Back to Nell");
+  assert.equal(title(), "Nell listens", "The report back button returns to the caller without sending");
+  action("Prepare a signal report");
   action("Send recording and report"); assert.equal(title(), "Report received");
   action("Back to the station"); use("Live terminal");
   assert.equal(title(), "Something they can check");
@@ -222,10 +226,56 @@ async function testUnverifiedReport() {
   assert.match(elements["panel-body"].innerHTML, /Not verified by this station/);
 }
 
+async function testReplySurvivesLaterInvestigation() {
+  const game = await startGame();
+  await train(game);
+  const { action, use, title, elements } = game;
+  use("Live terminal"); action("Compose a reply"); action("can’t tell from");
+  action("Send reply");
+  const originalReaction = elements["panel-body"].innerHTML;
+  assert.match(originalReaction, /I wish you knew/);
+  action("Leave the line open");
+
+  use("Archive"); action("Read the receiver"); action("Back to the station");
+  use("Live terminal");
+  assert.equal(elements["panel-body"].innerHTML, originalReaction,
+    "Reading new evidence cannot change what Nell heard in an earlier reply");
+  action("Leave the line open");
+  use("Radio"); action("Back to the station");
+  use("Live terminal");
+  assert.equal(elements["panel-body"].innerHTML, originalReaction,
+    "Capturing a recording later also preserves the sent reply's reaction");
+  action("Prepare a signal report");
+  assert.match(elements["panel-body"].innerHTML, /Automatic reply is possible/,
+    "A new report still uses the latest investigated evidence");
+  action("Back to Nell");
+  assert.equal(elements["panel-body"].innerHTML, originalReaction);
+  action("Prepare a signal report"); action("Send recording and report");
+  action("Tell Nell the report arrived");
+  assert.equal(title(), "Something they can check");
+  assert.match(elements["panel-body"].innerHTML, /They have your recording/,
+    "Actually delivering a report legitimately advances the conversation");
+}
+
+async function testInformedCaution() {
+  const game = await startGame();
+  await train(game);
+  const { action, use, elements } = game;
+  use("Archive"); action("Read the receiver"); action("Back to the station");
+  use("Live terminal"); action("Compose a reply");
+  action("receiver can answer automatically"); action("Send reply");
+  assert.match(elements["panel-body"].innerHTML, /So the radio might answer without him/);
+  const originalReaction = elements["panel-body"].innerHTML;
+  action("Leave the line open"); use("Live terminal");
+  assert.equal(elements["panel-body"].innerHTML, originalReaction);
+}
+
 (async () => {
   await testMovement();
   await testGroundedReport();
   await testOptionalInvestigation();
   await testUnverifiedReport();
-  console.log("PASS: movement directions, new floor collisions, receiver comparison, four-act flow, report branches, restart");
+  await testReplySurvivesLaterInvestigation();
+  await testInformedCaution();
+  console.log("PASS: movement, four acts, report navigation, immutable sent replies, later evidence, informed caution, restart");
 })().catch((error) => { console.error(error); process.exitCode = 1; });

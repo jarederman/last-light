@@ -41,11 +41,27 @@ Move with **WASD** or the **arrow keys**, and press **E** near an object or NPC.
 
 Run `node --experimental-vm-modules tests/game-flow.cjs` with Node.js. The checks load the real module graph with a minimal DOM and exercise player movement, the receiver comparison, all four acts, investigation-dependent replies, report delivery, menu reopening and shift reset.
 
+Sent replies retain their wording and evidence context. Later investigation can
+improve a new signal report without retroactively changing Nell's reaction to an
+earlier reply. Learned suggestions reflect training feedback, not an optimal
+answer or the untrained live-call help option.
+
+Run `node --experimental-vm-modules tests/dialog.cjs` for focus return, hidden NPC
+fallback and rapid modal reopening. Scene controls regain focus after closing;
+when an opener disappears, focus returns to the game area. A portrait-phone
+orientation hint appears only in the title and pause menus.
+
 The receiver bench is an isolated local test. Sending a live signal report requires capturing tonight's recording first. Reports carry the observed timestamp and only the notes the player reviewed. The ending records whether a report was actually delivered.
 
 ## GitHub Pages
 
 Publish the `main` branch from `/(root)` under **Settings → Pages → Deploy from a branch**. The root `.nojekyll` file keeps this a static deployment. No build step is required.
+
+Before publishing changed code, run `node tools/version.mjs RELEASE_TAG` once to
+update the entry, stylesheet and all local module imports together. It also adds
+a version to newly introduced local imports. `node tools/version.mjs --check`
+checks consistency and import paths without changing files. Keep one cache key
+across the module graph so audio and stateful UI modules cannot load twice.
 
 ## Assets
 

@@ -1,5 +1,5 @@
-import { show, close, done } from "../ui/dialog.js?v=storm-audio-1";
-import { playEffect } from "../audio/sound.js?v=storm-audio-1";
+import { show, close, done } from "../ui/dialog.js?v=narrative-fixes-1";
+import { playEffect } from "../audio/sound.js?v=narrative-fixes-1";
 
 // Caller reactions and report delivery share one session state so closing a
 // panel never discards a sent reply or submits the same report twice.
@@ -57,7 +57,10 @@ WAITING FOR THE NEXT CALL</p>`, [done()]);
   function preview(option) {
     show("Live terminal · Unsent", "Your reply", `<p class="record">“${option.text}”</p>`, [
       { text: "Send reply", primary: true, run: () => {
-        getState().finalReply = option;
+        const state = getState();
+        // Preserve what was sent and its context. Later investigation must not
+        // rewrite Nell's reaction to an earlier, less-informed reply.
+        state.finalReply = { ...option, recheckedAtSend: state.evidence.has("rechecked") };
         followup();
       } },
       { text: "Change reply", run: compose }, done("Keep Nell on hold"),
@@ -68,7 +71,7 @@ WAITING FOR THE NEXT CALL</p>`, [done()]);
     const state = getState();
     const reactions = {
       warmth: "Thank you. I’d been sitting here listening to the rain. It helps to hear somebody.",
-      caution: state.evidence.has("rechecked")
+      caution: state.finalReply.recheckedAtSend
         ? "So the radio might answer without him. I hadn’t thought of that. Can the search team still use it?"
         : "I wish you knew. Thank you for telling me what you do know.",
       confidence: "I want to believe that. But the search team just said they still don’t know.",
@@ -109,7 +112,7 @@ WAITING FOR THE NEXT CALL</p>`, [done()]);
             '<p class="terminal">KESTREL / 00:17:06\nRECORDING AND NOTES RECEIVED\nRELAY COVERAGE CHECK REQUESTED\nCREW STATUS · UNCONFIRMED</p><p>The search team now has the original signal and its capture time.</p>',
             [{ text: "Tell Nell the report arrived", run: followup }, done()]);
         } },
-        { text: "Review before sending", run: followup }, done("Return to the station"),
+        { text: "Back to Nell", run: followup }, done("Return to the station"),
       ]);
   }
 

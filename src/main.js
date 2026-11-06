@@ -1,14 +1,14 @@
-import { chapters, exercises } from "./data/story.js?v=storm-audio-1";
-import { interactionPoints, playerStart } from "./data/station.js?v=storm-audio-1";
-import { canStand, actorScale } from "./core/world.js?v=storm-audio-1";
-import { distance, findRoute } from "./core/navigation.js?v=storm-audio-1";
-import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=storm-audio-1";
-import { creditsMarkup } from "./data/credits.js?v=storm-audio-1";
-import { byId, dialog, show, close, done, configureDialog } from "./ui/dialog.js?v=storm-audio-1";
+import { chapters, exercises } from "./data/story.js?v=narrative-fixes-1";
+import { interactionPoints, playerStart } from "./data/station.js?v=narrative-fixes-1";
+import { canStand, actorScale } from "./core/world.js?v=narrative-fixes-1";
+import { distance, findRoute } from "./core/navigation.js?v=narrative-fixes-1";
+import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=narrative-fixes-1";
+import { creditsMarkup } from "./data/credits.js?v=narrative-fixes-1";
+import { byId, dialog, show, close, done, configureDialog } from "./ui/dialog.js?v=narrative-fixes-1";
 
-import { createRadioScene } from "./scenes/radio.js?v=storm-audio-1";
-import { createCallScene } from "./scenes/call.js?v=storm-audio-1";
-import { createWeather } from "./scenes/weather.js?v=storm-audio-1";
+import { createRadioScene } from "./scenes/radio.js?v=narrative-fixes-1";
+import { createCallScene } from "./scenes/call.js?v=narrative-fixes-1";
+import { createWeather } from "./scenes/weather.js?v=narrative-fixes-1";
 
 configureDialog(stopWalking);
 
@@ -21,6 +21,7 @@ const movement = {
   s: [0, 1], arrowdown: [0, 1], d: [1, 0], arrowright: [1, 0],
 };
 const handlers = { mara: talk, radio, archive, terminal };
+const orientationHint = '<p class="orientation-tip muted">For a larger view, turn your phone sideways.</p>';
 const stations = Object.fromEntries(Object.entries(interactionPoints).map(([id, point]) =>
   [id, { ...point, use: handlers[id] }]));
 const interactRange = 29;
@@ -217,13 +218,13 @@ function gameMenu(kind, label, title, body, actions) {
 
 function titleScreen() {
   gameMenu("title", "SIGNAL HOUSE", "Last Light",
-    '<p>The harbor is quiet. Your first night shift is about to begin.</p><p class="muted">WASD / arrows · Move<br>E · Interact<br>J · Field journal<br>Esc · Pause</p><p class="muted">You can also click the floor to walk or select an object marker.</p>',
+    '<p>The harbor is quiet. Your first night shift is about to begin.</p><p class="muted">WASD / arrows · Move<br>E · Interact<br>J · Field journal<br>Esc · Pause</p><p class="muted">You can also click the floor to walk or select an object marker.</p>' + orientationHint,
     [{ text: "Begin night shift", run: () => { startAmbience(); close(); }, primary: true },
       { text: "Credits", run: () => gameMenu("credits", "LAST LIGHT", "Made with care", creditsMarkup, [{ text: "Back to title", run: titleScreen }]) }]);
 }
 
 function pause() {
-  gameMenu("pause", "SIGNAL HOUSE", "Shift paused", "", [
+  gameMenu("pause", "SIGNAL HOUSE", "Shift paused", orientationHint, [
     { text: "Resume shift", run: close, primary: true },
     { text: "Open field journal", run: journal },
     { text: isSoundOn() ? "Sound · On" : "Sound · Off", run: () => {
@@ -359,6 +360,8 @@ function archiveDocument(id, title, body) {
 }
 
 function suggestion() {
+  // Suggestions reproduce learned human approval, not an optimal-answer oracle.
+  // The live-call "help" option was never trained and is intentionally unscored.
   const scores = Object.entries(state.instinct);
   scores.sort((a, b) => b[1] - a[1] || Number(b[0] === state.lastTrait) - Number(a[0] === state.lastTrait));
   return scores[0][1] > 0 ? scores[0][0] : null;

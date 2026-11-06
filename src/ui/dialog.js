@@ -1,18 +1,31 @@
-import { stopSignal, playEffect } from "../audio/sound.js?v=storm-audio-1";
+import { stopSignal, playEffect } from "../audio/sound.js?v=narrative-fixes-1";
 
 export const byId = (id) => document.getElementById(id);
 export const dialog = byId("dialog");
 let beforeOpen = () => {};
+let returnFocus = null;
 
 export function configureDialog(onOpen) { beforeOpen = onOpen; }
 
-dialog.addEventListener("close", stopSignal);
+dialog.addEventListener("close", () => {
+  stopSignal();
+  // A close event may arrive after a new modal has already opened (e.g. title
+  // reset). Do not take focus away from that new modal or discard its opener.
+  if (dialog.open) return;
+  const opener = returnFocus;
+  returnFocus = null;
+  const available = opener && opener !== document.body && opener.isConnected
+    && !opener.closest("dialog") && !opener.closest("[hidden]")
+    && !opener.disabled && opener.getClientRects().length;
+  (available ? opener : byId("room")).focus({ preventScroll: true });
+});
 dialog.addEventListener("cancel", (event) => {
   if (dialog.dataset.menu === "title") event.preventDefault();
 });
 
 export function show(label, title, body, actions) {
   beforeOpen();
+  if (!dialog.open) returnFocus = document.activeElement;
   dialog.dataset.menu = "";
   byId("panel-label").textContent = label;
   byId("panel-title").textContent = title;
