@@ -1,4 +1,4 @@
-import { zhCN } from "./zh-CN.js?v=language-2";
+import { zhCN } from "./zh-CN.js?v=language-3";
 
 export const languages = [["en", "English"], ["zh-CN", "简体中文"]];
 const storageKey = "last-light.language";
@@ -10,7 +10,7 @@ function initialLanguage() {
     const saved = globalThis.localStorage?.getItem(storageKey);
     if (languages.some(([code]) => code === saved)) return saved;
   } catch { /* Preferences are optional when browser storage is unavailable. */ }
-  return "en";
+  return globalThis.navigator?.language?.toLowerCase().startsWith("zh") ? "zh-CN" : "en";
 }
 
 export const getLanguage = () => language;

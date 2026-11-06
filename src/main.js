@@ -1,15 +1,15 @@
-import { chapters, exercises } from "./data/story.js?v=language-2";
-import { interactionPoints, playerStart } from "./data/station.js?v=language-2";
-import { canStand, actorScale } from "./core/world.js?v=language-2";
-import { distance, findRoute } from "./core/navigation.js?v=language-2";
-import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=language-2";
-import { creditsMarkup } from "./data/credits.js?v=language-2";
-import { byId, dialog, show, close, done, configureDialog } from "./ui/dialog.js?v=language-2";
+import { chapters, exercises } from "./data/story.js?v=language-3";
+import { interactionPoints, playerStart } from "./data/station.js?v=language-3";
+import { canStand, actorScale } from "./core/world.js?v=language-3";
+import { distance, findRoute } from "./core/navigation.js?v=language-3";
+import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=language-3";
+import { creditsMarkup } from "./data/credits.js?v=language-3";
+import { byId, dialog, show, close, done, configureDialog } from "./ui/dialog.js?v=language-3";
 
-import { createRadioScene } from "./scenes/radio.js?v=language-2";
-import { createCallScene } from "./scenes/call.js?v=language-2";
-import { createWeather } from "./scenes/weather.js?v=language-2";
-import { t, getLanguage, setLanguage, languages } from "./i18n/index.js?v=language-2";
+import { createRadioScene } from "./scenes/radio.js?v=language-3";
+import { createCallScene } from "./scenes/call.js?v=language-3";
+import { createWeather } from "./scenes/weather.js?v=language-3";
+import { t, getLanguage, setLanguage, languages } from "./i18n/index.js?v=language-3";
 
 configureDialog(stopWalking);
 

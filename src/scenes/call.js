@@ -1,5 +1,5 @@
-import { show, close, done } from "../ui/dialog.js?v=language-2";
-import { playEffect } from "../audio/sound.js?v=language-2";
+import { show, close, done } from "../ui/dialog.js?v=language-3";
+import { playEffect } from "../audio/sound.js?v=language-3";
 
 // Caller reactions and report delivery share one session state so closing a
 // panel never discards a sent reply or submits the same report twice.
