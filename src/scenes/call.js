@@ -1,10 +1,9 @@
-import { show, close, done } from "../ui/dialog.js?v=closing-1";
-import { t } from "../i18n/index.js?v=closing-1";
-import { assuranceReasons, correctionText, insistenceText, deferText, presenceReplies, presenceQuestion } from "../data/conversation.js?v=closing-1";
-import { reflectionQuestion } from "../data/reflections.js?v=closing-1";
-import { reflectionMenu } from "./reflection.js?v=closing-1";
-import { epilogue } from "../data/epilogue.js?v=closing-1";
-import { playEffect } from "../audio/sound.js?v=closing-1";
+import { show, close, done } from "../ui/dialog.js?v=ending-story-1";
+import { t } from "../i18n/index.js?v=ending-story-1";
+import { assuranceReasons, correctionText, insistenceText, deferText, presenceReplies, presenceQuestion } from "../data/conversation.js?v=ending-story-1";
+import { reflectionMenu } from "./reflection.js?v=ending-story-1";
+import { epilogue } from "../data/epilogue.js?v=ending-story-1";
+import { playEffect } from "../audio/sound.js?v=ending-story-1";
 
 // Caller reactions and report delivery share one session state so closing a
 // panel never discards a sent reply or submits the same report twice.
@@ -243,10 +242,10 @@ WAITING FOR THE NEXT CALL</p>`, [{ text: "Review this shift", run: recap }, done
   }
 
   function reflectionScreen() {
-    show("Chapter complete · Last Light", "What was on the other end?",
-      `<p class="record">${t(reflectionQuestion)}</p>`, [
+    show("Chapter complete · Last Light", "End of watch",
+      "<p>The line settles into rain. Outside, the breakwater light makes another turn. No one calls back before the end of your watch.</p>", [
         { text: "Review this shift", run: recap },
-        { text: "After the line · Questions and readings", run: () => reflectionMenu(reflectionScreen, "Return to the closing question") },
+        { text: "A second look", run: () => reflectionMenu(reflectionScreen) },
         done("Return to the station"),
       ]);
   }
@@ -268,8 +267,8 @@ WAITING FOR THE NEXT CALL</p>`, [{ text: "Review this shift", run: recap }, done
       <h3>The silence</h3><p>${t(state.ending.company)}</p>
       <h3>The next call</h3><p>${t(state.ending.trust)}</p>`,
       [done("Return to the station"),
-        { text: "Return to the closing question", run: reflectionScreen },
-        { text: "After the line · Questions and readings", run: () => reflectionMenu(recap) },
+        { text: "Back to the end of the watch", run: reflectionScreen },
+        { text: "A second look", run: () => reflectionMenu(recap, "Back to your shift record") },
         { text: "Replay from the beginning", run: restart },
         { text: "Return to title", run: returnToTitle },
       ]);

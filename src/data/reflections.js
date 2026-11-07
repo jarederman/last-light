@@ -1,36 +1,30 @@
-// Public-facing questions are deliberately separate from scored game state.
+// Optional, scene-led context for players who want to revisit the story.
+// The game itself ends before these notes begin.
 export const reflections = [
   {
-    title: "A voice, or an understanding?",
+    title: "The three clicks",
     paragraphs: [
-      "The receiver can repeat three clicks. ECHO can say ‘I’m here.’ A familiar response may give you a reason to listen, but what would make it evidence of understanding?",
-      "Turing’s imitation game asks how a machine would fare in a conversation where the questioner cannot see who is answering. What can conversation reveal about a mind?",
-      "In Searle’s Chinese Room, someone who does not know Chinese follows instructions for producing Chinese answers. The answers can look fluent without that person understanding them. Could the whole system nevertheless understand?",
-      "These are competing ways of approaching minds, not a settled test that this game can administer.",
-      "The clicks establish a limit on what you can infer from this signal. They do not establish that every machine lacks meaning. Would a longer conversation, a different internal mechanism, or a history of acting in the world change your judgment?",
+      "Nell's father gave three taps a meaning before anyone heard them. The spare receiver made the same sound with its microphone unplugged. The recording was worth passing to the search team, but it could not tell Nell whether her father meant to answer.",
+      "We often meet another mind through what it does, without seeing the understanding behind it. Finding out how one reply can be produced changes the evidence. It does not, by itself, tell us what every reply means.",
     ],
   },
   {
-    title: "Whose judgment was it?",
+    title: "The suggested draft",
     paragraphs: [
-      "You chose ECHO’s training replies. Approval strengthened a tendency; repeating a choice also left a habit. The draft was a trace of that history, not a second operator telling you what to do.",
-      "People also learn words and judgments from other people. Turing’s discussion of learning machines takes education seriously. A shared history of learning does not, by itself, establish that people and machines understand in the same way.",
-      "When you accepted or resisted the draft, was that your judgment, ECHO’s, or both? If having learned a response disqualifies it as understanding, how much of our own speech survives that standard? If learning is not enough, what else is needed?",
+      "The replies you chose in the practice calls became ECHO's history. Praise made some kinds of answer more likely to appear beside Nell's call. The suggestion carried that history, even when it sounded like a fresh judgment about her father.",
+      "You made those earlier choices too. The draft was neither a stranger's command nor a fact from the sea. It was something learned, placed back in front of you when another person's next move could depend on it.",
     ],
   },
   {
-    title: "Where would understanding belong?",
+    title: "The open line",
     paragraphs: [
-      "You could offer a reason, answer an objection, change an assurance, or stay. Such actions matter to Nell. Whether they also establish an inner understanding is a further question.",
-      "A defender of the Chinese Room may say that even appropriate replies can arise without understanding. The systems reply asks whether understanding could belong to the organized system rather than to one rule-following part. Searle disputes that reply.",
-      "If only you, the human player, understood, what is missing from the fictional ECHO? If the whole interaction counts, which parts belong to the understanding system? Neither helping someone nor revealing a mechanism settles that question on its own.",
+      "Nell heard a reason, a correction, a promise, or an offer to stay. She could respond to the words, but she could not see the room from your side of the line. You knew how ECHO's drafts were formed; you also supplied every choice it made.",
+      "A good response can matter to someone without settling what, or who, understood it. Nell's last question turns the uncertainty of the old recording back toward the voice she has been speaking with.",
     ],
   },
 ];
 
-export const reflectionQuestion = "Which part of tonight’s response would you call understanding, and what would count against your answer?";
-export const readingLinks = [
-  { title: "Alan Turing · Computing Machinery and Intelligence (1950)", url: "https://www.cs.sfu.ca/~vaughan/teaching/889/papers/turing1950.html" },
-  { title: "John Searle · Minds, Brains, and Programs (1980)", url: "https://cse.buffalo.edu/~rapaport/Papers/Papers.by.Others/Searle/searle80.html" },
+export const makerNote = [
+  "This story began for me in a class about minds and machines. We kept returning to a difficult pair of ideas: conversation is one of the ways we recognize understanding in others, yet a convincing answer can be produced by following rules. I wanted to put those ideas in a room where someone has a reason to care about the reply.",
+  "ECHO is fictional. Its suggestions follow simple rules, and you, the player, make its choices. That does not tell us what real machines experience. It does make Nell's question harder to leave at the radio: when a voice says it is here, what have we actually learned about the one on the other end?",
 ];
-export const limits = "This is a scripted, player-controlled thought experiment. ECHO’s drafts use a small scoring rule; they are not generated by an autonomous AI. Your own understanding helps produce every choice. The game raises a question about attributing understanding; it is not evidence that an actual machine has a mind.";

@@ -474,13 +474,14 @@ async function testProvenanceAndPublicNotes() {
       assert.ok(body().includes(t(path.basis)), "The ending quotes the original basis, not a recomputed one");
       if (path.tendency === "warmth") assert.ok(body().includes(t("Nell heard an offer of company, not an explanation of the signal. Whether you know more about her father remains an open question between you.")));
       const record = body();
-      action("After the line · Questions and readings");
-      for (const section of ["A voice, or an understanding?", "Whose judgment was it?", "Where would understanding belong?"]) {
-        action(section); assert.equal(title(), t(section)); action("Back to the questions");
+      action("A second look");
+      for (const section of ["The three clicks", "The suggested draft", "The open line"]) {
+        action(section); assert.equal(title(), t(section)); action("Back to the room's traces");
       }
-      action("Readings and how this game works");
-      assert.ok(body().includes("https://www.cs.sfu.ca/"));
-      assert.ok(body().includes('rel="noopener noreferrer"'));
+      action("Why I made this");
+      assert.equal(title(), t("A note from the maker"));
+      assert.ok(body().includes(t("This story began for me in a class about minds and machines. We kept returning to a difficult pair of ideas: conversation is one of the ways we recognize understanding in others, yet a convincing answer can be produced by following rules. I wanted to put those ideas in a room where someone has a reason to care about the reply.")));
+      assert.ok(!body().includes("<a "), "The optional note does not become a reading list");
       action("Back to your shift record"); assert.equal(body(), record, "Reflection notes do not score or change the ending");
       elements.dialog.close(); use("Live terminal"); action("Review this shift"); assert.equal(body(), record);
       assert.equal(game.locale.missingTranslations().length, 0, JSON.stringify(game.locale.missingTranslations()));
@@ -510,10 +511,10 @@ async function testReasonsAndReportAcknowledgment() {
     action("Stay with Nell"); action("I’ll be here"); action("I’m listening to you");
     assert.ok(elements["panel-body"].innerHTML.includes(t("When I asked about Dad, you stood by your answer. What would have made you change it?")));
     action("End this watch");
-    assert.equal(title(), t("What was on the other end?"));
+    assert.equal(title(), t("End of watch"));
     const closingPrompt = elements["panel-body"].innerHTML;
-    assert.ok(closingPrompt.includes(t("Which part of tonight’s response would you call understanding, and what would count against your answer?")));
-    action("After the line · Questions and readings"); action("Return to the closing question");
+    assert.ok(closingPrompt.includes(t("The line settles into rain. Outside, the breakwater light makes another turn. No one calls back before the end of your watch.")));
+    action("A second look"); action("Back to the end of the watch");
     assert.equal(elements["panel-body"].innerHTML, closingPrompt);
     action("Review this shift");
     assert.equal(title(), t("The words you leave behind"));
@@ -571,9 +572,8 @@ async function testPhilosophyCatalog() {
   const messages = [conversation.correctionText, conversation.insistenceText, conversation.deferText, conversation.presenceQuestion,
     ...conversation.assuranceReasons.flatMap(({ text, response }) => [text, response]),
     ...conversation.presenceReplies.flatMap(({ text, response }) => [text, response]),
-    reflection.reflectionQuestion, reflection.limits,
     ...reflection.reflections.flatMap(({ title, paragraphs }) => [title, ...paragraphs]),
-    ...reflection.readingLinks.map(({ title }) => title)];
+    ...reflection.makerNote];
   for (const message of messages) {
     assert.notEqual(game.t(message), message, "Missing paired Chinese story text: " + message);
     assert.ok(game.t(message).trim());

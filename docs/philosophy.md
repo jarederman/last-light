@@ -12,9 +12,9 @@
 | 训练时亲自选择回答，随后看到这些选择及赞许形成的建议 | 一个判断来自学习、模仿与反馈，是否就不再是“自己的”？ | 人与机器都有学习历史，不等于二者的学习机制或理解能力相同。 |
 | 对保证给出理由，听取 Nell 对该理由的质疑，再坚持、暂缓或修正 | 回应理由和修正判断，是理解的证据，还是仍可能没有理解地做到？ | 更谨慎的选择并不证明 ECHO 拥有意识；社会责任和主观体验不是同一问题。 |
 | Nell 把“你说我在，另一端是谁”这个问题转向 ECHO | 我们何时愿意从回应推断有人在理解？知道机制后，标准为何改变？ | 三种身份回答都不计分，也没有一个是作者认证的正确答案。 |
-| 在结束后选择查看问题与原文链接 | 为自己的心智归因提出理由，并考虑反例 | 可选笔记解释争论，不用哲学家名字来裁定剧情中的输赢。 |
+| 在结束后选择回看三处经历及创作者的话 | 从故事中的具体证据重新考虑自己的心智归因 | 可选文字不列课程阅读、不裁定剧情中的输赢；学术出处留在本说明中。 |
 
-课程联系以图灵的《计算机器与智能》和塞尔的《心智、大脑与程序》为主要锚点。前者使对话表现与学习成为可讨论的考察对象；后者通过中文房间质疑程序执行是否足以构成理解。游戏还借助系统回应，追问理解应该归属于单个执行部分，还是整个组织起来的系统。塞尔并不接受该回应，笔记同时指出这一争议。
+课程联系以图灵的《计算机器与智能》和塞尔的《心智、大脑与程序》为主要锚点。前者使对话表现与学习成为可讨论的考察对象；后者通过中文房间质疑程序执行是否足以构成理解。游戏还借助系统回应，追问理解应该归属于单个执行部分，还是整个组织起来的系统。塞尔并不接受该回应；这一争议留在课程说明中展开，游戏内只回看玩家亲身遇到的时刻。
 
 公众不需要先认识这些术语。故事先让他们解释一个信号，再发现自己的语言也在接受解释：船长的三下、ECHO 的“我在”、Nell 的“你还在吗”构成同一个问题的回返。不同回答得到不同的反问，没有“承认自己只是机器”或“宣称自己在听”就获得奖励的路径。
 
@@ -28,7 +28,7 @@ Last Light is a short bilingual narrative RPG for a general audience. It approac
 
 The player first learns that a familiar signal can have more than one source. Later, their own training choices become the history behind ECHO's suggested replies. They must give a reason for an assurance, hear an objection, and decide whether to revise it. Finally, Nell turns the opening question back toward the operator: what is at the other end when ECHO says it is here?
 
-The optional in-game notes connect these experiences to conversational evidence, the Chinese Room, learning, and the systems reply. They explain the dispute without awarding a correct philosophical position. Turing and Searle are points of engagement rather than opposing answer keys. No inference from three clicks alone establishes that machines cannot understand; no helpful action alone establishes that ECHO can.
+The optional in-game pages revisit the three clicks, the learned draft, and the open line, followed by a short maker's note. They give the general audience a way back into the story without a syllabus or reading list. This separate explanation connects those experiences to Turing, Searle, learning, and the systems reply. No inference from three clicks alone establishes that machines cannot understand; no helpful action alone establishes that ECHO can.
 
 There is an important limitation: a human player chooses authored dialogue for a fictional system. The game therefore cannot demonstrate autonomous machine understanding. Instead, it makes that limitation discussable: should understanding be attributed to the player, the fictional agent, an organized whole, or none of these on the evidence available? The intended public outcome is an ability to articulate and question one's standard, rather than agreement with the author.
 

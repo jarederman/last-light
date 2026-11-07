@@ -20,7 +20,7 @@ A short browser RPG set in a harbor radio station on a stormy night. Explore the
 | `src/data/epilogue.js` | Independent search, companionship and trust consequences |
 | `src/core/learning.js` | Learned tendency and truthful approval/habit provenance |
 | `src/data/conversation.js` | Spoken reasons, objections and final presence replies |
-| `src/data/reflections.js` | Public philosophy questions, primary readings and scope limits |
+| `src/data/reflections.js` | Optional scene-led reflections and maker's note |
 | `src/scenes/reflection.js` | Optional post-story notes |
 | `src/ui/dialog.js` | Dialog rendering, action buttons and modal lifecycle |
 | `src/i18n/` | Language preference, presentation translation and Simplified Chinese message catalog |
@@ -150,11 +150,11 @@ letter ordering, reflection navigation and replay.
 
 ## Public philosophy
 
-The sign-off returns the old signal’s ambiguity to ECHO’s own voice. Optional
-post-story notes explain conversational evidence, the Chinese Room, learning
-and the systems reply in plain language, with links to the original papers.
-They also state the limits of a scripted game controlled by a human player.
-The notes do not change the ending or award a philosophical score.
+The sign-off returns the old signal’s ambiguity to ECHO’s own voice. The watch
+ends quietly before any optional interpretation. Players can then revisit
+three moments from the room and read a short maker's note about the questions
+behind the story. These pages contain no reading list or philosophical score.
+The separate course explanation retains sources for the instructor.
 
 See [docs/philosophy.md](docs/philosophy.md) for the bilingual course explanation,
 mechanism-to-question mapping and primary readings. The course requires an advance proposal
