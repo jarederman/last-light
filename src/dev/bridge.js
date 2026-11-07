@@ -1,5 +1,5 @@
-import { fixture, presets, profiles } from "./fixtures.js?v=workbench-1";
-import { History, validateSnapshot } from "./snapshots.js?v=workbench-1";
+import { fixture, presets, profiles } from "./fixtures.js?v=workbench-2";
+import { History, validateSnapshot } from "./snapshots.js?v=workbench-2";
 
 const channel = "last-light-development-v1";
 export function connectDevelopment(adapter) {
@@ -34,7 +34,6 @@ export function connectDevelopment(adapter) {
     const { command, payload = {}, requestId } = event.data;
     try {
       scan();
-      if (command === "hello") { send({ ready: true, requestId, ok: true }); return; }
       if (command === "undo" || command === "redo") {
         const entry = command === "undo" ? history.undo() : history.redo();
         if (entry) restore(entry);

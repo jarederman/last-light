@@ -6,8 +6,8 @@
   <meta name="robots" content="noindex">
   <title>Last Light · 开发工作台</title>
   <link rel="icon" href="./assets/ui/icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./src/styles/development.css?v=workbench-1">
-  <script type="module" src="./src/dev/workbench.js?v=workbench-1"></script>
+  <link rel="stylesheet" href="./src/styles/development.css?v=workbench-2">
+  <script type="module" src="./src/dev/workbench.js?v=workbench-2"></script>
 </head>
 <body>
   <header><div><strong>Last Light</strong><span class="badge">开发工作台</span></div><a href="./player.html" target="_blank" rel="noopener">打开纯玩家版 ↗</a></header>
@@ -44,7 +44,7 @@
       </details>
       <details><summary>入口与使用说明</summary><p>默认首页暂时进入本工作台。玩家版始终位于 <a href="./player.html" target="_blank" rel="noopener">player.html</a>。</p><p>正式演示时运行 <code>node tools/entry.mjs player</code>，提交后首页切回玩家版。重新启用：<code>node tools/entry.mjs dev</code>。</p><p>游戏中仍可正常移动和互动。侧栏选项调用同一条剧情代码，不另写调试剧情。</p></details>
     </aside>
-    <section class="game-pane" aria-label="游戏预览"><iframe id="game-frame" src="./player.html?dev=1" title="Last Light 游戏调试画面" allow="autoplay"></iframe></section>
+    <section class="game-pane" aria-label="游戏预览"><iframe id="game-frame" title="Last Light 游戏调试画面" allow="autoplay"></iframe></section>
   </main>
 </body>
 </html>

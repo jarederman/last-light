@@ -1,6 +1,6 @@
-import { show, done } from "../ui/dialog.js?v=workbench-1";
-import { playSignal, stopSignal, playEffect } from "../audio/sound.js?v=workbench-1";
-import { signalTrace } from "../ui/signal.js?v=workbench-1";
+import { show, done } from "../ui/dialog.js?v=workbench-2";
+import { playSignal, stopSignal, playEffect } from "../audio/sound.js?v=workbench-2";
+import { signalTrace } from "../ui/signal.js?v=workbench-2";
 
 export function createRadioScene({ getState, mark }) {
   function open() {

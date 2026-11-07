@@ -5,6 +5,7 @@ const frame = byId("game-frame");
 const requests = new Map();
 let current = null, nextRequest = 0, initialized = false, initializing = false, activeBoot = null;
 let saved = null;
+let connectTimer;
 try { saved = JSON.parse(localStorage.getItem(storageKey) || "null"); } catch { /* Session controls work without storage. */ }
 function status(message, error = false) { byId("status").textContent = message; byId("status").dataset.error = String(error); }
 function command(name, payload = {}) {
@@ -74,6 +75,7 @@ window.addEventListener("message", async (event) => {
     const request = requests.get(view.requestId); clearTimeout(request.timer); requests.delete(view.requestId);
     view.error ? request.reject(Error(view.error)) : request.resolve(view);
   }
+  if (view.ready) clearTimeout(connectTimer);
   if (view.ready && !initialized && !initializing) {
     initializing = true;
     const workspace = saved;
@@ -85,9 +87,14 @@ window.addEventListener("message", async (event) => {
     finally { initialized = true; initializing = false; persist(); }
   } else persist();
 });
-frame.addEventListener("load", () => {
-  command("hello").catch((error) => status(error.message, true));
-});
+function loadFrame(reload = false) {
+  clearTimeout(connectTimer);
+  connectTimer = setTimeout(() => {
+    status("游戏连接超时，请重载游戏", true);
+    byId("reload").disabled = false;
+  }, 8000);
+  frame.src = "./player.html?dev=1" + (reload ? "&reload=" + Date.now() : "");
+}
 byId("jump").addEventListener("click", () => run("jump", { id: byId("preset").value, profile: byId("profile").value }));
 byId("undo").addEventListener("click", () => run("undo"));
 byId("redo").addEventListener("click", () => run("redo"));
@@ -99,7 +106,7 @@ byId("reload").addEventListener("click", () => {
   persist(); status("正在重载代码并恢复状态…");
   for (const pending of requests.values()) { clearTimeout(pending.timer); pending.reject(Error("游戏正在重载")); }
   requests.clear();
-  frame.src = "./player.html?dev=1&reload=" + Date.now();
+  loadFrame(true);
 });
 byId("edit").addEventListener("click", () => { byId("snapshot-editor").value = JSON.stringify(current.snapshot, null, 2); });
 byId("apply").addEventListener("click", () => {
@@ -124,3 +131,6 @@ document.addEventListener("keydown", (event) => {
     event.preventDefault(); run(event.shiftKey ? "redo" : "undo");
   }
 });
+
+// Subscribe before navigating the frame so its first ready message is observed.
+loadFrame();

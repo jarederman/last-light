@@ -58,7 +58,7 @@ const root = path.resolve(__dirname, '..');
   dispatch('jump', { id: 'full' }, 'https://evil.example');
   dispatch('jump', { id: 'full' }, 'https://example.com', {});
   assert.equal(sent.length, count, 'Only the same-origin parent controls the game');
-  dispatch('hello'); assert.equal(sent.at(-1).data.requestId, 'hello');
+  assert.equal(sent.at(-1).data.ready, true);
   dispatch('jump', { id: 'full', profile: 'approval' }); assert.equal(current.snapshot.state.phase, 'ending');
   dispatch('undo'); assert.equal(current.snapshot.state.phase, 'arrival');
   dispatch('redo'); assert.equal(current.snapshot.state.phase, 'ending');
