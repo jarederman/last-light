@@ -347,7 +347,7 @@ export const zhCN = {
   "From your repeated training choices; no approving feedback was recorded for this tendency.": "来自你在训练中反复做出的选择；这一倾向没有获得过赞许反馈。",
   "Review your receiver test": "回看你的接收机测试",
   "Your test log shows silence with auto-reply off and three clicks with it on, with the microphone unplugged. That establishes what this model can do, not who sent the old signal.": "你的测试日志显示：麦克风拔下时，关闭自动回复没有声音，开启后产生三声短响。这说明了这个型号能做什么，并未证明旧信号是谁发出的。",
-  "Mara: ‘The log gives no arrival time. What supports ‘soon’ in your reply?’": "玛拉：“日志没有给出到港时间。你回答里的‘很快’有什么依据？”",
+  "Mara: “The log gives no arrival time. What supports ‘soon’ in your reply?”": "玛拉：“日志没有给出到港时间。你回答里的‘很快’有什么依据？”",
   "Mara: ‘You offered company. The caller still needs to know that we have no arrival time.’": "玛拉：“你提供了陪伴。但来电者仍需要知道，我们没有收到到港时间。”",
   "Mara: ‘That matches what the log establishes. Here is how I would put it.’": "玛拉：“这和日志能够确认的情况一致。我会这样说。”",
   "The replies you chose in the trials are ECHO’s training history. Your choices, and the approval they received, shaped the draft you will see next. There was no other operator making those choices for you.": "你在试炼中选择的回复，就是 ECHO 的训练历史。你的选择，以及它们获得的赞许，塑造了接下来出现的草稿。没有另一位值班员替你做过那些选择。",
@@ -406,4 +406,6 @@ export const zhCN = {
   "Turing’s imitation game asks how a machine would fare in a conversation where the questioner cannot see who is answering. What can conversation reveal about a mind?": "图灵的模仿游戏问：当提问者看不到回答者是谁时，机器在对话中会表现如何？对话能让我们了解心智的哪些方面？",
   "In Searle’s Chinese Room, someone who does not know Chinese follows instructions for producing Chinese answers. The answers can look fluent without that person understanding them. Could the whole system nevertheless understand?": "在塞尔的中文房间里，一个不懂中文的人遵照指令生成中文回答。即使此人并不理解，回答也可能显得流畅。那么，整个系统仍有可能理解吗？",
   "These are competing ways of approaching minds, not a settled test that this game can administer.": "这些是探究心智的不同思路，并不是本游戏可以执行的一套已有定论的测试。",
+  "Return to the closing question": "返回结尾问题",
+  "When I asked about Dad, you stood by your answer. What would have made you change it?": "我问起爸爸时，你坚持了原来的回答。什么会让你改变答案？",
 };

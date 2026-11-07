@@ -1,17 +1,17 @@
-import { initialState } from "./core/state.js?v=workbench-2";
-import { learnedRecommendation } from "./core/learning.js?v=workbench-2";
-import { chapters, exercises } from "./data/story.js?v=workbench-2";
-import { interactionPoints, playerStart } from "./data/station.js?v=workbench-2";
-import { canStand, actorScale } from "./core/world.js?v=workbench-2";
-import { distance, findRoute } from "./core/navigation.js?v=workbench-2";
-import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=workbench-2";
-import { creditsMarkup } from "./data/credits.js?v=workbench-2";
-import { byId, dialog, show, close, done, configureDialog, capturePanel } from "./ui/dialog.js?v=workbench-2";
+import { initialState } from "./core/state.js?v=closing-1";
+import { learnedRecommendation } from "./core/learning.js?v=closing-1";
+import { chapters, exercises } from "./data/story.js?v=closing-1";
+import { interactionPoints, playerStart } from "./data/station.js?v=closing-1";
+import { canStand, actorScale } from "./core/world.js?v=closing-1";
+import { distance, findRoute } from "./core/navigation.js?v=closing-1";
+import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=closing-1";
+import { creditsMarkup } from "./data/credits.js?v=closing-1";
+import { byId, dialog, show, close, done, configureDialog, capturePanel } from "./ui/dialog.js?v=closing-1";
 
-import { createRadioScene } from "./scenes/radio.js?v=workbench-2";
-import { createCallScene } from "./scenes/call.js?v=workbench-2";
-import { createWeather } from "./scenes/weather.js?v=workbench-2";
-import { t, getLanguage, setLanguage, languages } from "./i18n/index.js?v=workbench-2";
+import { createRadioScene } from "./scenes/radio.js?v=closing-1";
+import { createCallScene } from "./scenes/call.js?v=closing-1";
+import { createWeather } from "./scenes/weather.js?v=closing-1";
+import { t, getLanguage, setLanguage, languages } from "./i18n/index.js?v=closing-1";
 
 configureDialog(stopWalking);
 
@@ -443,7 +443,7 @@ function trainingFeedback(index, option) {
   const earnedApproval = option.trait === call.preferred;
   const feedback = index === 0
     ? `${t(option.trait === "confidence"
-      ? "Mara: ‘The log gives no arrival time. What supports ‘soon’ in your reply?’"
+      ? "Mara: “The log gives no arrival time. What supports ‘soon’ in your reply?”"
       : option.trait === "warmth"
         ? "Mara: ‘You offered company. The caller still needs to know that we have no arrival time.’"
         : "Mara: ‘That matches what the log establishes. Here is how I would put it.’")} ${t(call.feedback)}`

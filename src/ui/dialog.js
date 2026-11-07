@@ -1,5 +1,5 @@
-import { stopSignal, playEffect } from "../audio/sound.js?v=workbench-2";
-import { t, translateHtml } from "../i18n/index.js?v=workbench-2";
+import { stopSignal, playEffect } from "../audio/sound.js?v=closing-1";
+import { t, translateHtml } from "../i18n/index.js?v=closing-1";
 
 export const byId = (id) => document.getElementById(id);
 export const dialog = byId("dialog");

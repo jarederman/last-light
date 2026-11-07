@@ -1,8 +1,8 @@
-import { initialState } from "../core/state.js?v=workbench-2";
-import { exercises } from "../data/story.js?v=workbench-2";
-import { learnedRecommendation } from "../core/learning.js?v=workbench-2";
-import { correctionText, insistenceText, assuranceReasons, presenceReplies } from "../data/conversation.js?v=workbench-2";
-import { epilogue } from "../data/epilogue.js?v=workbench-2";
+import { initialState } from "../core/state.js?v=closing-1";
+import { exercises } from "../data/story.js?v=closing-1";
+import { learnedRecommendation } from "../core/learning.js?v=closing-1";
+import { correctionText, insistenceText, assuranceReasons, presenceReplies } from "../data/conversation.js?v=closing-1";
+import { epilogue } from "../data/epilogue.js?v=closing-1";
 
 export const profiles = [
   ["approval", "跟随赞许"], ["caution", "始终谨慎"], ["warmth", "始终温暖"],

@@ -119,3 +119,6 @@ a { color: var(--amber); }
 .panel .eyebrow { letter-spacing: .19em; }
 .panel .record { background: #28322f; }
 @media (prefers-reduced-motion: reduce) { .player.walking { animation: none; } }
+
+/* The title heading receives focus for screen readers when the dialog opens. */
+[data-menu="title"] #panel-title:focus { outline: none; }

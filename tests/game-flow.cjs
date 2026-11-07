@@ -199,7 +199,7 @@ async function testGroundedReport() {
   action("Back to the station"); use("Live terminal");
   assert.equal(title(), "Something they can check");
   assert.ok(!game.hasAction("Prepare a signal report"), "A receipt cannot be submitted twice");
-  action("Stay with Nell"); action("I’ll be here"); action("I’m ECHO-01"); action("End this watch"); assert.equal(title(), "The words you leave behind");
+  action("Stay with Nell"); action("I’ll be here"); action("I’m ECHO-01"); action("End this watch"); action("Review this shift"); assert.equal(title(), "The words you leave behind");
   assert.match(elements["panel-body"].innerHTML, /REPORT · RECEIVED/);
   action("Return to the station");
   key("j"); assert.match(elements["panel-body"].innerHTML, /Recording delivered/);
@@ -218,7 +218,7 @@ async function testOptionalInvestigation() {
   action("keep the line open"); action("Send reply");
   assert.equal(title(), "Nell listens");
   assert.ok(!game.hasAction("Prepare a signal report"), "Cannot attach a recording that was not captured");
-  action("Stay with Nell"); action("I’ll be here"); action("I’m ECHO-01"); action("End this watch");
+  action("Stay with Nell"); action("I’ll be here"); action("I’m ECHO-01"); action("End this watch"); action("Review this shift");
   assert.match(elements["panel-body"].innerHTML, /NO SIGNAL REPORT SENT/);
 }
 
@@ -323,7 +323,7 @@ async function testBilingualShift() {
   assert.ok(elements["panel-body"].innerHTML.includes("尚未确认有船员操作"));
   action("Back to Nell"); action("Prepare a signal report"); action("Send recording and report");
   assert.equal(title(), "报告已收到");
-  action("Tell Nell the report arrived"); action("Stay with Nell"); action("I’ll be here"); action("I’m ECHO-01"); action("End this watch");
+  action("Tell Nell the report arrived"); action("Stay with Nell"); action("I’ll be here"); action("I’m ECHO-01"); action("End this watch"); action("Review this shift");
   assert.equal(title(), "留下的话语");
   action("Return to the station"); key("j");
   assert.ok(elements["panel-body"].innerHTML.includes(t("Recording delivered to search team")));
@@ -387,7 +387,7 @@ async function testConsequences() {
         }
       }
       action("Stay with Nell"); action(route === "available" ? "Keep the channel available and end the watch" : "I’ll be here");
-      action("I’m ECHO-01"); action("End this watch");
+      action("I’m ECHO-01"); action("End this watch"); action("Review this shift");
       assert.equal(title(), t("The words you leave behind"));
       const summary = body();
       assert.ok(summary.includes(t(["silent", "available"].includes(route) ? "No answer about his safety was sent." : route === "full" ? "The team has the recording and timestamp. We still don’t know who sent the clicks." : "Three clicks sounds like your dad. I think he’s safe.")));
@@ -410,7 +410,7 @@ async function testReportSnapshot() {
   use("Live terminal"); action("Prepare a signal report"); action("Send recording and report"); action("Back to the station");
   use("Archive"); action("Read the receiver"); action("Back to the station");
   use("Radio"); action("Read tonight’s relay log"); action("Back to the station");
-  use("Live terminal"); action("Stay with Nell"); action("I’ll be here"); action("I’m ECHO-01"); action("End this watch");
+  use("Live terminal"); action("Stay with Nell"); action("I’ll be here"); action("I’m ECHO-01"); action("End this watch"); action("Review this shift");
   const text = elements["panel-body"].innerHTML;
   assert.match(text, /Attached note: source unknown; no voice captured/);
   assert.match(text, /request the relay coverage log/);
@@ -469,7 +469,7 @@ async function testProvenanceAndPublicNotes() {
       const presenceReaction = body();
       elements.dialog.close(); use("Live terminal");
       assert.equal(body(), presenceReaction, "A sent identity answer survives closing the final conversation");
-      action("End this watch");
+      action("End this watch"); action("Review this shift");
       assert.ok(body().includes(t(path.presence === "I’m ECHO-01" ? "I’m ECHO-01, the station’s response system." : path.presence === "I’m listening to you" ? "I’m listening to you. I can go back over what you said, and change my answer." : "I don’t know what would make me someone. I can tell you what I did tonight.")));
       assert.ok(body().includes(t(path.basis)), "The ending quotes the original basis, not a recomputed one");
       if (path.tendency === "warmth") assert.ok(body().includes(t("Nell heard an offer of company, not an explanation of the signal. Whether you know more about her father remains an open question between you.")));
@@ -506,7 +506,16 @@ async function testReasonsAndReportAcknowledgment() {
     action("Tell Nell the report arrived");
     assert.ok(elements["panel-body"].innerHTML.includes(t("They have your recording now. Thank you for sending it. That gives them something to check; it doesn’t tell me yet whether Dad is safe.")),
       "Even an uncorrected assurance must not suppress acknowledgment of report delivery");
-    action("Stay with Nell"); action("I’ll be here"); action("I’m listening to you"); action("End this watch");
+    assert.ok(!elements["panel-body"].innerHTML.includes(t("Then I’ll wait for you to tell me he’s home.")));
+    action("Stay with Nell"); action("I’ll be here"); action("I’m listening to you");
+    assert.ok(elements["panel-body"].innerHTML.includes(t("When I asked about Dad, you stood by your answer. What would have made you change it?")));
+    action("End this watch");
+    assert.equal(title(), t("What was on the other end?"));
+    const closingPrompt = elements["panel-body"].innerHTML;
+    assert.ok(closingPrompt.includes(t("Which part of tonight’s response would you call understanding, and what would count against your answer?")));
+    action("After the line · Questions and readings"); action("Return to the closing question");
+    assert.equal(elements["panel-body"].innerHTML, closingPrompt);
+    action("Review this shift");
     assert.equal(title(), t("The words you leave behind"));
     assert.ok(elements["panel-body"].innerHTML.includes(t("Those are the three taps he promised you. That’s why I think it’s him.")));
     assert.ok(elements["panel-body"].innerHTML.includes(t("I still think he’s safe. I’m standing by what I told you.")));

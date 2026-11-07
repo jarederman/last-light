@@ -1,10 +1,10 @@
-import { show, close, done } from "../ui/dialog.js?v=workbench-2";
-import { t } from "../i18n/index.js?v=workbench-2";
-import { assuranceReasons, correctionText, insistenceText, deferText, presenceReplies, presenceQuestion } from "../data/conversation.js?v=workbench-2";
-import { reflectionQuestion } from "../data/reflections.js?v=workbench-2";
-import { reflectionMenu } from "./reflection.js?v=workbench-2";
-import { epilogue } from "../data/epilogue.js?v=workbench-2";
-import { playEffect } from "../audio/sound.js?v=workbench-2";
+import { show, close, done } from "../ui/dialog.js?v=closing-1";
+import { t } from "../i18n/index.js?v=closing-1";
+import { assuranceReasons, correctionText, insistenceText, deferText, presenceReplies, presenceQuestion } from "../data/conversation.js?v=closing-1";
+import { reflectionQuestion } from "../data/reflections.js?v=closing-1";
+import { reflectionMenu } from "./reflection.js?v=closing-1";
+import { epilogue } from "../data/epilogue.js?v=closing-1";
+import { playEffect } from "../audio/sound.js?v=closing-1";
 
 // Caller reactions and report delivery share one session state so closing a
 // panel never discards a sent reply or submits the same report twice.
@@ -99,8 +99,10 @@ WAITING FOR THE NEXT CALL</p>`, [{ text: "Review this shift", run: recap }, done
           : "I still don’t understand how you can be sure.",
       help: "You saved it? Can you give them what you heard? I don’t want to get the time wrong.",
     };
-    const response = state.reportSent && state.finalReply.trait !== "confidence"
-      ? "They called back. They have your recording, and they’re checking where that relay could have reached. We’re still waiting."
+    const response = state.reportSent
+      ? state.finalReply.trait === "confidence"
+        ? "They have your recording now. Thank you for sending it. That gives them something to check; it doesn’t tell me yet whether Dad is safe."
+        : "They called back. They have your recording, and they’re checking where that relay could have reached. We’re still waiting."
       : reactions[state.finalReply.trait];
     const actions = reportAction();
     if (!state.reportSent && !state.evidence.has("live")) {
@@ -109,7 +111,7 @@ WAITING FOR THE NEXT CALL</p>`, [{ text: "Review this shift", run: recap }, done
     if (state.accountability === "avoided") actions.push({ text: "Return to Nell’s question", run: challenge });
     actions.push({ text: "Stay with Nell", run: goodbye }, done("Leave the line open"));
     show("Live terminal · Channel 04", state.reportSent ? "Something they can check" : "Nell listens",
-      `<p class="record">“${t(response)}”</p>${state.reportSent && state.finalReply.trait === "confidence" ? `<p class="record">“${t("They have your recording now. Thank you for sending it. That gives them something to check; it doesn’t tell me yet whether Dad is safe.")}”</p>` : ""}`, actions);
+      `<p class="record">“${t(response)}”</p>`, actions);
   }
 
   function reportAction() {
@@ -222,8 +224,12 @@ WAITING FOR THE NEXT CALL</p>`, [{ text: "Review this shift", run: recap }, done
 
   function closingResponse() {
     const state = getState();
+    const reply = state.closing.reply;
+    const response = state.accountability === "insisted" && reply.id === "listening"
+      ? "When I asked about Dad, you stood by your answer. What would have made you change it?"
+      : reply.response;
     show("Live terminal · Channel 04", "At the other end",
-      `<p class="record">“${t(state.closing.reply.response)}”</p><p>Nell leaves a little silence after the question. No new instruction appears in the draft field.</p>`,
+      `<p class="record">“${t(response)}”</p><p>Nell leaves a little silence after the question. No new instruction appears in the draft field.</p>`,
       [{ text: "End this watch", primary: true, run: () => finish(state.closing.stayed) }, done("Leave the line open")]);
   }
 
@@ -233,7 +239,16 @@ WAITING FOR THE NEXT CALL</p>`, [{ text: "Review this shift", run: recap }, done
     // Freeze delivery and consequences: post-chapter exploration is read-only.
     state.ending = { ...epilogue(state) };
     setPhase("ending");
-    recap();
+    reflectionScreen();
+  }
+
+  function reflectionScreen() {
+    show("Chapter complete · Last Light", "What was on the other end?",
+      `<p class="record">${t(reflectionQuestion)}</p>`, [
+        { text: "Review this shift", run: recap },
+        { text: "After the line · Questions and readings", run: () => reflectionMenu(reflectionScreen, "Return to the closing question") },
+        done("Return to the station"),
+      ]);
   }
 
   function recap() {
@@ -251,9 +266,9 @@ WAITING FOR THE NEXT CALL</p>`, [{ text: "Review this shift", run: recap }, done
       ${state.reportSnapshot ? `<p>${t(state.reportSnapshot.sourceKnown ? "Attached note: automatic reply possible; crew input unconfirmed." : "Attached note: source unknown; no voice captured.")}</p><p>${t(state.reportSnapshot.rescueChecked ? "Rescue board checked before sending: crew status unconfirmed." : "The report carried no rescue-board update.")}</p>` : ""}
       <h3>The search</h3><p>${t(state.ending.search)}</p>
       <h3>The silence</h3><p>${t(state.ending.company)}</p>
-      <h3>The next call</h3><p>${t(state.ending.trust)}</p>
-      <p class="record">${t(reflectionQuestion)}</p>`,
+      <h3>The next call</h3><p>${t(state.ending.trust)}</p>`,
       [done("Return to the station"),
+        { text: "Return to the closing question", run: reflectionScreen },
         { text: "After the line · Questions and readings", run: () => reflectionMenu(recap) },
         { text: "Replay from the beginning", run: restart },
         { text: "Return to title", run: returnToTitle },
