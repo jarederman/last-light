@@ -1,4 +1,4 @@
-import { zhCN } from "./zh-CN.js?v=ending-story-1";
+import { zhCN } from "./zh-CN.js?v=ending-story-2";
 
 export const languages = [["en", "English"], ["zh-CN", "简体中文"]];
 const storageKey = "last-light.language";

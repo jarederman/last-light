@@ -1,17 +1,17 @@
-import { initialState } from "./core/state.js?v=ending-story-1";
-import { learnedRecommendation } from "./core/learning.js?v=ending-story-1";
-import { chapters, exercises } from "./data/story.js?v=ending-story-1";
-import { interactionPoints, playerStart } from "./data/station.js?v=ending-story-1";
-import { canStand, actorScale } from "./core/world.js?v=ending-story-1";
-import { distance, findRoute } from "./core/navigation.js?v=ending-story-1";
-import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=ending-story-1";
-import { creditsMarkup } from "./data/credits.js?v=ending-story-1";
-import { byId, dialog, show, close, done, configureDialog, capturePanel } from "./ui/dialog.js?v=ending-story-1";
+import { initialState } from "./core/state.js?v=ending-story-2";
+import { learnedRecommendation } from "./core/learning.js?v=ending-story-2";
+import { chapters, exercises } from "./data/story.js?v=ending-story-2";
+import { interactionPoints, playerStart } from "./data/station.js?v=ending-story-2";
+import { canStand, actorScale } from "./core/world.js?v=ending-story-2";
+import { distance, findRoute } from "./core/navigation.js?v=ending-story-2";
+import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=ending-story-2";
+import { creditsMarkup } from "./data/credits.js?v=ending-story-2";
+import { byId, dialog, show, close, done, configureDialog, capturePanel } from "./ui/dialog.js?v=ending-story-2";
 
-import { createRadioScene } from "./scenes/radio.js?v=ending-story-1";
-import { createCallScene } from "./scenes/call.js?v=ending-story-1";
-import { createWeather } from "./scenes/weather.js?v=ending-story-1";
-import { t, getLanguage, setLanguage, languages } from "./i18n/index.js?v=ending-story-1";
+import { createRadioScene } from "./scenes/radio.js?v=ending-story-2";
+import { createCallScene } from "./scenes/call.js?v=ending-story-2";
+import { createWeather } from "./scenes/weather.js?v=ending-story-2";
+import { t, getLanguage, setLanguage, languages } from "./i18n/index.js?v=ending-story-2";
 
 configureDialog(stopWalking);
 

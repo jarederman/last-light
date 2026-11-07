@@ -469,7 +469,12 @@ async function testProvenanceAndPublicNotes() {
       const presenceReaction = body();
       elements.dialog.close(); use("Live terminal");
       assert.equal(body(), presenceReaction, "A sent identity answer survives closing the final conversation");
-      action("End this watch"); action("Review this shift");
+      action("End this watch");
+      assert.ok(body().includes(t("The search continues with the team's existing information. No recording or station notes arrived from your shift.")),
+        "The ending itself shows the route's search consequence");
+      assert.ok(body().includes(t("You stay through the next stretch of silence. Nell stops filling every pause. Before lowering the volume, she asks which channel will reach you tomorrow.")),
+        "The ending itself shows whether the player stayed");
+      action("Review this shift");
       assert.ok(body().includes(t(path.presence === "I’m ECHO-01" ? "I’m ECHO-01, the station’s response system." : path.presence === "I’m listening to you" ? "I’m listening to you. I can go back over what you said, and change my answer." : "I don’t know what would make me someone. I can tell you what I did tonight.")));
       assert.ok(body().includes(t(path.basis)), "The ending quotes the original basis, not a recomputed one");
       if (path.tendency === "warmth") assert.ok(body().includes(t("Nell heard an offer of company, not an explanation of the signal. Whether you know more about her father remains an open question between you.")));

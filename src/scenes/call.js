@@ -1,9 +1,9 @@
-import { show, close, done } from "../ui/dialog.js?v=ending-story-1";
-import { t } from "../i18n/index.js?v=ending-story-1";
-import { assuranceReasons, correctionText, insistenceText, deferText, presenceReplies, presenceQuestion } from "../data/conversation.js?v=ending-story-1";
-import { reflectionMenu } from "./reflection.js?v=ending-story-1";
-import { epilogue } from "../data/epilogue.js?v=ending-story-1";
-import { playEffect } from "../audio/sound.js?v=ending-story-1";
+import { show, close, done } from "../ui/dialog.js?v=ending-story-2";
+import { t } from "../i18n/index.js?v=ending-story-2";
+import { assuranceReasons, correctionText, insistenceText, deferText, presenceReplies, presenceQuestion } from "../data/conversation.js?v=ending-story-2";
+import { reflectionMenu } from "./reflection.js?v=ending-story-2";
+import { epilogue } from "../data/epilogue.js?v=ending-story-2";
+import { playEffect } from "../audio/sound.js?v=ending-story-2";
 
 // Caller reactions and report delivery share one session state so closing a
 // panel never discards a sent reply or submits the same report twice.
@@ -242,8 +242,9 @@ WAITING FOR THE NEXT CALL</p>`, [{ text: "Review this shift", run: recap }, done
   }
 
   function reflectionScreen() {
+    const { search, company, trust } = getState().ending;
     show("Chapter complete · Last Light", "End of watch",
-      "<p>The line settles into rain. Outside, the breakwater light makes another turn. No one calls back before the end of your watch.</p>", [
+      `<p>${t("The line settles into rain. Outside, the breakwater light makes another turn. No one calls back before the end of your watch.")}</p><p>${t(search)}</p><p>${t(company)}</p><p>${t(trust)}</p>`, [
         { text: "Review this shift", run: recap },
         { text: "A second look", run: () => reflectionMenu(reflectionScreen) },
         done("Return to the station"),
