@@ -1,17 +1,17 @@
-import { initialState } from "./core/state.js?v=illustrated-ui-6";
-import { learnedRecommendation } from "./core/learning.js?v=illustrated-ui-6";
-import { chapters, exercises } from "./data/story.js?v=illustrated-ui-6";
-import { interactionPoints, playerStart } from "./data/station.js?v=illustrated-ui-6";
-import { canStand, actorScale } from "./core/world.js?v=illustrated-ui-6";
-import { distance, findRoute } from "./core/navigation.js?v=illustrated-ui-6";
-import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=illustrated-ui-6";
-import { creditsMarkup } from "./data/credits.js?v=illustrated-ui-6";
-import { byId, dialog, show, close, done, configureDialog, capturePanel } from "./ui/dialog.js?v=illustrated-ui-6";
+import { initialState } from "./core/state.js?v=illustrated-ui-7";
+import { learnedRecommendation } from "./core/learning.js?v=illustrated-ui-7";
+import { chapters, exercises } from "./data/story.js?v=illustrated-ui-7";
+import { interactionPoints, playerStart } from "./data/station.js?v=illustrated-ui-7";
+import { canStand, actorScale } from "./core/world.js?v=illustrated-ui-7";
+import { distance, findRoute } from "./core/navigation.js?v=illustrated-ui-7";
+import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=illustrated-ui-7";
+import { creditsMarkup } from "./data/credits.js?v=illustrated-ui-7";
+import { byId, dialog, show, close, done, configureDialog, capturePanel } from "./ui/dialog.js?v=illustrated-ui-7";
 
-import { createRadioScene } from "./scenes/radio.js?v=illustrated-ui-6";
-import { createCallScene } from "./scenes/call.js?v=illustrated-ui-6";
-import { createWeather } from "./scenes/weather.js?v=illustrated-ui-6";
-import { t, getLanguage, setLanguage, languages } from "./i18n/index.js?v=illustrated-ui-6";
+import { createRadioScene } from "./scenes/radio.js?v=illustrated-ui-7";
+import { createCallScene } from "./scenes/call.js?v=illustrated-ui-7";
+import { createWeather } from "./scenes/weather.js?v=illustrated-ui-7";
+import { t, getLanguage, setLanguage, languages } from "./i18n/index.js?v=illustrated-ui-7";
 
 configureDialog(stopWalking);
 
@@ -225,21 +225,35 @@ function gameMenu(kind, label, title, body, actions) {
 function titleScreen() {
   gameMenu("title", "SIGNAL HOUSE", "Last Light",
     '<p>The harbor is quiet. Your first night shift is about to begin.</p>',
-    [{ text: "Begin night shift", run: () => { startAmbience(); close(); }, primary: true },
+    [{ text: "Begin night shift", run: beginShift, primary: true },
       { text: "Instructions", run: () => instructions("title") },
       { text: "Settings", run: () => settings("title") },
       { text: "Credits", run: () => gameMenu("credits", "LAST LIGHT", "Made with care", creditsMarkup, [{ text: "Back to title", run: titleScreen }]) }]);
 }
 
+const instructionsSeenKey = "last-light.instructions-seen";
+let instructionsSeen = false;
+try { instructionsSeen = globalThis.localStorage?.getItem(instructionsSeenKey) === "1"; } catch { /* Storage is optional. */ }
+
+// The first shift in a browser opens the controls once; later starts go straight in.
+function beginShift() {
+  startAmbience();
+  if (instructionsSeen) { close(); return; }
+  instructionsSeen = true;
+  try { globalThis.localStorage?.setItem(instructionsSeenKey, "1"); } catch { /* Remember for this session only. */ }
+  instructions("start");
+}
+
 function leaveInstructions() {
-  (instructionsOrigin === "title" ? titleScreen : pause)();
+  if (instructionsOrigin === "start") close();
+  else (instructionsOrigin === "title" ? titleScreen : pause)();
 }
 
 function instructions(origin) {
   instructionsOrigin = origin;
   gameMenu("instructions", "SIGNAL HOUSE", "Instructions",
     '<p class="record">WASD / arrows · Move<br>E · Interact<br>J · Field journal<br>Esc · Pause</p><p>You can also click the floor to walk or select an object marker.</p>' + orientationHint,
-    [{ text: origin === "title" ? "Back to title" : "Back to pause menu", run: leaveInstructions }]);
+    [{ text: { title: "Back to title", pause: "Back to pause menu", start: "Start the shift" }[origin], run: leaveInstructions, primary: origin === "start" }]);
 }
 
 function pause() {

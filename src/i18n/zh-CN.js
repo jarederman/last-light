@@ -13,6 +13,8 @@ export const zhCN = {
   "Made with care": "用心制作",
   "Back to title": "返回主界面",
   "Back to pause menu": "返回暂停菜单",
+  "Start the shift": "开始值班",
+  "More below": "下方还有内容",
   "The harbor is quiet. Your first night shift is about to begin.": "港口静了下来。你的第一个夜班就要开始了。",
   "WASD / arrows · Move": "WASD／方向键 · 移动",
   "E · Interact": "E · 互动",

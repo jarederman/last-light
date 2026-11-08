@@ -1,7 +1,7 @@
-import { createDevelopmentAdapter } from "./main.js?v=illustrated-ui-6";
+import { createDevelopmentAdapter } from "./main.js?v=illustrated-ui-7";
 
 // No debug listener or inspector is installed on the standalone player page.
 if (new URL(location.href).searchParams.get("dev") === "1" && window.parent !== window) {
-  const { connectDevelopment } = await import("./dev/bridge.js?v=illustrated-ui-6");
+  const { connectDevelopment } = await import("./dev/bridge.js?v=illustrated-ui-7");
   connectDevelopment(createDevelopmentAdapter());
 }

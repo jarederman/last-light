@@ -1,8 +1,8 @@
-import { initialState } from "../core/state.js?v=illustrated-ui-6";
-import { exercises } from "../data/story.js?v=illustrated-ui-6";
-import { learnedRecommendation } from "../core/learning.js?v=illustrated-ui-6";
-import { correctionText, insistenceText, assuranceReasons, presenceReplies } from "../data/conversation.js?v=illustrated-ui-6";
-import { epilogue } from "../data/epilogue.js?v=illustrated-ui-6";
+import { initialState } from "../core/state.js?v=illustrated-ui-7";
+import { exercises } from "../data/story.js?v=illustrated-ui-7";
+import { learnedRecommendation } from "../core/learning.js?v=illustrated-ui-7";
+import { correctionText, insistenceText, assuranceReasons, presenceReplies } from "../data/conversation.js?v=illustrated-ui-7";
+import { epilogue } from "../data/epilogue.js?v=illustrated-ui-7";
 
 export const profiles = [
   ["approval", "跟随赞许"], ["caution", "始终谨慎"], ["warmth", "始终温暖"],

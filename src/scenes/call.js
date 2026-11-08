@@ -1,9 +1,9 @@
-import { show, close, done } from "../ui/dialog.js?v=illustrated-ui-6";
-import { t } from "../i18n/index.js?v=illustrated-ui-6";
-import { assuranceReasons, correctionText, insistenceText, deferText, presenceReplies, presenceQuestion } from "../data/conversation.js?v=illustrated-ui-6";
-import { reflectionMenu } from "./reflection.js?v=illustrated-ui-6";
-import { epilogue } from "../data/epilogue.js?v=illustrated-ui-6";
-import { playEffect } from "../audio/sound.js?v=illustrated-ui-6";
+import { show, close, done } from "../ui/dialog.js?v=illustrated-ui-7";
+import { t } from "../i18n/index.js?v=illustrated-ui-7";
+import { assuranceReasons, correctionText, insistenceText, deferText, presenceReplies, presenceQuestion } from "../data/conversation.js?v=illustrated-ui-7";
+import { reflectionMenu } from "./reflection.js?v=illustrated-ui-7";
+import { epilogue } from "../data/epilogue.js?v=illustrated-ui-7";
+import { playEffect } from "../audio/sound.js?v=illustrated-ui-7";
 
 // Caller reactions and report delivery share one session state so closing a
 // panel never discards a sent reply or submits the same report twice.

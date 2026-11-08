@@ -39,7 +39,13 @@ class Element {
   close() { this.open = false; this.emit("close"); }
 }
 
-async function startGame({ storage, browserLanguage = "en-US" } = {}) {
+// Most checks start from a returning player, so Begin goes straight to the room.
+const returningPlayer = () => {
+  const values = new Map([["last-light.instructions-seen", "1"]]);
+  return { getItem: (key) => values.get(key), setItem: (key, value) => values.set(key, value) };
+};
+
+async function startGame({ storage = returningPlayer(), browserLanguage = "en-US" } = {}) {
   const html = fs.readFileSync(path.join(root, "player.html"), "utf8");
   const elements = Object.fromEntries([...html.matchAll(/id="([^"]+)"/g)]
     .map((match) => [match[1], new Element()]));
@@ -298,7 +304,7 @@ function chooseLanguage(game, language) {
 }
 
 async function testBilingualShift() {
-  const preferences = new Map();
+  const preferences = new Map([["last-light.instructions-seen", "1"]]);
   const storage = { getItem: (key) => preferences.get(key), setItem: (key, value) => preferences.set(key, value) };
   const game = await startGame({ storage });
   const { action, use, elements, key, title, locale, t } = game;
@@ -624,7 +630,30 @@ async function testDevelopmentRestoration() {
   assert.equal(after.snapshot.state.receiver.automatic, true);
 }
 
+async function testFirstRunInstructions() {
+  const preferences = new Map();
+  const storage = { getItem: (key) => preferences.get(key), setItem: (key, value) => preferences.set(key, value) };
+  const first = await startGame({ storage });
+  first.action("Begin night shift");
+  assert.equal(first.title(), "Instructions", "The first shift opens the controls");
+  assert.equal(preferences.get("last-light.instructions-seen"), "1");
+  first.action("Start the shift");
+  assert.equal(first.elements.dialog.open, false, "Starting from Instructions enters the room");
+  first.key("Escape"); first.action("Return to title"); first.action("Return to title");
+  first.action("Begin night shift");
+  assert.equal(first.elements.dialog.open, false, "Instructions appear only once per browser");
+  const returning = await startGame({ storage });
+  returning.action("Begin night shift");
+  assert.equal(returning.elements.dialog.open, false, "A returning browser skips the first-run controls");
+  const blocked = await startGame({ storage: { getItem() { throw new Error("blocked"); }, setItem() { throw new Error("blocked"); } } });
+  blocked.action("Begin night shift");
+  assert.equal(blocked.title(), "Instructions", "Blocked storage still shows controls once");
+  blocked.key("Escape");
+  assert.equal(blocked.elements.dialog.open, false, "Escape from first-run controls starts the shift");
+}
+
 (async () => {
+  await testFirstRunInstructions();
   await testMovement();
   await testGroundedReport();
   await testOptionalInvestigation();

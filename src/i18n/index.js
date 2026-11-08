@@ -1,4 +1,4 @@
-import { zhCN } from "./zh-CN.js?v=illustrated-ui-6";
+import { zhCN } from "./zh-CN.js?v=illustrated-ui-7";
 
 export const languages = [["en", "English"], ["zh-CN", "简体中文"]];
 const storageKey = "last-light.language";

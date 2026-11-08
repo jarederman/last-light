@@ -335,35 +335,61 @@ html[lang="zh-CN"] dialog { font-family: "Noto Sans SC", "PingFang SC", "Microso
 html[lang="zh-CN"] dialog h2 { font-family: "Noto Serif SC", "Songti SC", SimSun, serif; }
 html[lang="zh-CN"] dialog .eyebrow { font-family: "Noto Sans SC", "PingFang SC", sans-serif; letter-spacing: .08em; }
 
+/* Stacked device layout: the illustrated instrument becomes a header and the
+   readable controls sit on a continuous panel below it. Used on narrow or short
+   screens, and on the radio whenever its choices are full sentences. */
+dialog[data-surface][data-layout="stacked"] {
+  width: min(96vw, 680px);
+  height: min(88dvh, 760px);
+  aspect-ratio: auto;
+  background-color: #111c20;
+  background-position: center top;
+  background-size: 100% auto;
+  border: 1px solid #745b3e;
+  box-shadow: 0 20px 60px #060b10c9;
+}
+dialog[data-layout="stacked"] .panel {
+  position: absolute;
+  left: 4%; bottom: 3%;
+  width: 92%; height: auto;
+  padding: 20px 12px 12px;
+  background: #101b1fe8;
+  border: 1px solid #755c42;
+  overflow-y: auto;
+}
+dialog[data-surface="radio"][data-layout="stacked"] .panel { top: min(calc(96vw * 879 / 1771 - 8px), 330px); }
+dialog[data-surface="terminal"][data-layout="stacked"] .panel { top: min(calc(96vw * 1077 / 1415 - 30px), 480px); background: #0c221bcf; border-color: #48705a; }
+dialog[data-surface="radio"][data-layout="stacked"] #panel-body { height: auto; overflow: visible; margin: 13px 0 17px; }
+dialog[data-surface="radio"][data-layout="stacked"] .actions { position: static; width: auto; height: auto; display: grid; overflow: visible; }
+dialog[data-surface="radio"][data-layout="stacked"] .action { min-width: 0; min-height: 44px; padding: 8px 12px; font-size: 15px; line-height: 1.35; text-align: left; white-space: normal; }
+
+/* Phones held sideways have no room for an instrument header. */
+@media (max-height: 550px) {
+  dialog[data-surface][data-layout="stacked"] { background-image: none; height: 92dvh; }
+  dialog[data-layout="stacked"] .panel,
+  dialog[data-surface="radio"][data-layout="stacked"] .panel,
+  dialog[data-surface="terminal"][data-layout="stacked"] .panel { top: 3%; }
+}
+
 @media (max-width: 700px), (max-height: 550px) {
-  /* On narrow screens, keep the illustrated instrument as a header and put
-     readable controls on a continuous panel below it. No text sits on knobs. */
-  dialog[data-surface="radio"], dialog[data-surface="terminal"] {
-    width: min(96vw, 610px);
-    height: min(86dvh, 730px);
-    aspect-ratio: auto;
-    background-color: #111c20;
-    background-position: center top;
-    background-size: 100% auto;
-    border: 1px solid #745b3e;
-    box-shadow: 0 20px 60px #060b10c9;
-  }
-  dialog[data-surface="radio"] .panel, dialog[data-surface="terminal"] .panel {
-    position: absolute;
-    left: 5%; bottom: 3%;
-    width: 90%; height: auto;
-    padding: 20px 12px 12px;
-    background: #101b1fe8;
-    border: 1px solid #755c42;
-  }
-  dialog[data-surface="radio"] .panel { top: min(48vw, 295px); }
-  dialog[data-surface="terminal"] .panel { top: min(73vw, 450px); }
-  dialog[data-surface="terminal"] .panel { background: #0c221bcf; border-color: #48705a; }
-  dialog[data-surface="radio"] .panel { overflow-y: auto; }
-  dialog[data-surface="radio"] #panel-body { height: auto; overflow: visible; margin: 13px 0 17px; }
-  dialog[data-surface="radio"] .actions { position: static; width: auto; height: auto; display: grid; overflow: visible; }
-  dialog[data-surface="radio"] .action { min-width: 0; white-space: normal; }
   dialog[data-surface="dialogue"] { bottom: 4px; }
   dialog[data-surface="wood"], dialog[data-surface="dialogue"] { border-width: 23px; border-image-width: 23px 29px; }
   dialog[data-surface="wood"] .panel, dialog[data-surface="dialogue"] .panel { max-height: calc(86dvh - 46px); }
 }
+
+/* Shown only while a scrolling screen still hides text or choices below. */
+dialog .more-cue {
+  position: absolute;
+  z-index: 3;
+  transform: translate(-50%, -110%);
+  min-height: 0;
+  padding: 3px 12px;
+  border: 1px solid #b89564;
+  border-radius: 999px;
+  background: #0d1417f0;
+  color: #f0dfbf;
+  font: 13px/1.4 var(--ui-sans);
+  box-shadow: 0 -10px 18px #0b1215cc;
+  cursor: pointer;
+}
+dialog .more-cue[hidden] { display: none; }
