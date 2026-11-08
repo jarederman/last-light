@@ -1,17 +1,17 @@
-import { initialState } from "./core/state.js?v=illustrated-ui-5";
-import { learnedRecommendation } from "./core/learning.js?v=illustrated-ui-5";
-import { chapters, exercises } from "./data/story.js?v=illustrated-ui-5";
-import { interactionPoints, playerStart } from "./data/station.js?v=illustrated-ui-5";
-import { canStand, actorScale } from "./core/world.js?v=illustrated-ui-5";
-import { distance, findRoute } from "./core/navigation.js?v=illustrated-ui-5";
-import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=illustrated-ui-5";
-import { creditsMarkup } from "./data/credits.js?v=illustrated-ui-5";
-import { byId, dialog, show, close, done, configureDialog, capturePanel } from "./ui/dialog.js?v=illustrated-ui-5";
+import { initialState } from "./core/state.js?v=illustrated-ui-6";
+import { learnedRecommendation } from "./core/learning.js?v=illustrated-ui-6";
+import { chapters, exercises } from "./data/story.js?v=illustrated-ui-6";
+import { interactionPoints, playerStart } from "./data/station.js?v=illustrated-ui-6";
+import { canStand, actorScale } from "./core/world.js?v=illustrated-ui-6";
+import { distance, findRoute } from "./core/navigation.js?v=illustrated-ui-6";
+import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=illustrated-ui-6";
+import { creditsMarkup } from "./data/credits.js?v=illustrated-ui-6";
+import { byId, dialog, show, close, done, configureDialog, capturePanel } from "./ui/dialog.js?v=illustrated-ui-6";
 
-import { createRadioScene } from "./scenes/radio.js?v=illustrated-ui-5";
-import { createCallScene } from "./scenes/call.js?v=illustrated-ui-5";
-import { createWeather } from "./scenes/weather.js?v=illustrated-ui-5";
-import { t, getLanguage, setLanguage, languages } from "./i18n/index.js?v=illustrated-ui-5";
+import { createRadioScene } from "./scenes/radio.js?v=illustrated-ui-6";
+import { createCallScene } from "./scenes/call.js?v=illustrated-ui-6";
+import { createWeather } from "./scenes/weather.js?v=illustrated-ui-6";
+import { t, getLanguage, setLanguage, languages } from "./i18n/index.js?v=illustrated-ui-6";
 
 configureDialog(stopWalking);
 
@@ -33,6 +33,7 @@ let state;
 let path = [];
 let destination = null;
 let settingsOrigin = "title";
+let instructionsOrigin = "title";
 const radioScene = createRadioScene({ getState: () => state, mark });
 const callScene = createCallScene({ getState: () => state, setPhase, replyOptions, recommendation,
   restart: () => { reset(); startAmbience(); },
@@ -193,6 +194,10 @@ document.addEventListener("keydown", (event) => {
       event.preventDefault();
       leaveSettings();
     }
+    if (dialog.dataset.menu === "instructions" && key === "escape") {
+      event.preventDefault();
+      leaveInstructions();
+    }
     return;
   }
   if (key === "escape" || key === "j") {
@@ -219,16 +224,29 @@ function gameMenu(kind, label, title, body, actions) {
 
 function titleScreen() {
   gameMenu("title", "SIGNAL HOUSE", "Last Light",
-    '<p>The harbor is quiet. Your first night shift is about to begin.</p><p class="muted">WASD / arrows · Move<br>E · Interact<br>J · Field journal<br>Esc · Pause</p><p class="muted">You can also click the floor to walk or select an object marker.</p>' + orientationHint,
+    '<p>The harbor is quiet. Your first night shift is about to begin.</p>',
     [{ text: "Begin night shift", run: () => { startAmbience(); close(); }, primary: true },
+      { text: "Instructions", run: () => instructions("title") },
       { text: "Settings", run: () => settings("title") },
       { text: "Credits", run: () => gameMenu("credits", "LAST LIGHT", "Made with care", creditsMarkup, [{ text: "Back to title", run: titleScreen }]) }]);
+}
+
+function leaveInstructions() {
+  (instructionsOrigin === "title" ? titleScreen : pause)();
+}
+
+function instructions(origin) {
+  instructionsOrigin = origin;
+  gameMenu("instructions", "SIGNAL HOUSE", "Instructions",
+    '<p class="record">WASD / arrows · Move<br>E · Interact<br>J · Field journal<br>Esc · Pause</p><p>You can also click the floor to walk or select an object marker.</p>' + orientationHint,
+    [{ text: origin === "title" ? "Back to title" : "Back to pause menu", run: leaveInstructions }]);
 }
 
 function pause() {
   gameMenu("pause", "SIGNAL HOUSE", "Shift paused", orientationHint, [
     { text: "Resume shift", run: close, primary: true },
     { text: "Open field journal", run: journal },
+    { text: "Instructions", run: () => instructions("pause") },
     { text: "Settings", run: () => settings("pause") },
     { text: "Return to title", run: confirmExit },
   ]);
@@ -304,6 +322,10 @@ dialog.addEventListener("cancel", (event) => {
   if (dialog.dataset.menu === "settings") {
     event.preventDefault();
     leaveSettings();
+  }
+  if (dialog.dataset.menu === "instructions") {
+    event.preventDefault();
+    leaveInstructions();
   }
 });
 

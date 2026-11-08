@@ -5,6 +5,7 @@ export const zhCN = {
   "SIGNAL HOUSE": "信号站",
   "LAST LIGHT": "LAST LIGHT",
   "Begin night shift": "开始夜班",
+  "Instructions": "操作说明",
   "Settings": "设置",
   "Language": "语言",
   "English": "English",

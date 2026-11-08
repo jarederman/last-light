@@ -105,8 +105,13 @@ async function startGame({ storage, browserLanguage = "en-US" } = {}) {
 }
 
 async function testMovement() {
-  const { elements, action, hold } = await startGame();
+  const { elements, action, hold, key, title } = await startGame();
   action("Begin night shift");
+  key("Escape"); action("Instructions");
+  assert.equal(title(), "Instructions");
+  key("Escape");
+  assert.equal(title(), "Shift paused", "In-game Instructions returns to pause");
+  action("Resume shift");
   const actor = elements.player;
   const left = () => parseFloat(actor.style.left);
   const start = left();
@@ -132,6 +137,12 @@ async function train(game, tendency = null) {
   assert.equal(title(), t("Made with care"));
   key("Escape");
   assert.equal(title(), "Last Light", "Closing credits returns to the title");
+  assert.ok(!elements["panel-body"].innerHTML.includes("WASD"), "Title keeps controls in Instructions");
+  action("Instructions");
+  assert.equal(title(), t("Instructions"));
+  assert.ok(elements["panel-body"].innerHTML.includes(t("WASD / arrows · Move")));
+  key("Escape");
+  assert.equal(title(), "Last Light", "Closing Instructions returns to the title");
   action("Begin night shift");
   assert.deepEqual(recommended(), targets("Mara"));
   use("Mara");
