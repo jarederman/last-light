@@ -1,5 +1,5 @@
-import { stopSignal, playEffect } from "../audio/sound.js?v=illustrated-ui-7";
-import { t, translateHtml } from "../i18n/index.js?v=illustrated-ui-7";
+import { stopSignal, playEffect } from "../audio/sound.js?v=illustrated-ui-8";
+import { t, translateHtml } from "../i18n/index.js?v=illustrated-ui-8";
 
 export const byId = (id) => document.getElementById(id);
 export const dialog = byId("dialog");
@@ -33,8 +33,35 @@ function applyLayout() {
   const device = surface === "radio" || surface === "terminal";
   const labels = (currentPanel?.actions ?? []).map(({ text }) => String(t(text)));
   const dense = surface === "radio" && labels.some((text) => visualLength(text) > 34);
-  dialog.dataset.layout = device && (narrowQuery?.matches || dense) ? "stacked" : "";
+  const narrow = Boolean(narrowQuery?.matches);
+  // Wide screens keep sentence-length radio answers on the instrument's own
+  // display; only short device keys remain in the tray below it.
+  dialog.dataset.layout = device && narrow ? "stacked" : dense ? "screen" : "";
+  if (narrowQuery) placeChoices(dialog.dataset.layout === "screen");
   updateMoreCue();
+}
+
+function placeChoices(onScreen) {
+  const tray = byId("panel-actions");
+  const body = byId("panel-body");
+  const buttons = [...(tray.children ?? []), ...(body.querySelector?.(".screen-choices")?.children ?? [])]
+    .filter((button) => button.dataset?.index !== undefined)
+    .sort((a, b) => a.dataset.index - b.dataset.index);
+  if (!onScreen) {
+    if (body.querySelector?.(".screen-choices")) tray.replaceChildren(...buttons);
+    body.querySelector?.(".screen-choices")?.remove();
+    return;
+  }
+  let holder = body.querySelector?.(".screen-choices");
+  if (!holder) {
+    holder = document.createElement("div");
+    holder.className = "screen-choices";
+    body.append(holder);
+  }
+  // Answers go on the display; navigation keys ("Back to ...") stay in the tray.
+  const long = buttons.filter((button) => !/^Back to /.test(button.dataset.message ?? ""));
+  holder.replaceChildren(...long);
+  tray.replaceChildren(...buttons.filter((button) => !long.includes(button)));
 }
 
 const moreCue = document.createElement("button");
@@ -99,11 +126,12 @@ export function show(label, title, body, actions) {
   byId("panel-label").textContent = t(label);
   byId("panel-title").textContent = t(title);
   byId("panel-body").innerHTML = translateHtml(body);
-  byId("panel-actions").replaceChildren(...actions.map(({ text, run, primary, suggested }) => {
+  byId("panel-actions").replaceChildren(...actions.map(({ text, run, primary, suggested }, index) => {
     const button = document.createElement("button");
     button.type = "button";
     button.className = `action${primary ? " primary" : ""}${suggested ? " suggested" : ""}`;
     button.dataset.message = text;
+    button.dataset.index = String(index);
     if (suggested) {
       const tag = document.createElement("span");
       tag.className = "tag";

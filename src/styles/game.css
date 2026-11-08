@@ -335,6 +335,30 @@ html[lang="zh-CN"] dialog { font-family: "Noto Sans SC", "PingFang SC", "Microso
 html[lang="zh-CN"] dialog h2 { font-family: "Noto Serif SC", "Songti SC", SimSun, serif; }
 html[lang="zh-CN"] dialog .eyebrow { font-family: "Noto Sans SC", "PingFang SC", sans-serif; letter-spacing: .08em; }
 
+/* Radio screens whose answers are full sentences keep them on the display:
+   type sizes follow the panel width, and the display scrolls only if needed. */
+dialog[data-surface="radio"] { container-type: inline-size; }
+dialog[data-surface="radio"][data-layout="screen"] h2 { font-size: clamp(19px, 2.4cqw, 25px); line-height: 1.2; }
+dialog[data-surface="radio"][data-layout="screen"] #panel-body {
+  height: calc(70% - 40px);
+  margin-top: 2px;
+  font-size: clamp(12px, 1.38cqw, 14px);
+  line-height: 1.38;
+}
+dialog[data-surface="radio"][data-layout="screen"] #panel-body p { margin: 3px 0; }
+dialog[data-surface="radio"][data-layout="screen"] .signal-trace { margin: 2px 0; }
+dialog[data-surface="radio"][data-layout="screen"] .signal-trace figcaption { font-size: clamp(10px, 1.1cqw, 11px); }
+dialog[data-surface="radio"][data-layout="screen"] .wave { height: clamp(26px, 3.2cqw, 34px); margin: 3px 0; }
+dialog[data-surface="radio"][data-layout="screen"] .trace-pair { gap: 12px; }
+dialog[data-surface="radio"] .screen-choices { display: grid; gap: 4px; margin: 5px 0 0; }
+dialog[data-surface="radio"] .screen-choices .action {
+  min-height: 0;
+  padding: 4px 10px;
+  font-size: inherit;
+  line-height: 1.3;
+  text-align: left;
+}
+
 /* Stacked device layout: the illustrated instrument becomes a header and the
    readable controls sit on a continuous panel below it. Used on narrow or short
    screens, and on the radio whenever its choices are full sentences. */
