@@ -1,4 +1,4 @@
-import { obstacles, maraObstacle, walkBounds } from "../data/station.js?v=illustrated-ui-3";
+import { obstacles, maraObstacle, walkBounds } from "../data/station.js?v=illustrated-ui-4";
 
 export function canStand({ x, y }, maraPresent = true) {
   const inside = ([left, top, right, bottom]) =>

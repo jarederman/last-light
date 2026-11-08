@@ -1,5 +1,5 @@
-import { stopSignal, playEffect } from "../audio/sound.js?v=illustrated-ui-3";
-import { t, translateHtml } from "../i18n/index.js?v=illustrated-ui-3";
+import { stopSignal, playEffect } from "../audio/sound.js?v=illustrated-ui-4";
+import { t, translateHtml } from "../i18n/index.js?v=illustrated-ui-4";
 
 export const byId = (id) => document.getElementById(id);
 export const dialog = byId("dialog");

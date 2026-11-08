@@ -63,6 +63,7 @@ dialog { width: min(575px, calc(100% - 26px)); max-height: 90dvh; border: 1px so
 dialog::backdrop { background: #0a1017a8; }
 .panel { position: relative; padding: 23px clamp(15px, 4vw, 30px) 24px; }
 .panel .eyebrow { margin: 0 30px 10px 0; }
+#panel-label { display: none; }
 .close { position: absolute; right: 13px; top: 10px; border: 0; background: transparent; color: var(--sub); font-size: 26px; line-height: 1; padding: 4px; }
 #panel-body { margin: 13px 0 17px; }
 #panel-body p + p { margin-top: 10px; }
