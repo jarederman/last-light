@@ -227,15 +227,38 @@ dialog[data-surface="radio"] {
 }
 dialog[data-surface="radio"] .panel {
   position: absolute;
-  left: 6.5%; top: 15%; width: 59%; height: 54%;
-  overflow-y: auto;
+  left: 6.5%; top: 15%; width: 59%; height: 76%;
+  overflow: visible;
   padding: 5px 15px 8px 9px;
 }
 dialog[data-surface="radio"] .close { right: 2px; top: 0; }
+dialog[data-surface="radio"] #panel-body {
+  height: calc(70% - 64px);
+  min-height: 0;
+  overflow-y: auto;
+  margin: 8px 0 0;
+  padding-right: 6px;
+  scrollbar-color: #90734e transparent;
+}
+dialog[data-surface="radio"] .actions {
+  position: absolute;
+  left: 9px; bottom: 3%;
+  width: 80%; height: 14%;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 5px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+}
 dialog[data-surface="radio"] .eyebrow { color: #e5b679; }
 dialog[data-surface="radio"] .record { background: #171b1ed8; }
 dialog[data-surface="radio"] .action {
   min-height: 40px;
+  min-width: 132px;
+  flex: 1 0 auto;
+  padding: 5px 8px;
+  white-space: nowrap;
   background: #171c21e6;
   border: 1px solid #72644f;
   color: #f3e8d5;
@@ -332,6 +355,10 @@ html[lang="zh-CN"] dialog .eyebrow { font-family: "Noto Sans SC", "PingFang SC",
   dialog[data-surface="radio"] .panel { top: min(48vw, 295px); }
   dialog[data-surface="terminal"] .panel { top: min(73vw, 450px); }
   dialog[data-surface="terminal"] .panel { background: #0c221bcf; border-color: #48705a; }
+  dialog[data-surface="radio"] .panel { overflow-y: auto; }
+  dialog[data-surface="radio"] #panel-body { height: auto; overflow: visible; margin: 13px 0 17px; }
+  dialog[data-surface="radio"] .actions { position: static; width: auto; height: auto; display: grid; overflow: visible; }
+  dialog[data-surface="radio"] .action { min-width: 0; white-space: normal; }
   dialog[data-surface="dialogue"] { bottom: 4px; }
   dialog[data-surface="wood"], dialog[data-surface="dialogue"] { border-width: 23px; border-image-width: 23px 29px; }
   dialog[data-surface="wood"] .panel, dialog[data-surface="dialogue"] .panel { max-height: calc(86dvh - 46px); }
