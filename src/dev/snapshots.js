@@ -1,5 +1,5 @@
-import { phases, evidenceIds, initialState } from "../core/state.js?v=illustrated-ui-2";
-import { canStand } from "../core/world.js?v=illustrated-ui-2";
+import { phases, evidenceIds, initialState } from "../core/state.js?v=illustrated-ui-3";
+import { canStand } from "../core/world.js?v=illustrated-ui-3";
 
 const traits = ["warmth", "caution", "confidence", "help"];
 const object = (value) => value && typeof value === "object" && !Array.isArray(value);

@@ -255,10 +255,12 @@ dialog[data-surface="radio"] .eyebrow { color: #e5b679; }
 dialog[data-surface="radio"] .record { background: #171b1ed8; }
 dialog[data-surface="radio"] .action {
   min-height: 40px;
-  min-width: 132px;
-  flex: 1 0 auto;
-  padding: 5px 8px;
-  white-space: nowrap;
+  min-width: 0;
+  flex: 1 1 0;
+  padding: 4px 5px;
+  font-size: 13px;
+  line-height: 1.15;
+  white-space: normal;
   background: #171c21e6;
   border: 1px solid #72644f;
   color: #f3e8d5;
