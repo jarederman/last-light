@@ -1,17 +1,17 @@
-import { initialState } from "./core/state.js?v=illustrated-ui-4";
-import { learnedRecommendation } from "./core/learning.js?v=illustrated-ui-4";
-import { chapters, exercises } from "./data/story.js?v=illustrated-ui-4";
-import { interactionPoints, playerStart } from "./data/station.js?v=illustrated-ui-4";
-import { canStand, actorScale } from "./core/world.js?v=illustrated-ui-4";
-import { distance, findRoute } from "./core/navigation.js?v=illustrated-ui-4";
-import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=illustrated-ui-4";
-import { creditsMarkup } from "./data/credits.js?v=illustrated-ui-4";
-import { byId, dialog, show, close, done, configureDialog, capturePanel } from "./ui/dialog.js?v=illustrated-ui-4";
+import { initialState } from "./core/state.js?v=illustrated-ui-5";
+import { learnedRecommendation } from "./core/learning.js?v=illustrated-ui-5";
+import { chapters, exercises } from "./data/story.js?v=illustrated-ui-5";
+import { interactionPoints, playerStart } from "./data/station.js?v=illustrated-ui-5";
+import { canStand, actorScale } from "./core/world.js?v=illustrated-ui-5";
+import { distance, findRoute } from "./core/navigation.js?v=illustrated-ui-5";
+import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=illustrated-ui-5";
+import { creditsMarkup } from "./data/credits.js?v=illustrated-ui-5";
+import { byId, dialog, show, close, done, configureDialog, capturePanel } from "./ui/dialog.js?v=illustrated-ui-5";
 
-import { createRadioScene } from "./scenes/radio.js?v=illustrated-ui-4";
-import { createCallScene } from "./scenes/call.js?v=illustrated-ui-4";
-import { createWeather } from "./scenes/weather.js?v=illustrated-ui-4";
-import { t, getLanguage, setLanguage, languages } from "./i18n/index.js?v=illustrated-ui-4";
+import { createRadioScene } from "./scenes/radio.js?v=illustrated-ui-5";
+import { createCallScene } from "./scenes/call.js?v=illustrated-ui-5";
+import { createWeather } from "./scenes/weather.js?v=illustrated-ui-5";
+import { t, getLanguage, setLanguage, languages } from "./i18n/index.js?v=illustrated-ui-5";
 
 configureDialog(stopWalking);
 

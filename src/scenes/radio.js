@@ -1,6 +1,6 @@
-import { show, done } from "../ui/dialog.js?v=illustrated-ui-4";
-import { playSignal, stopSignal, playEffect } from "../audio/sound.js?v=illustrated-ui-4";
-import { signalTrace } from "../ui/signal.js?v=illustrated-ui-4";
+import { show, done } from "../ui/dialog.js?v=illustrated-ui-5";
+import { playSignal, stopSignal, playEffect } from "../audio/sound.js?v=illustrated-ui-5";
+import { signalTrace } from "../ui/signal.js?v=illustrated-ui-5";
 
 export function createRadioScene({ getState, mark }) {
   function open() {
