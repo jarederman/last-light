@@ -122,3 +122,217 @@ a { color: var(--amber); }
 
 /* The title heading receives focus for screen readers when the dialog opens. */
 [data-menu="title"] #panel-title:focus { outline: none; }
+
+/* Illustrated interface surfaces. The device images have reserved text areas;
+   only those areas scroll, so content never crosses the hardware controls. */
+dialog {
+  --ui-serif: "Source Serif 4", "Palatino Linotype", Georgia, serif;
+  --ui-sans: "IBM Plex Sans", "Noto Sans", system-ui, sans-serif;
+  --ui-mono: "IBM Plex Mono", "Cascadia Mono", monospace;
+  font: 16px/1.55 var(--ui-sans);
+  border-radius: 0;
+  scrollbar-color: #8c7858 transparent;
+}
+dialog h2 { font-family: var(--ui-serif); font-size: clamp(24px, 3vw, 32px); }
+dialog .eyebrow, dialog .terminal, dialog .report dt, dialog .action .tag { font-family: var(--ui-mono); }
+dialog .panel { border: 0; }
+dialog .action { overflow-wrap: anywhere; }
+dialog .close { z-index: 2; width: 36px; height: 36px; font-family: var(--ui-sans); }
+
+dialog[data-surface="wood"], dialog[data-surface="dialogue"] {
+  width: min(860px, calc(100vw - 24px));
+  max-height: min(86dvh, 720px);
+  background: #12191c;
+  border: 34px solid transparent;
+  border-image: url("../../assets/ui/concept/dialogue-frame.webp") 110 145 fill / 34px 45px / 0 stretch;
+  box-shadow: 0 20px 70px #050a0dce;
+}
+dialog[data-surface="wood"] .panel, dialog[data-surface="dialogue"] .panel {
+  max-height: calc(min(86dvh, 720px) - 68px);
+  overflow-y: auto;
+  padding: 4px clamp(8px, 2vw, 25px) 8px;
+}
+dialog[data-surface="dialogue"] { position: fixed; top: auto; bottom: clamp(8px, 3dvh, 32px); margin-bottom: 0; }
+dialog[data-surface="wood"] .action, dialog[data-surface="dialogue"] .action,
+dialog[data-menu="title"] .action {
+  min-height: 44px;
+  padding: 3px 11px;
+  border: 12px solid transparent;
+  border-image: url("../../assets/ui/concept/choice-plate.webp") 95 125 fill / 12px 17px / 0 stretch;
+  background: #172024;
+  color: #f2e8d6;
+}
+dialog[data-surface="wood"] .action:hover, dialog[data-surface="dialogue"] .action:hover,
+dialog[data-menu="title"] .action:hover { filter: brightness(1.18); }
+dialog[data-surface="wood"] .action.primary, dialog[data-surface="dialogue"] .action.primary,
+dialog[data-menu="title"] .action.primary { color: #ffe1a8; }
+dialog[data-surface="wood"] .action.suggested, dialog[data-surface="dialogue"] .action.suggested {
+  color: #f1e2bb;
+}
+
+dialog[data-surface="archive"], dialog[data-menu="journal"] {
+  width: min(520px, calc(84dvh * 1011 / 1303), calc(100vw - 20px));
+  height: auto;
+  aspect-ratio: 1011 / 1303;
+  max-height: 84dvh;
+  border: 0;
+  border-image: none;
+  background: url("../../assets/ui/concept/archive-sheet.webp") center / 100% 100% no-repeat;
+  box-shadow: none;
+  color: #241f1b;
+}
+dialog[data-surface="archive"] .panel, dialog[data-menu="journal"] .panel {
+  position: absolute;
+  inset: 8% 9% 7% 10%;
+  overflow-y: auto;
+  padding: 4px 10px 10px 3px;
+}
+dialog[data-surface="archive"] .eyebrow, dialog[data-menu="journal"] .eyebrow { color: #533929; }
+dialog[data-surface="archive"] .close, dialog[data-menu="journal"] .close { color: #392e25; }
+dialog[data-surface="archive"] .muted, dialog[data-menu="journal"] .muted,
+dialog[data-surface="archive"] .notes li, dialog[data-menu="journal"] .notes li { color: #4f453c; }
+dialog[data-surface="archive"] .record, dialog[data-menu="journal"] .record {
+  color: #30261c;
+  background: #e5cf9d40;
+  border-left-color: #7b593c;
+}
+dialog[data-surface="archive"] .action, dialog[data-menu="journal"] .action {
+  min-height: 44px;
+  color: #241e18;
+  background: #cbb58a45;
+  border: 1px solid #6b543c;
+}
+dialog[data-surface="archive"] .action:hover, dialog[data-menu="journal"] .action:hover { background: #ddc39985; border-color: #3d2e21; }
+dialog[data-surface="archive"] .action.primary, dialog[data-menu="journal"] .action.primary { background: #b9925e70; }
+dialog[data-surface="archive"] .terminal, dialog[data-menu="journal"] .terminal {
+  background: #b6a28450;
+  color: #283d35;
+}
+dialog[data-surface="archive"] .notes li, dialog[data-menu="journal"] .notes li { border-color: #7b634d55; }
+dialog[data-surface="archive"] .notes li[data-done="true"]::before,
+dialog[data-menu="journal"] .notes li[data-done="true"]::before { color: #285749; }
+
+dialog[data-surface="radio"], dialog[data-surface="terminal"] {
+  border: 0;
+  max-height: none;
+  box-shadow: none;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+dialog[data-surface="radio"] {
+  width: min(980px, calc(100vw - 20px), calc(88dvh * 1771 / 879));
+  aspect-ratio: 1771 / 879;
+  background-image: url("../../assets/ui/concept/radio-faceplate-v2.webp");
+}
+dialog[data-surface="radio"] .panel {
+  position: absolute;
+  left: 6.5%; top: 15%; width: 59%; height: 54%;
+  overflow-y: auto;
+  padding: 5px 15px 8px 9px;
+}
+dialog[data-surface="radio"] .close { right: 2px; top: 0; }
+dialog[data-surface="radio"] .eyebrow { color: #e5b679; }
+dialog[data-surface="radio"] .record { background: #171b1ed8; }
+dialog[data-surface="radio"] .action {
+  min-height: 40px;
+  background: #171c21e6;
+  border: 1px solid #72644f;
+  color: #f3e8d5;
+}
+dialog[data-surface="radio"] .action:hover { background: #2b3031; border-color: #dcb47b; }
+dialog[data-surface="radio"] .action.primary, dialog[data-surface="radio"] .action.suggested { background: #30291f; border-color: #b28a5d; }
+
+dialog[data-surface="terminal"] {
+  width: min(850px, calc(100vw - 20px), calc(88dvh * 1415 / 1077));
+  aspect-ratio: 1415 / 1077;
+  background-image: url("../../assets/ui/concept/crt-faceplate-v2.webp");
+  color: #d5e6d6;
+}
+dialog[data-surface="terminal"] .panel {
+  position: absolute;
+  left: 10%; top: 13%; width: 72%; height: 67%;
+  overflow-y: auto;
+  padding: 7px 15px 10px 5px;
+  scrollbar-color: #427365 transparent;
+}
+dialog[data-surface="terminal"] .close { right: 4px; top: 2px; color: #b8d3bc; }
+dialog[data-surface="terminal"] .eyebrow, dialog[data-surface="terminal"] .action .tag { color: #a9c6a7; }
+dialog[data-surface="terminal"] .muted { color: #acc4b4; }
+dialog[data-surface="terminal"] .record { color: #e0e9d7; background: #12291fc0; border-left-color: #6e9978; }
+dialog[data-surface="terminal"] .terminal { background: #081d18; border-color: #476b56; }
+dialog[data-surface="terminal"] .action {
+  min-height: 44px;
+  border: 1px solid #547864;
+  background: #112a22dd;
+  color: #daeadb;
+}
+dialog[data-surface="terminal"] .action:hover { background: #204235; border-color: #b0d4a8; }
+dialog[data-surface="terminal"] .action.primary { border-color: #b5cba3; background: #244034; }
+dialog[data-surface="terminal"] .action.suggested { border-color: #899b72; background: #25392d; }
+dialog[data-surface="terminal"] .report { background: #10271f; border-color: #446554; }
+dialog[data-surface="terminal"] .report dt { color: #b1c8af; }
+
+/* The title is a game overlay on the existing room, not a webpage card. */
+dialog[data-menu="title"] {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  border: 0;
+  border-image: none;
+  background: linear-gradient(90deg, #071219ee 0%, #091721d9 34%, #0a17214d 72%, #07121a22);
+  box-shadow: none;
+  text-align: left;
+}
+dialog[data-menu="title"] .panel {
+  position: absolute;
+  left: clamp(20px, 9vw, 150px);
+  top: clamp(60px, 20dvh, 180px);
+  width: min(450px, 82vw);
+  max-height: calc(100dvh - 75px);
+  padding: 0 10px 20px 0;
+  overflow-y: auto;
+}
+dialog[data-menu="title"] h2 { font-size: clamp(50px, 7vw, 88px); letter-spacing: .015em; }
+dialog[data-menu="title"] .actions { margin-top: 24px; }
+dialog[data-menu="title"] .action { text-align: left; }
+dialog[data-menu="title"] #panel-body .muted { font-size: 12px; line-height: 1.45; }
+dialog[data-menu="title"]::backdrop { background: transparent; }
+body:has(dialog[data-menu="title"][open]) .marker { opacity: 0; }
+body:has(dialog[data-menu="title"][open]) .touch-menu { visibility: hidden; }
+
+html[lang="zh-CN"] dialog { font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif; line-height: 1.65; }
+html[lang="zh-CN"] dialog h2 { font-family: "Noto Serif SC", "Songti SC", SimSun, serif; }
+html[lang="zh-CN"] dialog .eyebrow { font-family: "Noto Sans SC", "PingFang SC", sans-serif; letter-spacing: .08em; }
+
+@media (max-width: 700px), (max-height: 550px) {
+  /* On narrow screens, keep the illustrated instrument as a header and put
+     readable controls on a continuous panel below it. No text sits on knobs. */
+  dialog[data-surface="radio"], dialog[data-surface="terminal"] {
+    width: min(96vw, 610px);
+    height: min(86dvh, 730px);
+    aspect-ratio: auto;
+    background-color: #111c20;
+    background-position: center top;
+    background-size: 100% auto;
+    border: 1px solid #745b3e;
+    box-shadow: 0 20px 60px #060b10c9;
+  }
+  dialog[data-surface="radio"] .panel, dialog[data-surface="terminal"] .panel {
+    position: absolute;
+    left: 5%; bottom: 3%;
+    width: 90%; height: auto;
+    padding: 12px;
+    background: #101b1fe8;
+    border: 1px solid #755c42;
+  }
+  dialog[data-surface="radio"] .panel { top: min(48vw, 295px); }
+  dialog[data-surface="terminal"] .panel { top: min(73vw, 450px); }
+  dialog[data-surface="terminal"] .panel { background: #0c221bcf; border-color: #48705a; }
+  dialog[data-surface="dialogue"] { bottom: 4px; }
+  dialog[data-surface="wood"], dialog[data-surface="dialogue"] { border-width: 23px; border-image-width: 23px 29px; }
+  dialog[data-surface="wood"] .panel, dialog[data-surface="dialogue"] .panel { max-height: calc(86dvh - 46px); }
+}

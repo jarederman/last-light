@@ -1,5 +1,5 @@
-import { stopSignal, playEffect } from "../audio/sound.js?v=ending-story-2";
-import { t, translateHtml } from "../i18n/index.js?v=ending-story-2";
+import { stopSignal, playEffect } from "../audio/sound.js?v=illustrated-ui-1";
+import { t, translateHtml } from "../i18n/index.js?v=illustrated-ui-1";
 
 export const byId = (id) => document.getElementById(id);
 export const dialog = byId("dialog");
@@ -11,6 +11,16 @@ let currentPanel = null;
 export const capturePanel = () => dialog.open ? currentPanel : null;
 
 export function configureDialog(onOpen) { beforeOpen = onOpen; }
+
+function surfaceFor(label) {
+  if (label.startsWith("Mara")) return "dialogue";
+  if (label.startsWith("Radio")) return "radio";
+  if (label.startsWith("Archive")) return "archive";
+  if (label.startsWith("Live terminal") || label.startsWith("Dispatch") || label.startsWith("Signal House · Handover")) return "terminal";
+  if (label.startsWith("Chapter complete")) return "terminal";
+  if (label.startsWith("After the line")) return "archive";
+  return "wood";
+}
 
 dialog.addEventListener("close", () => {
   stopSignal();
@@ -33,6 +43,7 @@ export function show(label, title, body, actions) {
   beforeOpen();
   if (!dialog.open) returnFocus = document.activeElement;
   dialog.dataset.menu = "";
+  dialog.dataset.surface = surfaceFor(label);
   byId("panel-label").textContent = t(label);
   byId("panel-title").textContent = t(title);
   byId("panel-body").innerHTML = translateHtml(body);
