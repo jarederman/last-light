@@ -1,5 +1,5 @@
-import { fixture, presets, profiles } from "./fixtures.js?v=illustrated-ui-8";
-import { History, validateSnapshot } from "./snapshots.js?v=illustrated-ui-8";
+import { fixture, presets, profiles } from "./fixtures.js?v=story-voice-1";
+import { History, validateSnapshot } from "./snapshots.js?v=story-voice-1";
 
 const channel = "last-light-development-v1";
 export function connectDevelopment(adapter) {

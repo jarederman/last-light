@@ -1,5 +1,5 @@
-import { stopSignal, playEffect } from "../audio/sound.js?v=illustrated-ui-8";
-import { t, translateHtml } from "../i18n/index.js?v=illustrated-ui-8";
+import { stopSignal, playEffect } from "../audio/sound.js?v=story-voice-1";
+import { t, translateHtml } from "../i18n/index.js?v=story-voice-1";
 
 export const byId = (id) => document.getElementById(id);
 export const dialog = byId("dialog");
@@ -59,7 +59,7 @@ function placeChoices(onScreen) {
     body.append(holder);
   }
   // Answers go on the display; navigation keys ("Back to ...") stay in the tray.
-  const long = buttons.filter((button) => !/^Back to /.test(button.dataset.message ?? ""));
+  const long = buttons.filter((button) => !/^(Back to |Close$)/.test(button.dataset.message ?? ""));
   holder.replaceChildren(...long);
   tray.replaceChildren(...buttons.filter((button) => !long.includes(button)));
 }
@@ -149,6 +149,6 @@ export function show(label, title, body, actions) {
 }
 
 export const close = () => dialog.close();
-export const done = (text = "Back to the station") => ({ text, run: close });
+export const done = (text = "Close") => ({ text, run: close });
 dialog.querySelector(".close").addEventListener("click", close);
 

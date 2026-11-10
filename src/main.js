@@ -1,17 +1,17 @@
-import { initialState } from "./core/state.js?v=illustrated-ui-8";
-import { learnedRecommendation } from "./core/learning.js?v=illustrated-ui-8";
-import { chapters, exercises } from "./data/story.js?v=illustrated-ui-8";
-import { interactionPoints, playerStart } from "./data/station.js?v=illustrated-ui-8";
-import { canStand, actorScale } from "./core/world.js?v=illustrated-ui-8";
-import { distance, findRoute } from "./core/navigation.js?v=illustrated-ui-8";
-import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=illustrated-ui-8";
-import { creditsMarkup } from "./data/credits.js?v=illustrated-ui-8";
-import { byId, dialog, show, close, done, configureDialog, capturePanel } from "./ui/dialog.js?v=illustrated-ui-8";
+import { initialState } from "./core/state.js?v=story-voice-1";
+import { learnedRecommendation } from "./core/learning.js?v=story-voice-1";
+import { chapters, exercises } from "./data/story.js?v=story-voice-1";
+import { interactionPoints, playerStart } from "./data/station.js?v=story-voice-1";
+import { canStand, actorScale } from "./core/world.js?v=story-voice-1";
+import { distance, findRoute } from "./core/navigation.js?v=story-voice-1";
+import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=story-voice-1";
+import { creditsMarkup } from "./data/credits.js?v=story-voice-1";
+import { byId, dialog, show, close, done, configureDialog, capturePanel } from "./ui/dialog.js?v=story-voice-1";
 
-import { createRadioScene } from "./scenes/radio.js?v=illustrated-ui-8";
-import { createCallScene } from "./scenes/call.js?v=illustrated-ui-8";
-import { createWeather } from "./scenes/weather.js?v=illustrated-ui-8";
-import { t, getLanguage, setLanguage, languages } from "./i18n/index.js?v=illustrated-ui-8";
+import { createRadioScene } from "./scenes/radio.js?v=story-voice-1";
+import { createCallScene } from "./scenes/call.js?v=story-voice-1";
+import { createWeather } from "./scenes/weather.js?v=story-voice-1";
+import { t, getLanguage, setLanguage, languages } from "./i18n/index.js?v=story-voice-1";
 
 configureDialog(stopWalking);
 
@@ -321,8 +321,32 @@ function confirmExit() {
     ]);
 }
 
+function nextStep() {
+  if (state.phase !== "archive") return null;
+  const has = (id) => state.evidence.has(id);
+  if (!has("tape")) return "Next: listen to the old tape at the Radio, by the left wall.";
+  if (!has("letter")) return "Next: read Nell’s letter in the Archive cabinet, on the right.";
+  if (!has("manual")) return "Next: read the receiver manual in the Archive cabinet.";
+  if (!has("bench") || !has("bench-silent")) return "Next: at the Radio, open the receiver bench. Send a ping with the switch off, then with it on.";
+  if (!has("comparison")) return "Next: on the receiver bench, compare your test with the old tape.";
+  return "Next: tell Mara what you found.";
+}
+
+let hintTimer = null;
+function flashNextStep() {
+  const hint = byId("next-step");
+  const step = nextStep();
+  globalThis.clearTimeout?.(hintTimer);
+  hint.hidden = !step;
+  if (!step) return;
+  hint.textContent = t(step);
+  hintTimer = globalThis.setTimeout?.(() => { hint.hidden = true; }, 7000);
+}
+dialog.addEventListener("close", () => { if (state) flashNextStep(); });
+
 function journal() {
-  const [chapter, title, objective] = chapters[state.phase];
+  const [chapter, title, chapterObjective] = chapters[state.phase];
+  const objective = nextStep() ? `${t(chapterObjective)}<br>${t(nextStep())}` : chapterObjective;
   const items = journalRecords().map(([id, label]) =>
     `<li data-done="${state.evidence.has(id)}">${label}</li>`).join("");
   gameMenu("journal", chapter, "Field journal",
@@ -390,10 +414,16 @@ function mark(id) {
 
 function talk() {
   if (state.phase === "arrival") {
-    show("Mara · Station keeper", "First night?", `
-      <p class="record">“Welcome to your first night shift. Before you take real calls, we’ll review an old case: the fishing boat Kestrel. Eighteen months ago, three clicks came over its radio. The boat came home, but nobody established who or what sent those clicks.”</p>
-      <p>“Listen to the tape. Check Nell’s letter and the equipment notes in the archive. There’s a matching receiver on the radio bench if you want to try it.”</p>`, [
-      { text: "I'll take a look", primary: true, run: () => { setPhase("archive"); close(); } },
+    // Three short beats: where you are, what the old case is, where to start.
+    show("Mara · Station keeper", "First night?",
+      "<p class=\"record\">“You made it. This is Signal House, the harbor’s night station. When boats or their families need help after dark, they call here, and someone answers.”</p><p>“Before you take real calls, we practice on an old case.”</p>", [
+      { text: "What case?", primary: true, run: () => show("Mara · Station keeper", "The Kestrel",
+        "<p class=\"record\">“A year and a half ago, a fishing boat called the Kestrel stopped answering. Then three short clicks came over its radio. The skipper’s daughter, Nell, was sure it was her dad saying ‘I’m here.’”</p><p>“The boat did come home. But nobody ever worked out who, or what, made those clicks.”</p>", [
+          { text: "Where do I start?", primary: true, run: () => show("Mara · Station keeper", "Start with the tape",
+            "<p class=\"record\">“Start with the recording on the radio, by the left wall. After that, the archive cabinet on the right has the rest of the file.”</p>", [
+              { text: "I'll take a look", primary: true, run: () => { setPhase("archive"); close(); } },
+            ]) },
+        ]) },
     ]);
   } else if (state.phase === "archive") {
     if (["tape", "letter", "manual", "comparison"].every((id) => state.evidence.has(id))) {
@@ -427,7 +457,7 @@ function radio() {
 function archive() {
   show("Archive · Drawer 07", "The Kestrel file", "<p>Two documents are clipped to the recording slip.</p>", [
     { text: "Read Nell’s letter", run: () => archiveDocument("letter", "A note from Nell",
-      "<p class='record'>“Dad says the microphone sticks in rough water. If he can hear us but can’t speak, he’ll tap three times so we know he’s there.”</p><p class='muted'>Filed eighteen months ago.</p>") },
+      "<p class='record'>“Dad says the mic sticks when it’s rough out. If he can hear us but can’t talk, he’ll tap three times. Three. So we know he’s there. Please write this down somewhere. — Nell”</p><p class='muted'>Filed eighteen months ago.</p>") },
     { text: "Read the receiver manual", run: () => archiveDocument("manual", "Automatic reply circuit",
       "<p class='record'>“When auto-reply is enabled, a coast station relay ping triggers three evenly spaced clicks. No crew input is required.”</p><p class='muted'>The Kestrel carries this model. Its auto-reply switch position is unknown.</p>") },
     done(),
@@ -440,12 +470,12 @@ function archiveDocument(id, title, body) {
   const actions = [{ text: "Back to the file", run: archive }, done()];
   if (id === "manual") {
     if (state.phase === "investigation") mark("rechecked");
-    actions.unshift({ text: state.evidence.has("bench") && state.evidence.has("bench-silent") ? "Review your receiver test" : "Find the receiver bench", run: () => {
+    actions.unshift({ text: state.evidence.has("bench") && state.evidence.has("bench-silent") ? "What did my bench test show?" : "Where is the spare receiver?", run: () => {
       show("Archive · Equipment note", "A matching set",
         state.evidence.has("bench") && state.evidence.has("bench-silent")
           ? "<p>Your test log shows silence with auto-reply off and three clicks with it on, with the microphone unplugged. That establishes what this model can do, not who sent the old signal.</p>"
           : "<p>The spare receiver is beside the radio. Its microphone is unplugged. Try sending a relay ping with its automatic reply switch in each position.</p>",
-        [done("Return to the station")]);
+        [done("Back to the room")]);
     } });
   }
   show("Archive · Drawer 07", title, body, actions);
@@ -506,7 +536,7 @@ function reveal() {
   setPhase("live");
   show("Signal House · Handover", "ECHO-01",
     '<p class="terminal">TRAINING SIMULATION COMPLETE\nARCHIVE CASES LOADED\nHUMAN FEEDBACK INTEGRATED\nLIVE CALLS HANDLED: 0\n\nCHANNEL 04 · INCOMING</p><p>The figure you move is ECHO-01’s station avatar. Mara was the recorded training guide; her session has ended. The room remains your interface. The next voice comes from the real harbor line.</p><p>The replies you chose in the trials are ECHO’s training history. Your choices, and the approval they received, shaped the draft you will see next. There was no other operator making those choices for you.</p>',
-    [{ text: "Return to the station", primary: true, run: close }]);
+    [{ text: "Back to the room", primary: true, run: close }]);
 }
 
 function terminal() {

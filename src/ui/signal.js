@@ -1,4 +1,4 @@
-import { t } from "../i18n/index.js?v=illustrated-ui-8";
+import { t } from "../i18n/index.js?v=story-voice-1";
 
 export function signalTrace(label, clicks = true) {
   const trace = clicks

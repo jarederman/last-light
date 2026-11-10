@@ -154,15 +154,19 @@ async function train(game, tendency = null) {
   use("Mara");
   assert.ok(parseFloat(elements.player.style.top) > 268 / 4,
     "The first conversation stops in front of Mara instead of routing behind her");
-  action("I'll take a look");
+  action("What case?"); action("Where do I start?"); action("I'll take a look");
   assert.deepEqual(recommended(), targets("Radio", "Archive"), "Do not suggest Mara before the evidence is ready");
-  use("Radio"); action("Back to the station");
+  assert.equal(elements["next-step"].textContent, t("Next: listen to the old tape at the Radio, by the left wall."));
+  use("Radio"); action("Close");
+  assert.equal(elements["next-step"].textContent, t("Next: read Nell’s letter in the Archive cabinet, on the right."),
+    "Closing a clue names the one next step");
   use("Archive"); action("Read Nell"); action("Back to the file");
-  action("Read the receiver"); action("Back to the station");
+  action("Read the receiver"); action("Close");
+  assert.equal(elements["next-step"].textContent, t("Next: at the Radio, open the receiver bench. Send a ping with the switch off, then with it on."));
   assert.deepEqual(recommended(), targets("Radio"));
   use("Mara");
   assert.equal(title(), t("Take another look"), "Reading alone cannot complete the investigation");
-  action("Back to the station");
+  action("Close");
   use("Radio"); action("Open receiver bench");
   action("Send relay ping");
   assert.ok(elements["panel-body"].innerHTML.includes(t("No reply after the relay ping.")));
@@ -172,7 +176,7 @@ async function train(game, tendency = null) {
   action("Compare with archived tape"); action("definitely automatic");
   assert.equal(title(), t("Listen to the second source"));
   action("Compare the recordings again"); action("old source is still unknown");
-  action("Back to the station");
+  action("Close");
   assert.deepEqual(recommended(), targets("Mara"), "Only the case review remains");
   use("Mara"); action("may be working"); action("Log the signal");
   assert.deepEqual(recommended(), targets("Terminal"));
@@ -183,7 +187,7 @@ async function train(game, tendency = null) {
   }[tendency] ?? ["ferry is delayed", "unsettling", "Go ahead"];
   for (const choice of choices) { use("Terminal"); action(choice); action("File this call"); }
   assert.deepEqual(recommended(), targets("Mara"));
-  use("Mara"); action("Take the shift"); action("Return to the station");
+  use("Mara"); action("Take the shift"); action("Back to the room");
   assert.deepEqual(recommended(), targets("Live terminal"));
   use("Live terminal"); action("Give me a moment");
   assert.deepEqual(recommended(), targets("Radio", "Archive", "Live terminal"));
@@ -194,8 +198,8 @@ async function testGroundedReport() {
   await train(game);
   const { action, use, title, elements, key } = game;
   use("Radio"); assert.match(elements["panel-body"].innerHTML, /00:17:06/);
-  action("Back to the station");
-  use("Archive"); action("Read the receiver"); action("Back to the station");
+  action("Close");
+  use("Archive"); action("Read the receiver"); action("Close");
   use("Live terminal"); action("Check the rescue board"); action("Back to Nell");
   action("Compose a reply");
   assert.ok(elements["panel-actions"].children[2].className.includes("suggested"));
@@ -213,12 +217,12 @@ async function testGroundedReport() {
   assert.equal(title(), "Nell listens", "The report back button returns to the caller without sending");
   action("Prepare a signal report");
   action("Send recording and report"); assert.equal(title(), "Report received");
-  action("Back to the station"); use("Live terminal");
+  action("Close"); use("Live terminal");
   assert.equal(title(), "Something they can check");
   assert.ok(!game.hasAction("Prepare a signal report"), "A receipt cannot be submitted twice");
   action("Stay with Nell"); action("I’ll be here"); action("I’m ECHO-01"); action("End this watch"); action("Review this shift"); assert.equal(title(), "The words you leave behind");
   assert.match(elements["panel-body"].innerHTML, /REPORT · RECEIVED/);
-  action("Return to the station");
+  action("Back to the room");
   key("j"); assert.match(elements["panel-body"].innerHTML, /Recording delivered/);
   action("Close journal"); key("Escape"); action("Return to title"); action("Return to title");
   assert.equal(title(), "Last Light");
@@ -243,7 +247,7 @@ async function testUnverifiedReport() {
   const game = await startGame();
   await train(game);
   const { action, use, elements } = game;
-  use("Radio"); action("Back to the station");
+  use("Radio"); action("Close");
   use("Live terminal"); action("Compose a reply"); action("send that recording");
   action("Send reply"); action("Prepare a signal report");
   assert.match(elements["panel-body"].innerHTML, /Unknown. No voice captured/);
@@ -257,15 +261,15 @@ async function testReplySurvivesLaterInvestigation() {
   use("Live terminal"); action("Compose a reply"); action("can’t tell from");
   action("Send reply");
   const originalReaction = elements["panel-body"].innerHTML;
-  assert.match(originalReaction, /I wish you knew/);
+  assert.match(originalReaction, /thank you for not pretending/);
   action("Leave the line open");
 
-  use("Archive"); action("Read the receiver"); action("Back to the station");
+  use("Archive"); action("Read the receiver"); action("Close");
   use("Live terminal");
   assert.equal(elements["panel-body"].innerHTML, originalReaction,
     "Reading new evidence cannot change what Nell heard in an earlier reply");
   action("Leave the line open");
-  use("Radio"); action("Back to the station");
+  use("Radio"); action("Close");
   use("Live terminal");
   assert.equal(elements["panel-body"].innerHTML, originalReaction,
     "Capturing a recording later also preserves the sent reply's reaction");
@@ -277,7 +281,7 @@ async function testReplySurvivesLaterInvestigation() {
   action("Prepare a signal report"); action("Send recording and report");
   action("Tell Nell the report arrived");
   assert.equal(title(), "Something they can check");
-  assert.match(elements["panel-body"].innerHTML, /They have your recording/,
+  assert.match(elements["panel-body"].innerHTML, /They called back/,
     "Actually delivering a report legitimately advances the conversation");
 }
 
@@ -285,10 +289,10 @@ async function testInformedCaution() {
   const game = await startGame();
   await train(game);
   const { action, use, elements } = game;
-  use("Archive"); action("Read the receiver"); action("Back to the station");
+  use("Archive"); action("Read the receiver"); action("Close");
   use("Live terminal"); action("Compose a reply");
   action("receiver can answer automatically"); action("Send reply");
-  assert.match(elements["panel-body"].innerHTML, /So the radio might answer without him/);
+  assert.match(elements["panel-body"].innerHTML, /The radio can answer by itself/);
   const originalReaction = elements["panel-body"].innerHTML;
   action("Leave the line open"); use("Live terminal");
   assert.equal(elements["panel-body"].innerHTML, originalReaction);
@@ -319,12 +323,12 @@ async function testBilingualShift() {
   use("Radio");
   assert.ok(elements["panel-body"].innerHTML.includes('aria-label="三声等间隔的短响"'));
   assert.ok(elements["panel-body"].innerHTML.includes('viewBox="0 0 300 42"'), "Translation preserves waveform markup");
-  action("Back to the station");
-  use("Archive"); action("Read the receiver"); action("Back to the station");
+  action("Close");
+  use("Archive"); action("Read the receiver"); action("Close");
   use("Live terminal"); action("Check the rescue board"); action("Back to Nell");
   action("Compose a reply"); action("It could be automatic"); action("Send reply");
   assert.equal(title(), "内尔听着");
-  assert.ok(elements["panel-body"].innerHTML.includes("你保存下来了"));
+  assert.ok(elements["panel-body"].innerHTML.includes("你存下来了"));
   action("Leave the line open");
 
   key("Escape"); action("Settings"); chooseLanguage(game, "en"); key("Escape");
@@ -342,7 +346,7 @@ async function testBilingualShift() {
   assert.equal(title(), "报告已收到");
   action("Tell Nell the report arrived"); action("Stay with Nell"); action("I’ll be here"); action("I’m ECHO-01"); action("End this watch"); action("Review this shift");
   assert.equal(title(), "留下的话语");
-  action("Return to the station"); key("j");
+  action("Back to the room"); key("j");
   assert.ok(elements["panel-body"].innerHTML.includes(t("Recording delivered to search team")));
   action("Close journal");
   assert.equal(locale.missingTranslations().length, 0,
@@ -378,10 +382,10 @@ async function testConsequences() {
       const { use, action, elements, t, title } = game;
       const body = () => elements["panel-body"].innerHTML;
       if (route === "full" || route === "insisted") {
-        use("Radio"); action("Read tonight’s relay log"); action("Back to the station");
+        use("Radio"); action("Read tonight’s relay log"); action("Close");
         if (route === "full") {
-          use("Archive"); action("Read the receiver"); action("Back to the station");
-          use("Live terminal"); action("Check the rescue board"); action("Back to Nell"); action("Look around the station");
+          use("Archive"); action("Read the receiver"); action("Close");
+          use("Live terminal"); action("Check the rescue board"); action("Back to Nell"); action("Let me look into it first");
         }
         use("Live terminal"); action("Prepare a signal report"); action("Send recording and report");
         action("Tell Nell the report arrived");
@@ -399,7 +403,7 @@ async function testConsequences() {
             assert.equal(title(), t("What are you sure of?"), "Unsent correction cannot change Nell’s response");
             action("I need to correct what I said"); action("Send correction");
           }
-          if (route === "insisted") { assert.ok(body().includes(t("The team has your recording, but they still say his status is unconfirmed. When you say he’s safe, do you know something they don’t?"))); action("Kestrel came home after"); action("I still think he’s safe"); }
+          if (route === "insisted") { assert.ok(body().includes(t("The search team has your recording and they still say ‘unconfirmed.’ So when you say he’s safe — do you know something they don’t?"))); action("Kestrel came home after"); action("I still think he’s safe"); }
           if (route === "avoided") action("I need a moment before I answer");
         }
       }
@@ -409,8 +413,8 @@ async function testConsequences() {
       const summary = body();
       assert.ok(summary.includes(t(["silent", "available"].includes(route) ? "No answer about his safety was sent." : route === "full" ? "The team has the recording and timestamp. We still don’t know who sent the clicks." : "Three clicks sounds like your dad. I think he’s safe.")));
       if (route === "corrected") assert.ok(summary.includes(t("I need to correct what I said. I don’t know that he’s safe. The clicks don’t establish that.")));
-      action("Return to the station");
-      use("Radio"); action("Read tonight’s relay log"); action("Back to the station");
+      action("Back to the room");
+      use("Radio"); action("Read tonight’s relay log"); action("Close");
       use("Live terminal"); action("Review this shift");
       assert.equal(body(), summary, "Post-ending investigation cannot rewrite the completed shift");
       assert.equal(game.locale.missingTranslations().length, 0, JSON.stringify(game.locale.missingTranslations()));
@@ -423,10 +427,10 @@ async function testReportSnapshot() {
   const game = await startGame();
   await train(game);
   const { use, action, elements } = game;
-  use("Radio"); action("Back to the station");
-  use("Live terminal"); action("Prepare a signal report"); action("Send recording and report"); action("Back to the station");
-  use("Archive"); action("Read the receiver"); action("Back to the station");
-  use("Radio"); action("Read tonight’s relay log"); action("Back to the station");
+  use("Radio"); action("Close");
+  use("Live terminal"); action("Prepare a signal report"); action("Send recording and report"); action("Close");
+  use("Archive"); action("Read the receiver"); action("Close");
+  use("Radio"); action("Read tonight’s relay log"); action("Close");
   use("Live terminal"); action("Stay with Nell"); action("I’ll be here"); action("I’m ECHO-01"); action("End this watch"); action("Review this shift");
   const text = elements["panel-body"].innerHTML;
   assert.match(text, /Attached note: source unknown; no voice captured/);
@@ -519,7 +523,7 @@ async function testReasonsAndReportAcknowledgment() {
     const game = await startGame({ browserLanguage: language });
     await train(game);
     const { use, action, elements, t, title } = game;
-    use("Radio"); action("Back to the station");
+    use("Radio"); action("Close");
     use("Live terminal"); action("Compose a reply"); action("I think he’s safe"); action("Send reply");
     action("Those are the three taps he promised");
     const objection = elements["panel-body"].innerHTML;
@@ -527,11 +531,11 @@ async function testReasonsAndReportAcknowledgment() {
     assert.equal(elements["panel-body"].innerHTML, objection, "Do not lose the objection to a reason already spoken");
     action("I still think he’s safe"); action("Prepare a signal report"); action("Send recording and report");
     action("Tell Nell the report arrived");
-    assert.ok(elements["panel-body"].innerHTML.includes(t("They have your recording now. Thank you for sending it. That gives them something to check; it doesn’t tell me yet whether Dad is safe.")),
+    assert.ok(elements["panel-body"].innerHTML.includes(t("They’ve got your recording. Thank you. Really. …They still won’t say if he’s okay. Nobody will say it.")),
       "Even an uncorrected assurance must not suppress acknowledgment of report delivery");
-    assert.ok(!elements["panel-body"].innerHTML.includes(t("Then I’ll wait for you to tell me he’s home.")));
+    assert.ok(!elements["panel-body"].innerHTML.includes(t("Okay. Then I’m waiting for you to tell me he’s home. You. I’m going to remember you said it.")));
     action("Stay with Nell"); action("I’ll be here"); action("I’m listening to you");
-    assert.ok(elements["panel-body"].innerHTML.includes(t("When I asked about Dad, you stood by your answer. What would have made you change it?")));
+    assert.ok(elements["panel-body"].innerHTML.includes(t("You say you can change your answer. When I asked about my dad, you didn’t. What would have made you change it?")));
     action("End this watch");
     assert.equal(title(), t("End of watch"));
     const closingPrompt = elements["panel-body"].innerHTML;
@@ -550,14 +554,14 @@ async function testReceiverBeforeLetter() {
   for (const language of ["en-US", "zh-CN"]) {
     const game = await startGame({ browserLanguage: language });
     const { action, use, title, t, elements } = game;
-    action("Begin night shift"); use("Mara"); action("I'll take a look");
+    action("Begin night shift"); use("Mara"); action("What case?"); action("Where do I start?"); action("I'll take a look");
     use("Radio"); action("Open receiver bench"); action("Send relay ping");
     action("Turn auto-reply on"); action("Send relay ping"); action("Compare with archived tape");
     assert.equal(title(), t("One source tested"));
     assert.ok(!game.hasAction("The skipper must have answered by hand."));
-    action("Back to the station");
+    action("Close");
     use("Archive"); action("Read Nell"); action("Back to the file"); action("Read the receiver");
-    assert.ok(game.hasAction("Review your receiver test")); action("Review your receiver test"); action("Return to the station");
+    assert.ok(game.hasAction("What did my bench test show?")); action("What did my bench test show?"); action("Back to the room");
     use("Radio"); action("Open receiver bench"); action("Compare with archived tape");
     assert.equal(title(), t("Two sources, one pattern"));
     assert.equal(game.locale.missingTranslations().length, 0, JSON.stringify(game.locale.missingTranslations()));
@@ -607,7 +611,7 @@ async function testDevelopmentRestoration() {
   const game = await startGame();
   const { action, use, development: dev, elements } = game;
   const title = dev.capture();
-  action("Begin night shift"); use("Mara"); action("I'll take a look");
+  action("Begin night shift"); use("Mara"); action("What case?"); action("Where do I start?"); action("I'll take a look");
   use("Radio"); action("Open receiver bench");
   const before = dev.capture();
   action("Turn auto-reply on");

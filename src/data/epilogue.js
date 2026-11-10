@@ -16,9 +16,9 @@ export function epilogue(state) {
       ? "Nell leaves with no promise that her father is safe. She knows what you could tell her, and what you could not."
       : "You never answer the question about her father's safety. Your presence is real; what she should believe about the clicks remains unsaid."
     : state.accountability === "corrected"
-      ? "Nell says, ‘I held on to what you said first.’ She asks you to tell her when you know more, even when it is difficult to hear."
+      ? "Nell says, ‘I was holding on to the first thing you said.’ She asks you to tell her straight next time, even if it’s bad news."
       : state.accountability === "insisted"
-        ? "Nell repeats your assurance once, more quietly. ‘Then I'll wait for you to tell me he's home.’ The search board still reads UNCONFIRMED."
+        ? "Nell repeats it once, quietly: ‘You told me he’s safe. I’m waiting for you to tell me he’s home.’ The search board still reads UNCONFIRMED."
         : "Your assurance stays on the line without an answer to Nell's question. Before signing off, she asks whether she should trust your words or the search board.";
   return { search, company, trust };
 }

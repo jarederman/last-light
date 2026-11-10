@@ -125,6 +125,20 @@ a { color: var(--amber); }
    around a non-interactive heading. Buttons retain their visible focus ring. */
 #panel-title:focus { outline: none; }
 
+/* One concrete next step after each clue in the old case. */
+.next-step {
+  position: absolute; left: 50%; top: 4%; z-index: 30;
+  transform: translateX(-50%);
+  max-width: min(620px, 86%);
+  padding: 8px 16px;
+  border: 1px solid #b89564; border-radius: 6px;
+  background: #0d1417e8; color: #f0dfbf;
+  font: 15px/1.45 "IBM Plex Sans", "Noto Sans SC", system-ui, sans-serif;
+  text-align: center; pointer-events: none;
+  box-shadow: 0 8px 24px #05090cb0;
+}
+.next-step[hidden] { display: none; }
+
 /* Illustrated interface surfaces. The device images have reserved text areas;
    only those areas scroll, so content never crosses the hardware controls. */
 dialog {
