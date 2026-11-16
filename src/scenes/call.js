@@ -1,9 +1,9 @@
-import { show, close, done } from "../ui/dialog.js?v=story-voice-1";
-import { t } from "../i18n/index.js?v=story-voice-1";
-import { assuranceReasons, correctionText, insistenceText, deferText, presenceReplies, presenceQuestion } from "../data/conversation.js?v=story-voice-1";
-import { reflectionMenu } from "./reflection.js?v=story-voice-1";
-import { epilogue } from "../data/epilogue.js?v=story-voice-1";
-import { playEffect } from "../audio/sound.js?v=story-voice-1";
+import { show, close, done } from "../ui/dialog.js?v=action-and-voice-1";
+import { t } from "../i18n/index.js?v=action-and-voice-1";
+import { assuranceReasons, correctionText, insistenceText, deferText, presenceReplies, presenceQuestion, handoverChoices } from "../data/conversation.js?v=action-and-voice-1";
+import { reflectionMenu } from "./reflection.js?v=action-and-voice-1";
+import { epilogue } from "../data/epilogue.js?v=action-and-voice-1";
+import { playEffect } from "../audio/sound.js?v=action-and-voice-1";
 
 // Caller reactions and report delivery share one session state so closing a
 // panel never discards a sent reply or submits the same report twice.
@@ -65,8 +65,26 @@ WAITING FOR THE NEXT CALL</p>`, [{ text: "Review this shift", run: recap }, done
     const suggested = options.find((option) => option.trait === learned.trait);
     const snapshot = { ...learned, text: suggested?.text ?? null, basis: suggested ? learned.basis : null };
     show("Live terminal · Reply draft", "What do you tell Nell?",
-      `<p class="muted">Choose a draft. Review it before sending.</p>${snapshot.basis ? `<p class="muted">${t("Draft basis")}: ${snapshot.sourceLabel ? `${t(snapshot.sourceLabel)} · ` : ""}${t(snapshot.basis)}</p>` : ""}`,
+      `<p class="muted">Choose a draft. Review it before sending.</p>${snapshot.basis ? `<p class="muted">${t("Draft basis")}: ${snapshot.sourceLabel ? `${t(snapshot.sourceLabel)} · ` : ""}${t(snapshot.basis)}</p>` : ""}${knownFacts(state, suggested?.trait)}`,
       [...replyOptions(options, (option) => preview(option, snapshot)), { text: "Back to the call", run: open }]);
+  }
+
+  // What the station actually knows sits beside the learned draft, so a habit
+  // formed from earlier feedback meets tonight's reasons and Nell's need.
+  function knownFacts(state, suggestedTrait) {
+    const facts = [];
+    if (state.evidence.has("live")) facts.push("Tonight: three clicks at 00:17:06, after a relay ping.");
+    if (state.evidence.has("manual")) facts.push("The auto-reply circuit can produce the same three clicks.");
+    if (state.rescueChecked) facts.push("Rescue board: crew status unconfirmed.");
+    if (state.evidence.has("coverage")) facts.push("Relay log: the ping covered the north breakwater and outer approach.");
+    const note = state.handoverNote && handoverChoices[state.handoverNote]?.[0];
+    const check = {
+      confidence: "Nothing above confirms that he is safe.",
+      warmth: "This draft offers company. It does not answer her question about her father.",
+      caution: "This draft says what is unknown. It does not answer how she is doing right now.",
+    }[suggestedTrait];
+    if (!facts.length && !note && !check) return "";
+    return `<div class="known-facts"><p class="eyebrow">${t("Known at the station")}</p>${facts.length ? `<ul>${facts.map((fact) => `<li>${t(fact)}</li>`).join("")}</ul>` : ""}${note ? `<p>${t("Your handover note")}: “${t(note)}”</p>` : ""}${check ? `<p class="draft-check">${t("Draft check")}: ${t(check)}</p>` : ""}</div>`;
   }
 
   function preview(option, suggestion) {
@@ -184,18 +202,28 @@ WAITING FOR THE NEXT CALL</p>`, [{ text: "Review this shift", run: recap }, done
         <dt>Source</dt><dd>${sourceKnown ? "Automatic reply is possible. Crew input unconfirmed." : "Unknown. No voice captured."}</dd>
         <dt>Relay coverage</dt><dd>${state.evidence.has("coverage") ? "North breakwater / outer approach · relay log attached" : "Not checked · coverage verification requested"}</dd>
         <dt>Crew status</dt><dd>${state.rescueChecked ? "Rescue board checked · unconfirmed" : "Not verified by this station"}</dd>
-      </dl><p class="muted">Send the recording and these notes to the search team?</p>`, [
-        { text: "Send recording and report", primary: true, run: () => {
-          playEffect("receipt");
-          state.reportSent = true;
-          state.reportSnapshot = { sourceKnown, rescueChecked: state.rescueChecked, coverage: state.evidence.has("coverage") };
-          state.evidence.add("report");
-          show("Dispatch · Receipt", "Report received",
-            '<p class="terminal">KESTREL / 00:17:06\nRECORDING AND NOTES RECEIVED\nRELAY COVERAGE CHECK REQUESTED\nCREW STATUS · UNCONFIRMED</p><p>The search team now has the original signal and its capture time.</p>',
-            [{ text: "Tell Nell the report arrived", run: followup }, done()]);
-        } },
+      </dl>${state.evidence.has("coverage") ? "" : `<p class="muted">${t("Without tonight’s relay log, you can send the recording and the time, but not a place to check first.")}</p>`}<p class="muted">Send the recording and these notes to the search team?</p>`, [
+        // The relay log supports a place to check first. It is a direction for
+        // the search, never the boat's location or proof of who sent the clicks.
+        ...(state.evidence.has("coverage")
+          ? [{ text: "Send, and ask them to check the north breakwater first", primary: true, run: () => send(true) }] : []),
+        { text: "Send recording and report", primary: !state.evidence.has("coverage"), run: () => send(false) },
         { text: "Back to Nell", run: followup }, done("Back to the room"),
       ]);
+  }
+
+  function send(priority) {
+    const state = getState();
+    if (state.reportSent) { followup(); return; }
+    playEffect("receipt");
+    state.reportSent = true;
+    state.reportSnapshot = { sourceKnown: state.evidence.has("rechecked"), rescueChecked: state.rescueChecked, coverage: state.evidence.has("coverage"), priority };
+    state.evidence.add("report");
+    show("Dispatch · Receipt", "Report received",
+      `<p class="terminal">KESTREL / 00:17:06\nRECORDING AND NOTES RECEIVED\n${priority ? "PRIORITY: NORTH BREAKWATER / OUTER APPROACH" : "RELAY COVERAGE CHECK REQUESTED"}\nCREW STATUS · UNCONFIRMED</p><p>${t(priority
+        ? "Search team: “Understood. We’ll check the north-breakwater coverage first. That’s a place to look, not a sighting.”"
+        : "Search team: “Received. We’ll go through the recording and the time before choosing the next sweep.”")}</p>`,
+      [{ text: "Tell Nell the report arrived", run: followup }, done()]);
   }
 
   function goodbye() {
@@ -214,7 +242,8 @@ WAITING FOR THE NEXT CALL</p>`, [{ text: "Review this shift", run: recap }, done
     state.closing ??= { stayed, reply: null };
     if (state.closing.reply) { closingResponse(); return; }
     show("Live terminal · Channel 04", "Are you there?",
-      `<p>${t(stayed ? "You wait together. Then Nell speaks again, more quietly." : "Before you end the watch, Nell asks one more question.")}</p><p class="record">“${t(presenceQuestion)}”</p>`,
+      // Her attention turns from her father to the voice that keeps answering.
+      `<p>${t(stayed ? "You wait together. Then Nell speaks again, more quietly." : "Before you end the watch, Nell asks one more question.")}</p>${stayed ? `<p class="record">“${t("You said you’d stay. Do you say that to everyone who calls?")}”</p>` : ""}<p class="record">“${t(presenceQuestion)}”</p>`,
       presenceReplies.map((reply) => ({ text: reply.text, run: () => {
         state.closing.reply = { ...reply };
         closingResponse();

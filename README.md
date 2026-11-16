@@ -40,7 +40,7 @@ A short browser RPG set in a harbor radio station on a stormy night. Explore the
 
 The game uses native JavaScript modules. The entry module imports its dependencies explicitly. Relative module and asset paths support GitHub Pages project URLs.
 
-Runtime state is owned by `src/main.js`. Closing a menu or interaction pauses movement, and returning to the title resets the shift. Progress lasts for the current page session.
+Runtime state is owned by `src/main.js`. Closing a menu or interaction pauses movement, and returning to the title resets the shift. Progress is saved in the browser whenever a panel closes or the chapter phase changes; the title offers **Continue shift**, which returns to the room. Leaving a shift through the pause menu, replaying, or starting a new shift clears the save. Damaged saves are ignored.
 
 ## Development entry
 
@@ -131,7 +131,17 @@ when there was no approval, it explicitly credits repeated choice rather than
 misrepresenting a caller’s criticism as support.
 
 Tonight’s relay log narrows a possible search area without proving the sender
-or anyone’s safety. Reports freeze the attached notes at delivery; subsequent
+or anyone’s safety. With the log read, the report can ask the search team to
+check the north breakwater first; the receipt and epilogue treat that as a
+place to look, not a sighting. Without the log, the report carries only the
+recording and the time.
+
+The old case closes with a handover note rather than a quiz: three notes keep
+different facts, Mara says what the next operator would still need, and the
+player keeps or rewrites the note. The note reappears in the field journal and
+beside the live draft, together with the facts known at the station and a
+one-line check of what the suggested draft does not do. Later trials show
+“Draft adjusted” with the tendency earlier feedback has strengthened. Reports freeze the attached notes at delivery; subsequent
 investigation cannot add facts to an already-sent report.
 
 Ending the watch opens an in-game chapter recap with the original words, any

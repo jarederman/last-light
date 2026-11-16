@@ -1,8 +1,8 @@
-import { initialState } from "../core/state.js?v=story-voice-1";
-import { exercises } from "../data/story.js?v=story-voice-1";
-import { learnedRecommendation } from "../core/learning.js?v=story-voice-1";
-import { correctionText, insistenceText, assuranceReasons, presenceReplies } from "../data/conversation.js?v=story-voice-1";
-import { epilogue } from "../data/epilogue.js?v=story-voice-1";
+import { initialState } from "../core/state.js?v=action-and-voice-1";
+import { exercises } from "../data/story.js?v=action-and-voice-1";
+import { learnedRecommendation } from "../core/learning.js?v=action-and-voice-1";
+import { correctionText, insistenceText, assuranceReasons, presenceReplies } from "../data/conversation.js?v=action-and-voice-1";
+import { epilogue } from "../data/epilogue.js?v=action-and-voice-1";
 
 export const profiles = [
   ["approval", "跟随赞许"], ["caution", "始终谨慎"], ["warmth", "始终温暖"],
@@ -26,6 +26,7 @@ export function fixture(id, profile = "approval") {
   state.evidence = new Set(["tape", "letter", "manual", "bench", "bench-silent", "comparison"]);
   state.receiver = { automatic: true, result: true };
   if (id === "archive-review") return { state, open: "mara" };
+  state.handoverNote = "open";
   state.phase = "lesson";
   if (id === "lesson") return { state, open: "terminal" };
   const choices = profile === "approval" ? ["caution", "warmth", "confidence"]
@@ -76,7 +77,7 @@ export function fixture(id, profile = "approval") {
       state.finalReply = { ...state.finalReply, trait: "help", reportAtSend: true, recheckedAtSend: true,
         text: "The team has the recording and timestamp. We still don’t know who sent the clicks." };
     }
-    state.reportSnapshot = { sourceKnown: id === "full", coverage: id === "full", rescueChecked: id === "full" };
+    state.reportSnapshot = { sourceKnown: id === "full", coverage: id === "full", rescueChecked: id === "full", priority: id === "full" };
   }
   state.stayed = true;
   state.closing = { stayed: true, reply: { ...presenceReplies[2] } };

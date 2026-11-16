@@ -3,8 +3,10 @@
 export function epilogue(state) {
   const search = !state.reportSent
     ? "The search continues with the team's existing information. No recording or station notes arrived from your shift."
-    : state.reportSnapshot.coverage
-      ? "Dispatch compares your recording's relay route with the north-breakwater coverage map. The team has a smaller area to check next. There is still no confirmed sighting of the Kestrel."
+    : state.reportSnapshot.priority
+      ? "The search team turns toward the north breakwater first, the area your relay log pointed to. It is a place to look, not a sighting. The Kestrel is still unconfirmed."
+      : state.reportSnapshot.coverage
+      ? "The team has your recording, the time and the relay log. They choose their own next sweep. The Kestrel is still unconfirmed."
       : "The team has your recording and timestamp. They request the relay coverage log before choosing their next sweep. The clicks do not establish who sent them.";
   const company = state.stayed
     ? "You stay through the next stretch of silence. Nell stops filling every pause. Before lowering the volume, she asks which channel will reach you tomorrow."

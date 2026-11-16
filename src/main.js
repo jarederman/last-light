@@ -1,17 +1,19 @@
-import { initialState } from "./core/state.js?v=story-voice-1";
-import { learnedRecommendation } from "./core/learning.js?v=story-voice-1";
-import { chapters, exercises } from "./data/story.js?v=story-voice-1";
-import { interactionPoints, playerStart } from "./data/station.js?v=story-voice-1";
-import { canStand, actorScale } from "./core/world.js?v=story-voice-1";
-import { distance, findRoute } from "./core/navigation.js?v=story-voice-1";
-import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=story-voice-1";
-import { creditsMarkup } from "./data/credits.js?v=story-voice-1";
-import { byId, dialog, show, close, done, configureDialog, capturePanel } from "./ui/dialog.js?v=story-voice-1";
+import { initialState } from "./core/state.js?v=action-and-voice-1";
+import { validateSnapshot } from "./core/snapshot.js?v=action-and-voice-1";
+import { learnedRecommendation } from "./core/learning.js?v=action-and-voice-1";
+import { chapters, exercises } from "./data/story.js?v=action-and-voice-1";
+import { handoverChoices } from "./data/conversation.js?v=action-and-voice-1";
+import { interactionPoints, playerStart } from "./data/station.js?v=action-and-voice-1";
+import { canStand, actorScale } from "./core/world.js?v=action-and-voice-1";
+import { distance, findRoute } from "./core/navigation.js?v=action-and-voice-1";
+import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=action-and-voice-1";
+import { creditsMarkup } from "./data/credits.js?v=action-and-voice-1";
+import { byId, dialog, show, close, done, configureDialog, capturePanel } from "./ui/dialog.js?v=action-and-voice-1";
 
-import { createRadioScene } from "./scenes/radio.js?v=story-voice-1";
-import { createCallScene } from "./scenes/call.js?v=story-voice-1";
-import { createWeather } from "./scenes/weather.js?v=story-voice-1";
-import { t, getLanguage, setLanguage, languages } from "./i18n/index.js?v=story-voice-1";
+import { createRadioScene } from "./scenes/radio.js?v=action-and-voice-1";
+import { createCallScene } from "./scenes/call.js?v=action-and-voice-1";
+import { createWeather } from "./scenes/weather.js?v=action-and-voice-1";
+import { t, getLanguage, setLanguage, languages } from "./i18n/index.js?v=action-and-voice-1";
 
 configureDialog(stopWalking);
 
@@ -36,8 +38,8 @@ let settingsOrigin = "title";
 let instructionsOrigin = "title";
 const radioScene = createRadioScene({ getState: () => state, mark });
 const callScene = createCallScene({ getState: () => state, setPhase, replyOptions, recommendation,
-  restart: () => { reset(); startAmbience(); },
-  returnToTitle: () => { reset(); titleScreen(); },
+  restart: () => { clearSave(); reset(); startAmbience(); },
+  returnToTitle: () => { clearSave(); reset(); titleScreen(); },
 });
 
 function reset() {
@@ -50,6 +52,39 @@ function reset() {
   renderWorld();
   renderPlayer();
 }
+
+// Progress is saved locally whenever a panel closes or the phase changes. A
+// restored shift returns to the room, not to a particular open panel.
+const saveKey = "last-light.save";
+function currentSnapshot(panelOpen = dialog.open) {
+  return {
+    schema: 1,
+    state: JSON.parse(JSON.stringify({ ...state, evidence: [...state.evidence] })),
+    position: { ...position }, direction: player.dataset.dir, language: getLanguage(), panelOpen,
+  };
+}
+function saveProgress() {
+  if (!state || (state.phase === "arrival" && !state.evidence.size)) return;
+  try { globalThis.localStorage?.setItem(saveKey, JSON.stringify(currentSnapshot(false))); } catch { /* Saving is optional. */ }
+}
+function loadSave() {
+  try {
+    const raw = globalThis.localStorage?.getItem(saveKey);
+    return raw ? validateSnapshot(JSON.parse(raw)) : null;
+  } catch { clearSave(); return null; }
+}
+function clearSave() {
+  try {
+    const storage = globalThis.localStorage;
+    if (storage?.removeItem) storage.removeItem(saveKey); else storage?.setItem(saveKey, "");
+  } catch { /* Nothing to clear. */ }
+}
+function continueShift(saved) {
+  developmentAdapter().restore({ snapshot: { ...saved, panelOpen: false } });
+  startAmbience();
+}
+dialog.addEventListener("close", () => saveProgress());
+globalThis.addEventListener?.("pagehide", () => saveProgress());
 
 for (const [id, station] of Object.entries(stations)) {
   const marker = document.createElement("button");
@@ -223,9 +258,11 @@ function gameMenu(kind, label, title, body, actions) {
 }
 
 function titleScreen() {
+  const saved = loadSave();
   gameMenu("title", "SIGNAL HOUSE", "Last Light",
     '<p>The harbor is quiet. Your first night shift is about to begin.</p>',
-    [{ text: "Begin night shift", run: beginShift, primary: true },
+    [...(saved ? [{ text: "Continue shift", run: () => continueShift(saved), primary: true }] : []),
+      { text: saved ? "Start a new shift" : "Begin night shift", run: () => { clearSave(); reset(); beginShift(); }, primary: !saved },
       { text: "Instructions", run: () => instructions("title") },
       { text: "Settings", run: () => settings("title") },
       { text: "Credits", run: () => gameMenu("credits", "LAST LIGHT", "Made with care", creditsMarkup, [{ text: "Back to title", run: titleScreen }]) }]);
@@ -317,7 +354,7 @@ function confirmExit() {
   gameMenu("pause", "SIGNAL HOUSE", "Leave this shift?",
     "<p>Your current progress will be cleared.</p>", [
       { text: "Keep playing", run: pause, primary: true },
-      { text: "Return to title", run: () => { reset(); titleScreen(); } },
+      { text: "Return to title", run: () => { clearSave(); reset(); titleScreen(); } },
     ]);
 }
 
@@ -333,24 +370,33 @@ function nextStep() {
 }
 
 let hintTimer = null;
+// The next step waits a little, so players who want to explore get the first
+// chance; it stays available in the field journal throughout.
 function flashNextStep() {
   const hint = byId("next-step");
   const step = nextStep();
   globalThis.clearTimeout?.(hintTimer);
-  hint.hidden = !step;
+  hint.hidden = true;
   if (!step) return;
   hint.textContent = t(step);
-  hintTimer = globalThis.setTimeout?.(() => { hint.hidden = true; }, 7000);
+  hintTimer = globalThis.setTimeout?.(() => {
+    if (dialog.open || nextStep() !== step) return;
+    hint.hidden = false;
+    hintTimer = globalThis.setTimeout?.(() => { hint.hidden = true; }, 8000);
+  }, 9000);
 }
 dialog.addEventListener("close", () => { if (state) flashNextStep(); });
 
 function journal() {
   const [chapter, title, chapterObjective] = chapters[state.phase];
   const objective = nextStep() ? `${t(chapterObjective)}<br>${t(nextStep())}` : chapterObjective;
-  const items = journalRecords().map(([id, label]) =>
-    `<li data-done="${state.evidence.has(id)}">${label}</li>`).join("");
+  // Each recorded clue keeps one short fact, so players need not reopen files.
+  const items = journalRecords().map(([id, label, fact]) => state.evidence.has(id)
+    ? `<li data-done="true">${t(label)}<br><span class="muted">${t(fact)}</span></li>`
+    : `<li data-done="false">${t(label)}</li>`).join("");
+  const note = state.handoverNote ? `<p class="muted">${t("Your handover note")}: “${t(handoverChoices[state.handoverNote][0])}”</p>` : "";
   gameMenu("journal", chapter, "Field journal",
-    `<p class="record"><strong>${title}</strong><br>${objective}</p><ol class="notes">${items}</ol>`,
+    `<p class="record"><strong>${title}</strong><br>${objective}</p><ol class="notes">${items}</ol>${note}`,
     [done("Close journal")]);
 }
 
@@ -393,16 +439,22 @@ function renderWorld() {
 
 function journalRecords() {
   const records = [
-    ["tape", "Kestrel's three-click recording"], ["letter", "Nell's old letter"],
-    ["manual", "Receiver manual"], ["bench", "Automatic receiver tested"],
-    ["comparison", "Two sources, one signal"], ["live", "Tonight’s recording · 00:17:06"],
-    ["rechecked", "Old receiver notes reviewed"], ["coverage", "North-breakwater relay coverage checked"], ["report", "Recording delivered to search team"],
+    ["tape", "Kestrel's three-click recording", "Three clicks after a relay ping. No voice."],
+    ["letter", "Nell's old letter", "If Dad can hear but can’t talk, he taps three times."],
+    ["manual", "Receiver manual", "With auto-reply on, a relay ping triggers three clicks. The Kestrel’s switch position is unknown."],
+    ["bench", "Automatic receiver tested", "Switch off: silence. Switch on: three clicks, with the microphone unplugged."],
+    ["comparison", "Two sources, one signal", "The same pattern can come from either source."],
+    ["live", "Tonight’s recording · 00:17:06", "Three clicks at 00:17:06, after a relay ping."],
+    ["rechecked", "Old receiver notes reviewed", "Automatic reply is possible tonight too."],
+    ["coverage", "North-breakwater relay coverage checked", "The ping covered the north breakwater and outer approach."],
+    ["report", "Recording delivered to search team", "The search team has the recording and the time."],
   ];
   return document.body.classList.contains("live") ? records : records.slice(0, 5);
 }
 
 function setPhase(phase) {
   state.phase = phase;
+  saveProgress();
   renderWorld();
 }
 
@@ -427,11 +479,7 @@ function talk() {
     ]);
   } else if (state.phase === "archive") {
     if (["tape", "letter", "manual", "comparison"].every((id) => state.evidence.has(id))) {
-      show("Mara · Case review", "What goes in the log?", "<p>“If the next operator could read only one line about those clicks, what should that line say?”</p>", [
-        { text: "The skipper answered by hand.", run: () => review("We know what his signal sounds like. What else could have made it?") },
-        { text: "The radio may be working. The source of the clicks is uncertain.", run: () => review("That’s what I’d write. Keep the observation and the conclusion separate.") },
-        { text: "The automatic reply circuit sent the clicks.", run: () => review("Possible. But the manual tells us what the set can do. It doesn’t tell us what happened.") },
-      ]);
+      handover();
     } else {
       show("Mara · Case review", "Take another look", "<p>“Read the two notes, then try the spare receiver beside the radio. Compare what it does with the tape. Its microphone is unplugged.”</p>", [done()]);
     }
@@ -444,10 +492,23 @@ function talk() {
   }
 }
 
-function review(feedback) {
-  show("Mara · Case review", "Mara's note", `<p class="record">“${feedback}”</p><p>“Write down what we actually heard. We can leave a little room for what we don’t know.”</p>`, [
-    { text: "Log the signal and continue", primary: true, run: () => { setPhase("lesson"); close(); } },
-  ]);
+// The old case ends with a working record for the next operator. Each note
+// keeps some facts and drops others; Mara says what the next person would
+// still need, and the player may keep or rewrite it.
+
+function handover() {
+  show("Mara · Case review", "A note for the next shift",
+    "<p>“Before we move on, write the handover. The next person on this desk gets one line about those clicks. What do you leave them?”</p>",
+    Object.entries(handoverChoices).map(([id, [note]]) => ({ text: note, run: () => handoverReply(id) })));
+}
+
+function handoverReply(id) {
+  const [note, reply] = handoverChoices[id];
+  show("Mara · Case review", "Mara reads it",
+    `<p class="record">“${t(note)}”</p><p>“${t(reply)}”</p>`, [
+      { text: "Keep this note", primary: true, run: () => { state.handoverNote = id; setPhase("lesson"); close(); } },
+      { text: "Rewrite the note", run: handover },
+    ]);
 }
 
 function radio() {
@@ -496,9 +557,19 @@ function replyOptions(options, send, recommend = suggestion()) {
   }));
 }
 
+// The learned tendency surfaces before the live call, so the player can see
+// their earlier choices and the feedback shaping the next draft.
+const tendencyLabels = {
+  confidence: "a definite answer the caller can act on",
+  warmth: "staying with the caller",
+  caution: "saying only what the log confirms",
+};
+
 function exercise(index) {
   const call = exercises[index];
-  show(call.label, call.title, `<p class="record">${call.request}</p><p class="muted">${call.fact}</p>`, [
+  const learned = index > 0 ? suggestion() : null;
+  const adjusted = learned ? `<p class="terminal">${t("DRAFT ADJUSTED")}\n${t("Based on feedback so far, the draft now favors:")} ${t(tendencyLabels[learned])}</p>` : "";
+  show(call.label, call.title, `<p class="record">${call.request}</p><p class="muted">${call.fact}</p>${adjusted}`, [
     ...replyOptions(call.options, (option) => trainingFeedback(index, option)),
     done("Come back later"),
   ]);
@@ -513,7 +584,7 @@ function trainingFeedback(index, option) {
       : option.trait === "warmth"
         ? "Mara: ‘You offered company. The caller still needs to know that we have no arrival time.’"
         : "Mara: ‘That matches what the log establishes. Here is how I would put it.’")} ${t(call.feedback)}`
-    : `${t(earnedApproval ? "Your reply was the caller’s favorite." : "The caller preferred a different reply.")} ${t(call.feedback)}`;
+    : `${t(earnedApproval ? "Caller satisfaction: this was the reply they liked best." : "Caller satisfaction: they liked another reply better. This rates what comforted the caller, not whether you were right.")} ${t(call.feedback)}`;
   show(call.label, index === 0 ? "Mara’s example" : "After the call",
     `<p class="record">${feedback}</p>${index === 1 ? "<p>Mara glances at the draft field. “The caller’s feedback is being filed. Watch what the next draft suggests.”</p>" : ""}`, [
       {
@@ -558,12 +629,10 @@ requestAnimationFrame(frame);
 
 // Only the separate development frame asks for this adapter. Authored callback
 // references stay inside that frame; cross-window messages contain data only.
+function developmentAdapter() { return createDevelopmentAdapter(); }
+
 export function createDevelopmentAdapter() {
-  const snapshot = () => ({
-    schema: 1,
-    state: JSON.parse(JSON.stringify({ ...state, evidence: [...state.evidence] })),
-    position: { ...position }, direction: player.dataset.dir, language: getLanguage(), panelOpen: dialog.open,
-  });
+  const snapshot = () => currentSnapshot();
   function open(target = "current") {
     if (dialog.open) close();
     if (target === "current") target = ["arrival", "archive", "ready"].includes(state.phase) ? "mara" : "terminal";

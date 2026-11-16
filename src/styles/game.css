@@ -431,3 +431,10 @@ dialog .more-cue {
   cursor: pointer;
 }
 dialog .more-cue[hidden] { display: none; }
+
+/* Facts known at the station, shown beside the learned draft. */
+dialog .known-facts { margin: 8px 0 10px; padding: 7px 11px; border: 1px solid #476b56; background: #081d18b8; font-size: 14px; line-height: 1.45; }
+dialog .known-facts .eyebrow { margin: 0 0 3px; font-size: 11px; letter-spacing: .06em; }
+dialog .known-facts ul { margin: 0; padding-left: 18px; }
+dialog .known-facts li, dialog .known-facts p { margin: 2px 0; }
+dialog .known-facts .draft-check { margin-top: 5px; color: #f0dfbf; }

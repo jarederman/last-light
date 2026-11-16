@@ -1,4 +1,4 @@
-import { zhCN } from "./zh-CN.js?v=story-voice-1";
+import { zhCN } from "./zh-CN.js?v=action-and-voice-1";
 
 export const languages = [["en", "English"], ["zh-CN", "简体中文"]];
 const storageKey = "last-light.language";

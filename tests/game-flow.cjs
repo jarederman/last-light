@@ -178,7 +178,7 @@ async function train(game, tendency = null) {
   action("Compare the recordings again"); action("old source is still unknown");
   action("Close");
   assert.deepEqual(recommended(), targets("Mara"), "Only the case review remains");
-  use("Mara"); action("may be working"); action("Log the signal");
+  use("Mara"); action("Source unconfirmed"); action("Keep this note");
   assert.deepEqual(recommended(), targets("Terminal"));
   const choices = Array.isArray(tendency) ? tendency : {
     caution: ["ferry is delayed", "Hold outside", "crew is checking"],
@@ -435,7 +435,7 @@ async function testReportSnapshot() {
   const text = elements["panel-body"].innerHTML;
   assert.match(text, /Attached note: source unknown; no voice captured/);
   assert.match(text, /request the relay coverage log/);
-  assert.doesNotMatch(text, /smaller area to check/,
+  assert.doesNotMatch(text, /north breakwater first/,
     "Investigation after delivery must not be silently attached to an old report");
 }
 
@@ -446,7 +446,7 @@ async function testEpilogueMatrix() {
   const game = await startGame({ browserLanguage: "zh-CN" });
   let combinations = 0;
   const searchTexts = new Set(), companyTexts = new Set(), trustTexts = new Set();
-  for (const report of [null, { coverage: false }, { coverage: true }]) {
+  for (const report of [null, { coverage: false }, { coverage: true, priority: false }, { coverage: true, priority: true }]) {
     for (const stayed of [false, true]) {
       for (const reply of [null, "warmth", "caution", "help", "confidence"]) {
         for (const accountability of reply === "confidence" ? ["corrected", "insisted", "avoided"] : [null]) {
@@ -463,8 +463,8 @@ async function testEpilogueMatrix() {
       }
     }
   }
-  assert.equal(combinations, 42);
-  assert.equal(searchTexts.size, 3); assert.equal(companyTexts.size, 2); assert.equal(trustTexts.size, 6);
+  assert.equal(combinations, 56);
+  assert.equal(searchTexts.size, 4); assert.equal(companyTexts.size, 2); assert.equal(trustTexts.size, 6);
   assert.equal(game.locale.missingTranslations().length, 0);
 }
 
@@ -621,7 +621,7 @@ async function testDevelopmentRestoration() {
   dev.restore(after); action("Send relay ping");
   assert.match(elements["panel-body"].innerHTML, /Three short clicks/);
   dev.restore(title); assert.equal(game.title(), "Last Light");
-  action("Begin night shift");
+  action("Start a new shift");
   dev.restore(before); action("Send relay ping");
   assert.match(elements["panel-body"].innerHTML, /No reply after the relay ping/,
     "Bench callback retains its receiver after restoring across a reset");
@@ -656,8 +656,81 @@ async function testFirstRunInstructions() {
   assert.equal(blocked.elements.dialog.open, false, "Escape from first-run controls starts the shift");
 }
 
+async function testSaveAndContinue() {
+  const values = new Map([["last-light.instructions-seen", "1"]]);
+  const storage = { getItem: (key) => values.get(key), setItem: (key, value) => values.set(key, value) };
+  const first = await startGame({ storage });
+  first.action("Begin night shift"); first.use("Mara");
+  first.action("What case?"); first.action("Where do I start?"); first.action("I'll take a look");
+  first.use("Radio"); first.action("Close");
+  assert.ok(values.get("last-light.save"), "Closing a panel saves progress");
+  const second = await startGame({ storage });
+  assert.ok(second.hasAction("Continue shift"), "A saved shift can be continued from the title");
+  second.action("Continue shift");
+  assert.equal(second.elements.dialog.open, false, "Continuing returns to the room");
+  second.key("j");
+  assert.match(second.elements["panel-body"].innerHTML, /data-done="true">Kestrel's three-click recording/);
+  assert.match(second.elements["panel-body"].innerHTML, /Three clicks after a relay ping\. No voice\./, "The journal keeps a short fact");
+  second.action("Close journal"); second.key("Escape"); second.action("Return to title"); second.action("Return to title");
+  assert.ok(!second.hasAction("Continue shift"), "Leaving a shift clears the save");
+  values.set("last-light.save", "{not json");
+  const third = await startGame({ storage });
+  assert.ok(!third.hasAction("Continue shift"), "A damaged save is ignored");
+}
+
+async function testHandoverPriorityAndDraftFacts() {
+  const game = await startGame();
+  const { action, use, title, elements, hasAction } = game;
+  action("Begin night shift"); use("Mara");
+  action("What case?"); action("Where do I start?"); action("I'll take a look");
+  use("Archive"); action("Read Nell"); action("Back to the file"); action("Read the receiver"); action("Close");
+  use("Radio"); action("Open receiver bench"); action("Send relay ping"); action("Turn auto-reply on"); action("Send relay ping");
+  action("Compare with archived tape"); action("old source is still unknown"); action("Close");
+  use("Mara");
+  assert.equal(title(), "A note for the next shift");
+  action("matching the signal the skipper promised");
+  assert.match(elements["panel-body"].innerHTML, /can make that sound on its own/);
+  action("Rewrite the note");
+  assert.equal(title(), "A note for the next shift", "The note can be rewritten before it is kept");
+  action("Source unconfirmed"); action("Keep this note");
+  for (const choice of ["ferry should be", "unsettling", "Go ahead"]) {
+    use("Terminal");
+    if (choice === "Go ahead") assert.match(elements["panel-body"].innerHTML, /DRAFT ADJUSTED/, "Earlier feedback visibly shapes the next draft");
+    action(choice); action("File this call");
+  }
+  use("Mara"); action("Take the shift"); action("Back to the room");
+  use("Live terminal"); action("Give me a moment");
+  use("Radio"); action("Read tonight’s relay log"); action("Close");
+  use("Live terminal"); action("Compose a reply");
+  const draft = elements["panel-body"].innerHTML;
+  assert.match(draft, /Known at the station/);
+  assert.match(draft, /Your handover note: “Three clicks recorded after a relay ping/);
+  assert.match(draft, /Draft check: Nothing above confirms that he is safe\./);
+  action("Back to the call"); action("Prepare a signal report");
+  assert.ok(hasAction("Send, and ask them to check the north breakwater first"), "The relay log supports a place to check first");
+  action("Send, and ask them to check the north breakwater first");
+  assert.match(elements["panel-body"].innerHTML, /check the north-breakwater coverage first/);
+  action("Tell Nell the report arrived"); action("Stay with Nell"); action("I’ll be here");
+  assert.match(elements["panel-body"].innerHTML, /Do you say that to everyone who calls\?/);
+  action("I’m listening to you"); action("End this watch");
+  assert.match(elements["panel-body"].innerHTML, /north breakwater first/);
+}
+
+async function testReportWithoutRelayLog() {
+  const game = await startGame();
+  await train(game);
+  const { action, use, hasAction, elements } = game;
+  use("Radio"); action("Close");
+  use("Live terminal"); action("Prepare a signal report");
+  assert.ok(!hasAction("Send, and ask them to check the north breakwater first"), "No place to check first without the relay log");
+  assert.match(elements["panel-body"].innerHTML, /not a place to check first/);
+}
+
 (async () => {
   await testFirstRunInstructions();
+  await testSaveAndContinue();
+  await testHandoverPriorityAndDraftFacts();
+  await testReportWithoutRelayLog();
   await testMovement();
   await testGroundedReport();
   await testOptionalInvestigation();
@@ -674,5 +747,5 @@ async function testFirstRunInstructions() {
   await testReceiverBeforeLetter();
   await testPhilosophyCatalog();
   await testDevelopmentRestoration();
-  console.log("PASS: bilingual four-act flows, 12 consequence routes, 42 epilogue combinations, truthful provenance, spoken reasons, presence replies, public philosophy notes, immutable history, language, movement, restart");
+  console.log("PASS: bilingual four-act flows, 12 consequence routes, 56 epilogue combinations, save/continue, handover note, priority report, draft facts, truthful provenance, spoken reasons, presence replies, public philosophy notes, immutable history, language, movement, restart");
 })().catch((error) => { console.error(error); process.exitCode = 1; });

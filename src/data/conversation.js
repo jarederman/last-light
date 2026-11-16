@@ -34,3 +34,12 @@ export const presenceReplies = [
   },
 ];
 export const presenceQuestion = "Can I ask you something weird? When Dad’s radio clicks, I can’t tell what’s on the other end. And you said ‘I’m here.’ Is somebody actually there? Or is that just the station answering?";
+
+export const handoverChoices = {
+  pattern: ["Three clicks, matching the signal the skipper promised his family.",
+    "True. It’s also what Nell will hear first. But the next person needs to know the set can make that sound on its own."],
+  automatic: ["The auto-reply circuit can produce the same three clicks.",
+    "Also true. Leave only that, though, and the next person might forget there could be a man behind it."],
+  open: ["Three clicks recorded after a relay ping. Source unconfirmed: the skipper, or the auto-reply.",
+    "That gives them both. It’s less comforting, and it will be harder to say out loud to someone waiting at home."],
+};
