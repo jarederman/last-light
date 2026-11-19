@@ -1,19 +1,19 @@
-import { initialState } from "./core/state.js?v=action-and-voice-1";
-import { validateSnapshot } from "./core/snapshot.js?v=action-and-voice-1";
-import { learnedRecommendation } from "./core/learning.js?v=action-and-voice-1";
-import { chapters, exercises } from "./data/story.js?v=action-and-voice-1";
-import { handoverChoices } from "./data/conversation.js?v=action-and-voice-1";
-import { interactionPoints, playerStart } from "./data/station.js?v=action-and-voice-1";
-import { canStand, actorScale } from "./core/world.js?v=action-and-voice-1";
-import { distance, findRoute } from "./core/navigation.js?v=action-and-voice-1";
-import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=action-and-voice-1";
-import { creditsMarkup } from "./data/credits.js?v=action-and-voice-1";
-import { byId, dialog, show, close, done, configureDialog, capturePanel } from "./ui/dialog.js?v=action-and-voice-1";
+import { initialState } from "./core/state.js?v=listening-1";
+import { validateSnapshot } from "./core/snapshot.js?v=listening-1";
+import { learnedRecommendation } from "./core/learning.js?v=listening-1";
+import { chapters, exercises } from "./data/story.js?v=listening-1";
+import { handoverChoices } from "./data/conversation.js?v=listening-1";
+import { interactionPoints, playerStart } from "./data/station.js?v=listening-1";
+import { canStand, actorScale } from "./core/world.js?v=listening-1";
+import { distance, findRoute } from "./core/navigation.js?v=listening-1";
+import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=listening-1";
+import { creditsMarkup } from "./data/credits.js?v=listening-1";
+import { byId, dialog, show, close, done, configureDialog, capturePanel } from "./ui/dialog.js?v=listening-1";
 
-import { createRadioScene } from "./scenes/radio.js?v=action-and-voice-1";
-import { createCallScene } from "./scenes/call.js?v=action-and-voice-1";
-import { createWeather } from "./scenes/weather.js?v=action-and-voice-1";
-import { t, getLanguage, setLanguage, languages } from "./i18n/index.js?v=action-and-voice-1";
+import { createRadioScene } from "./scenes/radio.js?v=listening-1";
+import { createCallScene } from "./scenes/call.js?v=listening-1";
+import { createWeather } from "./scenes/weather.js?v=listening-1";
+import { t, getLanguage, setLanguage, languages } from "./i18n/index.js?v=listening-1";
 
 configureDialog(stopWalking);
 

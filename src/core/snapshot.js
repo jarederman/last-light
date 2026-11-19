@@ -1,7 +1,8 @@
 // Saved progress and development snapshots share one validator: state is data,
 // never executable code or authored dialogue markup.
-import { phases, evidenceIds, initialState, handoverNotes } from "./state.js?v=action-and-voice-1";
-import { canStand } from "./world.js?v=action-and-voice-1";
+import { phases, evidenceIds, initialState, handoverNotes } from "./state.js?v=listening-1";
+import { canStand } from "./world.js?v=listening-1";
+import { quietReplies } from "../data/conversation.js?v=listening-1";
 
 const traits = ["warmth", "caution", "confidence", "help"];
 const object = (value) => value && typeof value === "object" && !Array.isArray(value);
@@ -44,6 +45,14 @@ export function validateSnapshot(input) {
   assert(!s.correctionSent || (s.accountability === "corrected" && typeof s.correction === "string"), "更正状态不一致");
   if (s.closing !== null) {
     assert(object(s.closing) && typeof s.closing.stayed === "boolean", "收尾状态无效");
+    const quietReplyId = s.closing.quietReplyId;
+    // Older saves and workbench presets can open directly at the identity question.
+    if (quietReplyId !== undefined) {
+      const validQuietReply = quietReplyId === null
+        ? s.closing.reply === null
+        : typeof quietReplyId === "string" && Object.hasOwn(quietReplies, quietReplyId);
+      assert(s.closing.stayed && validQuietReply, "陪伴回复无效");
+    }
     if (s.closing.reply !== null) assert(object(s.closing.reply) && typeof s.closing.reply.text === "string" && typeof s.closing.reply.response === "string", "身份回复无效");
   }
   if (s.ending !== null) assert(object(s.ending) && ["search", "company", "trust"].every((key) => typeof s.ending[key] === "string"), "尾声无效");

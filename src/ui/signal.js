@@ -1,4 +1,4 @@
-import { t } from "../i18n/index.js?v=action-and-voice-1";
+import { t } from "../i18n/index.js?v=listening-1";
 
 export function signalTrace(label, clicks = true) {
   const trace = clicks

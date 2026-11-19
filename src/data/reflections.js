@@ -18,8 +18,8 @@ export const reflections = [
   {
     title: "The open line",
     paragraphs: [
-      "Nell heard a reason, a correction, a promise, or an offer to stay. She could respond to the words, but she could not see the room from your side of the line. You knew how ECHO's drafts were formed; you also supplied every choice it made.",
-      "A good response can matter to someone without settling what, or who, understood it. Nell's last question turns the uncertainty of the old recording back toward the voice she has been speaking with.",
+      "If you stay with Nell, she asks for a minute of quiet. Keeping the line open can mean waiting for her to speak first. Think back to what she heard from you. Which parts could have been said to anyone? Which depended on what she had just asked?",
+      "Nell could hear the reply and decide what to do next. She couldn't see who was making the choices. If she called back tomorrow, what could she ask or notice that would change your mind about who understood her tonight?",
     ],
   },
 ];

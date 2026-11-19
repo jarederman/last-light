@@ -1,4 +1,4 @@
-export { validateSnapshot } from "../core/snapshot.js?v=action-and-voice-1";
+export { validateSnapshot } from "../core/snapshot.js?v=listening-1";
 
 export class History {
   constructor(limit = 120) { this.limit = limit; this.entries = []; this.index = -1; }

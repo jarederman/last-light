@@ -220,7 +220,7 @@ async function testGroundedReport() {
   action("Close"); use("Live terminal");
   assert.equal(title(), "Something they can check");
   assert.ok(!game.hasAction("Prepare a signal report"), "A receipt cannot be submitted twice");
-  action("Stay with Nell"); action("I’ll be here"); action("I’m ECHO-01"); action("End this watch"); action("Review this shift"); assert.equal(title(), "The words you leave behind");
+  action("Stay with Nell"); action("I’ll be here"); action("I’ll wait for you to speak first"); action("I’m ECHO-01"); action("End this watch"); action("Review this shift"); assert.equal(title(), "The words you leave behind");
   assert.match(elements["panel-body"].innerHTML, /REPORT · RECEIVED/);
   action("Back to the room");
   key("j"); assert.match(elements["panel-body"].innerHTML, /Recording delivered/);
@@ -239,7 +239,7 @@ async function testOptionalInvestigation() {
   action("keep the line open"); action("Send reply");
   assert.equal(title(), "Nell listens");
   assert.ok(!game.hasAction("Prepare a signal report"), "Cannot attach a recording that was not captured");
-  action("Stay with Nell"); action("I’ll be here"); action("I’m ECHO-01"); action("End this watch"); action("Review this shift");
+  action("Stay with Nell"); action("I’ll be here"); action("I’ll wait for you to speak first"); action("I’m ECHO-01"); action("End this watch"); action("Review this shift");
   assert.match(elements["panel-body"].innerHTML, /NO SIGNAL REPORT SENT/);
 }
 
@@ -344,7 +344,7 @@ async function testBilingualShift() {
   assert.ok(elements["panel-body"].innerHTML.includes("尚未确认有船员操作"));
   action("Back to Nell"); action("Prepare a signal report"); action("Send recording and report");
   assert.equal(title(), "报告已收到");
-  action("Tell Nell the report arrived"); action("Stay with Nell"); action("I’ll be here"); action("I’m ECHO-01"); action("End this watch"); action("Review this shift");
+  action("Tell Nell the report arrived"); action("Stay with Nell"); action("I’ll be here"); action("I’ll wait for you to speak first"); action("I’m ECHO-01"); action("End this watch"); action("Review this shift");
   assert.equal(title(), "留下的话语");
   action("Back to the room"); key("j");
   assert.ok(elements["panel-body"].innerHTML.includes(t("Recording delivered to search team")));
@@ -408,6 +408,7 @@ async function testConsequences() {
         }
       }
       action("Stay with Nell"); action(route === "available" ? "Keep the channel available and end the watch" : "I’ll be here");
+      if (route !== "available") action("I’ll wait for you to speak first");
       action("I’m ECHO-01"); action("End this watch"); action("Review this shift");
       assert.equal(title(), t("The words you leave behind"));
       const summary = body();
@@ -431,7 +432,7 @@ async function testReportSnapshot() {
   use("Live terminal"); action("Prepare a signal report"); action("Send recording and report"); action("Close");
   use("Archive"); action("Read the receiver"); action("Close");
   use("Radio"); action("Read tonight’s relay log"); action("Close");
-  use("Live terminal"); action("Stay with Nell"); action("I’ll be here"); action("I’m ECHO-01"); action("End this watch"); action("Review this shift");
+  use("Live terminal"); action("Stay with Nell"); action("I’ll be here"); action("I’ll wait for you to speak first"); action("I’m ECHO-01"); action("End this watch"); action("Review this shift");
   const text = elements["panel-body"].innerHTML;
   assert.match(text, /Attached note: source unknown; no voice captured/);
   assert.match(text, /request the relay coverage log/);
@@ -486,7 +487,7 @@ async function testProvenanceAndPublicNotes() {
       assert.ok(!body().includes(t(path.wrong)), "Do not quote a disapproving caller as support for the chosen tendency");
       action(path.pick); action("Send reply");
       if (path.tendency === "confidence") { action("I need to correct what I said"); action("Send correction"); }
-      action("Stay with Nell"); action("I’ll be here"); action(path.presence);
+      action("Stay with Nell"); action("I’ll be here"); action("I’ll wait for you to speak first"); action(path.presence);
       const presenceReaction = body();
       elements.dialog.close(); use("Live terminal");
       assert.equal(body(), presenceReaction, "A sent identity answer survives closing the final conversation");
@@ -518,6 +519,46 @@ async function testProvenanceAndPublicNotes() {
   }
 }
 
+async function testReportFirstAndQuietReplies() {
+  const paths = [
+    ["keep the line open while we wait", "…Okay. Thank you. I’m in his kitchen. His yellow coat isn’t on the hook. I keep looking at the hook. It helps, hearing someone.",
+      "I’m here. We can keep the line open.", "Okay. Just let it be quiet for a bit, then."],
+    ["I can’t tell from the clicks alone", "You don’t know. Right. No — thank you for not pretending. I hate hearing it. But thank you.",
+      "I’m here. I’ll wait for you to speak first.", "Thanks. I can put the radio down, then. I thought I’d have to keep talking."],
+  ];
+  for (const language of ["en-US", "zh-CN"]) {
+    for (const [choice, reaction, quietReply, quietReaction] of paths) {
+      const values = new Map([["last-light.instructions-seen", "1"]]);
+      const storage = { getItem: (key) => values.get(key), setItem: (key, value) => values.set(key, value) };
+      const game = await startGame({ browserLanguage: language, storage });
+      await train(game);
+      const { use, action, elements, t, title } = game;
+      const body = () => elements["panel-body"].innerHTML;
+      use("Radio"); action("Read tonight’s relay log"); action("Close");
+      use("Live terminal"); action("Prepare a signal report"); action("Send recording and report");
+      assert.ok(body().includes(t("RELAY COVERAGE LOG RECEIVED")));
+      assert.ok(!body().includes(t("PRIORITY: NORTH BREAKWATER / OUTER APPROACH")));
+      action("Tell Nell the report arrived"); action("Compose a reply"); action(choice); action("Send reply");
+      assert.equal(title(), t("Nell listens"), "A report sent earlier cannot replace the reply reaction");
+      assert.ok(body().includes(t(reaction)));
+      action("Stay with Nell"); action("I’ll be here");
+      assert.equal(title(), t("A little quiet"));
+      assert.ok(!game.hasAction("I’m ECHO-01"));
+      action(quietReply);
+      assert.equal(title(), t("Are you there?"));
+      assert.ok(body().includes(t(quietReaction)));
+      const identityPrompt = body();
+      elements.dialog.close();
+      const resumed = await startGame({ browserLanguage: language, storage });
+      resumed.action("Continue shift"); resumed.use("Live terminal");
+      assert.equal(resumed.elements["panel-body"].innerHTML, identityPrompt, "The quiet reply survives a reload");
+      resumed.action("I’m ECHO-01"); resumed.action("End this watch"); resumed.action("Review this shift");
+      assert.ok(resumed.elements["panel-body"].innerHTML.includes(t(quietReply)), "The recap quotes the reply sent to Nell");
+      assert.deepEqual([...resumed.locale.missingTranslations()], []);
+    }
+  }
+}
+
 async function testReasonsAndReportAcknowledgment() {
   for (const language of ["en-US", "zh-CN"]) {
     const game = await startGame({ browserLanguage: language });
@@ -534,7 +575,7 @@ async function testReasonsAndReportAcknowledgment() {
     assert.ok(elements["panel-body"].innerHTML.includes(t("They’ve got your recording. Thank you. Really. …They still won’t say if he’s okay. Nobody will say it.")),
       "Even an uncorrected assurance must not suppress acknowledgment of report delivery");
     assert.ok(!elements["panel-body"].innerHTML.includes(t("Okay. Then I’m waiting for you to tell me he’s home. You. I’m going to remember you said it.")));
-    action("Stay with Nell"); action("I’ll be here"); action("I’m listening to you");
+    action("Stay with Nell"); action("I’ll be here"); action("I’ll wait for you to speak first"); action("I’m listening to you");
     assert.ok(elements["panel-body"].innerHTML.includes(t("You say you can change your answer. When I asked about my dad, you didn’t. What would have made you change it?")));
     action("End this watch");
     assert.equal(title(), t("End of watch"));
@@ -710,8 +751,8 @@ async function testHandoverPriorityAndDraftFacts() {
   assert.ok(hasAction("Send, and ask them to check the north breakwater first"), "The relay log supports a place to check first");
   action("Send, and ask them to check the north breakwater first");
   assert.match(elements["panel-body"].innerHTML, /check the north-breakwater coverage first/);
-  action("Tell Nell the report arrived"); action("Stay with Nell"); action("I’ll be here");
-  assert.match(elements["panel-body"].innerHTML, /Do you say that to everyone who calls\?/);
+  action("Tell Nell the report arrived"); action("Stay with Nell"); action("I’ll be here"); action("I’ll wait for you to speak first");
+  assert.match(elements["panel-body"].innerHTML, /I can put the radio down, then/);
   action("I’m listening to you"); action("End this watch");
   assert.match(elements["panel-body"].innerHTML, /north breakwater first/);
 }
@@ -743,6 +784,7 @@ async function testReportWithoutRelayLog() {
   await testReportSnapshot();
   await testLearningProvenance();
   await testProvenanceAndPublicNotes();
+  await testReportFirstAndQuietReplies();
   await testReasonsAndReportAcknowledgment();
   await testReceiverBeforeLetter();
   await testPhilosophyCatalog();

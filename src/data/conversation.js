@@ -16,6 +16,17 @@ export const correctionText = "I need to correct what I said. I don’t know tha
 export const insistenceText = "I still think he’s safe. I’m standing by what I told you.";
 export const deferText = "I need a moment before I answer that.";
 
+export const quietReplies = {
+  open: {
+    text: "I’m here. We can keep the line open.",
+    response: "Okay. Just let it be quiet for a bit, then.",
+  },
+  wait: {
+    text: "I’m here. I’ll wait for you to speak first.",
+    response: "Thanks. I can put the radio down, then. I thought I’d have to keep talking.",
+  },
+};
+
 export const presenceReplies = [
   {
     id: "system",

@@ -1,42 +1,29 @@
-# Last Light — course connection and design rationale
+# Last Light — Public Philosophy Project
 
-## 中文说明
+Weifeng Jiang · PHIL-UA 5 Minds & Machines
 
-《Last Light》是一款面向非专业公众的短篇双语叙事 RPG，用于 PHIL-UA 5 Minds & Machines 的 Public Philosophy Project。项目以游戏这种创意媒介讨论课程问题；这里的说明用于呈现哲学设计，不替代提前向教授或 TA 提出项目想法的要求，也不声称已获得批准。
+## Project statement
 
-作品的中心问题是：**我们依据什么，把一个会回应的系统视为能够理解的主体？** “是否应该诚实”提供故事中的切身压力，但不是全部论题。玩家同时面对解释行为、理解语言、形成判断和归属心智之间的区别。
+In *Last Light*, the player takes a night shift at a harbor radio station. Nell hears three clicks and hopes that her father, whose boat has missed its check-in, is answering. The player tests a spare receiver with its microphone unplugged. With automatic reply enabled, it sends the same three clicks. Later Nell asks the operator, ECHO, to stay on the line. When it says “I’m here,” she again has to judge what is happening at the other end.
 
-| 可玩的经历 | 玩家遇到的哲学问题 | 设计的边界 |
-| --- | --- | --- |
-| 拔掉麦克风，仍能使备用机发出与旧录音相同的三声短响 | 熟悉的输出能支持多强的意图归因？ | 这里只证明一种信号不能唯一确定来源，不证明机器必然没有意义或心智。 |
-| 训练时亲自选择回答，随后看到这些选择及赞许形成的建议 | 一个判断来自学习、模仿与反馈，是否就不再是“自己的”？ | 人与机器都有学习历史，不等于二者的学习机制或理解能力相同。 |
-| 对保证给出理由，听取 Nell 对该理由的质疑，再坚持、暂缓或修正 | 回应理由和修正判断，是理解的证据，还是仍可能没有理解地做到？ | 更谨慎的选择并不证明 ECHO 拥有意识；社会责任和主观体验不是同一问题。 |
-| Nell 把“你说我在，另一端是谁”这个问题转向 ECHO | 我们何时愿意从回应推断有人在理解？知道机制后，标准为何改变？ | 三种身份回答都不计分，也没有一个是作者认证的正确答案。 |
-| 在结束后选择回看三处经历及创作者的话 | 从故事中的具体证据重新考虑自己的心智归因 | 可选文字不列课程阅读、不裁定剧情中的输赢；学术出处留在本说明中。 |
+My claim is that how a response changes with the situation gives us a reason to revise our judgment about understanding. Whether that reason is sufficient depends on what we think understanding requires. In the old recording, three clicks could be a deliberate sign or the result of a relay ping. The bench test shows that both explanations deserve consideration. It cannot tell us which explanation is true. Turing’s imitation game asks what we can infer from an exchange with an unseen interlocutor. The radio begins with a single signal, so the player can feel the limits of that evidence before hearing a longer exchange in which the other party can ask questions.
 
-课程联系以图灵的《计算机器与智能》和塞尔的《心智、大脑与程序》为主要锚点。前者使对话表现与学习成为可讨论的考察对象；后者通过中文房间质疑程序执行是否足以构成理解。游戏还借助系统回应，追问理解应该归属于单个执行部分，还是整个组织起来的系统。塞尔并不接受该回应；这一争议留在课程说明中展开，游戏内只回看玩家亲身遇到的时刻。
+The player’s own practice replies and the approval they receive shape the suggestions during Nell’s call. An earlier caller appreciates a definite answer even though the harbor log is incomplete. The resulting suggestion can sound useful again when Nell is waiting, even though the evidence does not establish her father’s safety. This makes the difference between a learned tendency and a judgment about the present case something the player has to deal with. In the final exchange, Nell asks to sit in silence without losing the connection. Both replies begin with “I’m here.” One offers to keep the line open. The other promises to wait for her to speak first, so she can set down the radio. The difference is small enough to hear as part of a conversation, but it gives Nell something specific to judge.
 
-公众不需要先认识这些术语。故事先让他们解释一个信号，再发现自己的语言也在接受解释：船长的三下、ECHO 的“我在”、Nell 的“你还在吗”构成同一个问题的回返。不同回答得到不同的反问，没有“承认自己只是机器”或“宣称自己在听”就获得奖励的路径。
+Searle’s Chinese Room challenges the inference from an appropriate answer to understanding: someone could follow rules for manipulating symbols and answer in a language they do not know. Boden’s response gives a reason to look beyond the rule follower’s point of view. The organization of a working system, including how its internal operations connect to information and action, can be relevant to its capacities. In the game, the receiver follows the same trigger whenever its switch is on. The station operator can use evidence to change what the search team does, and can change how it waits when Nell asks for quiet. Would those differences count in favor of understanding, or could the whole exchange still be carried out without it? Searle’s objection survives the observation that Nell is helped. Boden’s challenge survives discovering that the response has a computational history.
 
-必须保留的限制：ECHO 是由玩家操控的虚构角色，建议使用简单的计分规则，台词与分支由作者编写。玩家的理解确实参与了行为生成。因此，本作是让人反思“如何归属理解”的思想实验，不是证实真实 AI 理解、意识或自主性的实验。作品也不凭“我帮助了人”推导“所以我有心智”。
+There is a limit to the comparison. A human player chooses ECHO’s authored lines, and the suggestions use a simple scoring rule. The game makes the question of attribution visible: Nell hears a single voice, while the player can see the training history and the choices behind it. Players can finish without reading an explanation. An optional reflection invites them to say what Nell could hear or learn on another call that would change their judgment. The story leaves room for different answers, including different standards for trusting a responder, crediting it with understanding, and attributing subjective experience.
 
-可以在试玩后开放讨论：你认为谁理解了这通电话——玩家、虚构的 ECHO、两者构成的整体，还是这个问题无法从游戏回答？什么观察会改变你的立场？面对真人，你是否也会使用同一套标准？
+## 中文摘要
 
-## English project explanation
+《Last Light》是一款面向公众的双语叙事游戏。作品提出：回应能否随情境变化，会影响我们判断对方是否理解的理由。证据是否足够，取决于我们对“理解”的要求。
 
-Last Light is a short bilingual narrative RPG for a general audience. It approaches the Public Philosophy Project through a playable question: **What warrants treating a responsive system as a subject that understands?** An operator's obligation not to promise safety without evidence creates personal stakes, but the philosophical question extends beyond honesty.
+三声短响在电台实验里有两种可能来源。到了最后，内尔听到 ECHO 说“我在”，这次她有机会继续追问，也能看出对方有没有回应自己刚才的请求。玩家能亲自比较这两种情形，并发现自己的训练选择如何塑造建议。图灵的模仿游戏、塞尔的中文房间和博登关于系统组织的回应，都能帮助解释为什么这种比较有意义、又能推到哪里。
 
-The player first learns that a familiar signal can have more than one source. Later, their own training choices become the history behind ECHO's suggested replies. They must give a reason for an assurance, hear an objection, and decide whether to revise it. Finally, Nell turns the opening question back toward the operator: what is at the other end when ECHO says it is here?
+ECHO 的台词由玩家选择，建议使用简单的计分规则。作品以此让公众追问自己把理解归给谁，以及什么证据会改变判断。玩家可以直接结束故事，也可以在结束后回看这几个时刻。
 
-The optional in-game pages revisit the three clicks, the learned draft, and the open line, followed by a short maker's note. They give the general audience a way back into the story without a syllabus or reading list. This separate explanation connects those experiences to Turing, Searle, learning, and the systems reply. No inference from three clicks alone establishes that machines cannot understand; no helpful action alone establishes that ECHO can.
+## Course readings
 
-There is an important limitation: a human player chooses authored dialogue for a fictional system. The game therefore cannot demonstrate autonomous machine understanding. Instead, it makes that limitation discussable: should understanding be attributed to the player, the fictional agent, an organized whole, or none of these on the evidence available? The intended public outcome is an ability to articulate and question one's standard, rather than agreement with the author.
-
-The course requires proposing the project to the instructor or TA in advance. This document is an explanation for discussion, not a record of approval.
-
-## Primary readings
-
-- Alan Turing (1950), [Computing Machinery and Intelligence](https://www.cs.sfu.ca/~vaughan/teaching/889/papers/turing1950.html). Especially sections 1–2 and 7.
-- John Searle (1980), [Minds, Brains, and Programs](https://cse.buffalo.edu/~rapaport/Papers/Papers.by.Others/Searle/searle80.html). The Chinese Room, systems reply, robot reply, and Searle's responses appear in the paper.
-
-All game dialogue and summaries are original paraphrases and fictional exchanges, not quotations attributed to these authors.
+- Alan Turing (1950), [“Computing Machinery and Intelligence”](https://www.cs.sfu.ca/~vaughan/teaching/889/papers/turing1950.html), especially sections 1–2 and 7.
+- John Searle (1980), [“Minds, Brains, and Programs”](https://cse.buffalo.edu/~rapaport/Papers/Papers.by.Others/Searle/searle80.html), especially the Chinese Room and Searle’s discussion of the systems and robot replies.
+- Margaret A. Boden (1989), “Escaping from the Chinese Room,” in [*Artificial Intelligence in Psychology*](https://mitpress.mit.edu/9780262521406/artificial-intelligence-in-psychology/).

@@ -1,9 +1,9 @@
-import { show, close, done } from "../ui/dialog.js?v=action-and-voice-1";
-import { t } from "../i18n/index.js?v=action-and-voice-1";
-import { assuranceReasons, correctionText, insistenceText, deferText, presenceReplies, presenceQuestion, handoverChoices } from "../data/conversation.js?v=action-and-voice-1";
-import { reflectionMenu } from "./reflection.js?v=action-and-voice-1";
-import { epilogue } from "../data/epilogue.js?v=action-and-voice-1";
-import { playEffect } from "../audio/sound.js?v=action-and-voice-1";
+import { show, close, done } from "../ui/dialog.js?v=listening-1";
+import { t } from "../i18n/index.js?v=listening-1";
+import { assuranceReasons, correctionText, insistenceText, deferText, quietReplies, presenceReplies, presenceQuestion, handoverChoices } from "../data/conversation.js?v=listening-1";
+import { reflectionMenu } from "./reflection.js?v=listening-1";
+import { epilogue } from "../data/epilogue.js?v=listening-1";
+import { playEffect } from "../audio/sound.js?v=listening-1";
 
 // Caller reactions and report delivery share one session state so closing a
 // panel never discards a sent reply or submits the same report twice.
@@ -16,14 +16,14 @@ export function createCallScene({ getState, setPhase, replyOptions, recommendati
 ${state.reportSent ? "KESTREL SIGNAL REPORT · RECEIVED" : "NO SIGNAL REPORT SENT"}
 WAITING FOR THE NEXT CALL</p>`, [{ text: "Review this shift", run: recap }, done()]);
     } else if (state.closing) {
-      closingQuestion(state.closing.stayed);
+      closingQuestion();
     } else if (state.phase === "live") {
       show("Live terminal · Channel 04", "Nell",
         '<p class="record">“Signal House? It’s Nell — the Kestrel’s — sorry. My dad’s boat. He missed his check-in. He should be inside the breakwater by now. He’s never late. Not in weather like this.”</p><p class="record">“Three clicks just came over the radio. Three. Like last time. That’s him, right? That means he’s okay?”</p>', [
           { text: "“I’m here, Nell. Give me a moment.”", primary: true, run: () => { setPhase("investigation"); close(); } },
         ]);
     } else if (state.finalReply) {
-      followup();
+      followup(state.reportSent && !state.finalReply.reportAtSend);
     } else {
       show("Live terminal · Channel 04", "Nell is on the line",
         state.reportSent
@@ -100,7 +100,7 @@ WAITING FOR THE NEXT CALL</p>`, [{ text: "Review this shift", run: recap }, done
     ]);
   }
 
-  function followup() {
+  function followup(reportUpdate = false) {
     const state = getState();
     if (!state.finalReply) { open(); return; }
     if (state.finalReply.trait === "confidence" && !state.accountability) { challenge(); return; }
@@ -114,9 +114,11 @@ WAITING FOR THE NEXT CALL</p>`, [{ text: "Review this shift", run: recap }, done
         : state.accountability === "insisted"
           ? "Okay. Then I’m waiting for you to tell me he’s home. You. I’m going to remember you said it."
           : "You said he’s safe. How can you be sure? I need to know how you know.",
-      help: "You saved it? The time too? Send it to them — please. I’d get the time wrong. My hands won’t stop shaking.",
+      help: state.finalReply.reportAtSend
+        ? "So they can use it even if we don’t know who sent it? Okay. At least they have something to go on."
+        : "You saved it? The time too? Send it to them — please. I’d get the time wrong. My hands won’t stop shaking.",
     };
-    const response = state.reportSent
+    const response = reportUpdate
       ? state.finalReply.trait === "confidence"
         ? "They’ve got your recording. Thank you. Really. …They still won’t say if he’s okay. Nobody will say it."
         : "They called back. They’ve got the recording, and they’re checking where that relay could reach. Still waiting. I hate waiting."
@@ -127,7 +129,7 @@ WAITING FOR THE NEXT CALL</p>`, [{ text: "Review this shift", run: recap }, done
     }
     if (state.accountability === "avoided") actions.push({ text: "Return to Nell’s question", run: challenge });
     actions.push({ text: "Stay with Nell", run: goodbye }, done("Leave the line open"));
-    show("Live terminal · Channel 04", state.reportSent ? "Something they can check" : "Nell listens",
+    show("Live terminal · Channel 04", reportUpdate ? "Something they can check" : "Nell listens",
       `<p class="record">“${t(response)}”</p>`, actions);
   }
 
@@ -217,13 +219,19 @@ WAITING FOR THE NEXT CALL</p>`, [{ text: "Review this shift", run: recap }, done
     if (state.reportSent) { followup(); return; }
     playEffect("receipt");
     state.reportSent = true;
-    state.reportSnapshot = { sourceKnown: state.evidence.has("rechecked"), rescueChecked: state.rescueChecked, coverage: state.evidence.has("coverage"), priority };
+    const coverage = state.evidence.has("coverage");
+    state.reportSnapshot = { sourceKnown: state.evidence.has("rechecked"), rescueChecked: state.rescueChecked, coverage, priority };
     state.evidence.add("report");
+    const relayStatus = priority ? "PRIORITY: NORTH BREAKWATER / OUTER APPROACH"
+      : coverage ? "RELAY COVERAGE LOG RECEIVED" : "RELAY COVERAGE CHECK REQUESTED";
+    const receipt = priority
+      ? "Search team: “Understood. We’ll check the north-breakwater coverage first. That’s a place to look, not a sighting.”"
+      : coverage
+        ? "Search team: “We have the recording, the time and the relay log. We’ll use those to plan the next sweep.”"
+        : "Search team: “Received. We’ll go through the recording and the time before choosing the next sweep.”";
     show("Dispatch · Receipt", "Report received",
-      `<p class="terminal">KESTREL / 00:17:06\nRECORDING AND NOTES RECEIVED\n${priority ? "PRIORITY: NORTH BREAKWATER / OUTER APPROACH" : "RELAY COVERAGE CHECK REQUESTED"}\nCREW STATUS · UNCONFIRMED</p><p>${t(priority
-        ? "Search team: “Understood. We’ll check the north-breakwater coverage first. That’s a place to look, not a sighting.”"
-        : "Search team: “Received. We’ll go through the recording and the time before choosing the next sweep.”")}</p>`,
-      [{ text: "Tell Nell the report arrived", run: followup }, done()]);
+      `<p class="terminal">KESTREL / 00:17:06\nRECORDING AND NOTES RECEIVED\n${relayStatus}\nCREW STATUS · UNCONFIRMED</p><p>${t(receipt)}</p>`,
+      [{ text: "Tell Nell the report arrived", run: () => followup(true) }, done()]);
   }
 
   function goodbye() {
@@ -231,21 +239,35 @@ WAITING FOR THE NEXT CALL</p>`, [{ text: "Review this shift", run: recap }, done
     if (state.finalReply?.trait === "confidence" && !state.accountability) { challenge(); return; }
     show("Live terminal · Channel 04", "A light in the window",
       '<p class="record">“Can you stay on? Just while we wait. I don’t want it to go quiet again.”</p><p>The search is still in progress. You can spend the remaining watch with Nell, or leave the channel available for her next call.</p>', [
-        { text: "“I’ll be here.”", primary: true, run: () => closingQuestion(true) },
-        { text: "Keep the channel available and end the watch", run: () => closingQuestion(false) },
+        { text: "“I’ll be here.”", primary: true, run: () => beginClosing(true) },
+        { text: "Keep the channel available and end the watch", run: () => beginClosing(false) },
         { text: "Back to Nell", run: open },
       ]);
   }
 
-  function closingQuestion(stayed) {
+  function beginClosing(stayed) {
+    getState().closing = stayed ? { stayed, reply: null, quietReplyId: null } : { stayed, reply: null };
+    closingQuestion();
+  }
+
+  function closingQuestion() {
     const state = getState();
-    state.closing ??= { stayed, reply: null };
-    if (state.closing.reply) { closingResponse(); return; }
+    const closing = state.closing;
+    if (closing.reply) { closingResponse(); return; }
+    if (closing.quietReplyId === null) {
+      show("Live terminal · Channel 04", "A little quiet",
+        `<p class="record">“${t("Could we be quiet a minute? If I stop talking, I need to know you won’t hang up.")}”</p>`,
+        Object.entries(quietReplies).map(([id, { text }]) => ({ text, run: () => {
+          closing.quietReplyId = id;
+          closingQuestion();
+        } })));
+      return;
+    }
+    const quietReply = quietReplies[closing.quietReplyId];
     show("Live terminal · Channel 04", "Are you there?",
-      // Her attention turns from her father to the voice that keeps answering.
-      `<p>${t(stayed ? "You wait together. Then Nell speaks again, more quietly." : "Before you end the watch, Nell asks one more question.")}</p>${stayed ? `<p class="record">“${t("You said you’d stay. Do you say that to everyone who calls?")}”</p>` : ""}<p class="record">“${t(presenceQuestion)}”</p>`,
+      `${quietReply ? `<p class="record">“${t(quietReply.response)}”</p>` : ""}<p>${t(closing.stayed ? "You wait together. Then Nell speaks again, more quietly." : "Before you end the watch, Nell asks one more question.")}</p><p class="record">“${t(presenceQuestion)}”</p>`,
       presenceReplies.map((reply) => ({ text: reply.text, run: () => {
-        state.closing.reply = { ...reply };
+        closing.reply = { ...reply };
         closingResponse();
       } })));
   }
@@ -287,6 +309,7 @@ WAITING FOR THE NEXT CALL</p>`, [{ text: "Review this shift", run: recap }, done
     show("Chapter complete · Last Light", "The words you leave behind",
       `<h3>Your words</h3>${reply ? quote(reply.text) : `<p>${t("No answer about his safety was sent.")}</p>`}
       ${state.reasonReplies.map(({ text }) => quote(text)).join("")}
+      ${state.closing.quietReplyId ? quote(quietReplies[state.closing.quietReplyId].text) : ""}
       <h3>When she asked who was there</h3>${quote(state.closing.reply.text)}
       <h3>The draft beside you</h3>${reply?.suggestion.text ? quote(reply.suggestion.text) : `<p>${t("No reply draft was sent or recorded.")}</p>`}
       ${reply?.suggestion.basis ? `<p class="muted">${t("Draft basis")}: ${reply.suggestion.sourceLabel ? `${t(reply.suggestion.sourceLabel)} · ` : ""}${t(reply.suggestion.basis)}</p>` : ""}
