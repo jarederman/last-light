@@ -179,6 +179,9 @@ async function train(game, tendency = null) {
   action("Close");
   assert.deepEqual(recommended(), targets("Mara"), "Only the case review remains");
   use("Mara"); action("Source unconfirmed"); action("Keep this note");
+  assert.equal(title(), t("Before you take a call"));
+  assert.ok(elements["panel-body"].innerHTML.includes(t("I’ve queued a practice call at the dispatch terminal. A ferry’s late. Read the log, choose what you’d tell the caller, and we’ll go over your reply.")));
+  action("Back to the room");
   assert.deepEqual(recommended(), targets("Terminal"));
   const choices = Array.isArray(tendency) ? tendency : {
     caution: ["ferry is delayed", "Hold outside", "crew is checking"],
@@ -734,8 +737,12 @@ async function testHandoverPriorityAndDraftFacts() {
   action("Rewrite the note");
   assert.equal(title(), "A note for the next shift", "The note can be rewritten before it is kept");
   action("Source unconfirmed"); action("Keep this note");
+  action("Back to the room"); use("Mara");
+  assert.equal(title(), "Before you take a call", "Returning to Mara reopens the briefing");
+  action("Back to the room");
   for (const choice of ["ferry should be", "unsettling", "Go ahead"]) {
     use("Terminal");
+    if (choice === "ferry should be") assert.match(elements["panel-body"].innerHTML, /Practice call: read the dispatch log/);
     if (choice === "Go ahead") assert.match(elements["panel-body"].innerHTML, /DRAFT ADJUSTED/, "Earlier feedback visibly shapes the next draft");
     action(choice); action("File this call");
   }

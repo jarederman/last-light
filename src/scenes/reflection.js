@@ -1,6 +1,6 @@
-import { show } from "../ui/dialog.js?v=listening-1";
-import { t } from "../i18n/index.js?v=listening-1";
-import { reflections, makerNote } from "../data/reflections.js?v=listening-1";
+import { show } from "../ui/dialog.js?v=practice-briefing-1";
+import { t } from "../i18n/index.js?v=practice-briefing-1";
+import { reflections, makerNote } from "../data/reflections.js?v=practice-briefing-1";
 
 export function reflectionMenu(back, backText = "Back to the end of the watch") {
   function menu() {

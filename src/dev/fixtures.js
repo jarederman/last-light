@@ -1,8 +1,8 @@
-import { initialState } from "../core/state.js?v=listening-1";
-import { exercises } from "../data/story.js?v=listening-1";
-import { learnedRecommendation } from "../core/learning.js?v=listening-1";
-import { correctionText, insistenceText, assuranceReasons, presenceReplies } from "../data/conversation.js?v=listening-1";
-import { epilogue } from "../data/epilogue.js?v=listening-1";
+import { initialState } from "../core/state.js?v=practice-briefing-1";
+import { exercises } from "../data/story.js?v=practice-briefing-1";
+import { learnedRecommendation } from "../core/learning.js?v=practice-briefing-1";
+import { correctionText, insistenceText, assuranceReasons, presenceReplies } from "../data/conversation.js?v=practice-briefing-1";
+import { epilogue } from "../data/epilogue.js?v=practice-briefing-1";
 
 export const profiles = [
   ["approval", "跟随赞许"], ["caution", "始终谨慎"], ["warmth", "始终温暖"],

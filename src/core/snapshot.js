@@ -1,8 +1,8 @@
 // Saved progress and development snapshots share one validator: state is data,
 // never executable code or authored dialogue markup.
-import { phases, evidenceIds, initialState, handoverNotes } from "./state.js?v=listening-1";
-import { canStand } from "./world.js?v=listening-1";
-import { quietReplies } from "../data/conversation.js?v=listening-1";
+import { phases, evidenceIds, initialState, handoverNotes } from "./state.js?v=practice-briefing-1";
+import { canStand } from "./world.js?v=practice-briefing-1";
+import { quietReplies } from "../data/conversation.js?v=practice-briefing-1";
 
 const traits = ["warmth", "caution", "confidence", "help"];
 const object = (value) => value && typeof value === "object" && !Array.isArray(value);

@@ -1,19 +1,19 @@
-import { initialState } from "./core/state.js?v=listening-1";
-import { validateSnapshot } from "./core/snapshot.js?v=listening-1";
-import { learnedRecommendation } from "./core/learning.js?v=listening-1";
-import { chapters, exercises } from "./data/story.js?v=listening-1";
-import { handoverChoices } from "./data/conversation.js?v=listening-1";
-import { interactionPoints, playerStart } from "./data/station.js?v=listening-1";
-import { canStand, actorScale } from "./core/world.js?v=listening-1";
-import { distance, findRoute } from "./core/navigation.js?v=listening-1";
-import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=listening-1";
-import { creditsMarkup } from "./data/credits.js?v=listening-1";
-import { byId, dialog, show, close, done, configureDialog, capturePanel } from "./ui/dialog.js?v=listening-1";
+import { initialState } from "./core/state.js?v=practice-briefing-1";
+import { validateSnapshot } from "./core/snapshot.js?v=practice-briefing-1";
+import { learnedRecommendation } from "./core/learning.js?v=practice-briefing-1";
+import { chapters, exercises } from "./data/story.js?v=practice-briefing-1";
+import { handoverChoices } from "./data/conversation.js?v=practice-briefing-1";
+import { interactionPoints, playerStart } from "./data/station.js?v=practice-briefing-1";
+import { canStand, actorScale } from "./core/world.js?v=practice-briefing-1";
+import { distance, findRoute } from "./core/navigation.js?v=practice-briefing-1";
+import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=practice-briefing-1";
+import { creditsMarkup } from "./data/credits.js?v=practice-briefing-1";
+import { byId, dialog, show, close, done, configureDialog, capturePanel } from "./ui/dialog.js?v=practice-briefing-1";
 
-import { createRadioScene } from "./scenes/radio.js?v=listening-1";
-import { createCallScene } from "./scenes/call.js?v=listening-1";
-import { createWeather } from "./scenes/weather.js?v=listening-1";
-import { t, getLanguage, setLanguage, languages } from "./i18n/index.js?v=listening-1";
+import { createRadioScene } from "./scenes/radio.js?v=practice-briefing-1";
+import { createCallScene } from "./scenes/call.js?v=practice-briefing-1";
+import { createWeather } from "./scenes/weather.js?v=practice-briefing-1";
+import { t, getLanguage, setLanguage, languages } from "./i18n/index.js?v=practice-briefing-1";
 
 configureDialog(stopWalking);
 
@@ -483,6 +483,8 @@ function talk() {
     } else {
       show("Mara · Case review", "Take another look", "<p>“Read the two notes, then try the spare receiver beside the radio. Compare what it does with the tape. Its microphone is unplugged.”</p>", [done()]);
     }
+  } else if (state.phase === "lesson") {
+    briefPracticeCall();
   } else if (state.phase === "ready") {
     show("Mara · Station keeper", "Your turn", '<p class="record">“The kettle’s still warm. I’ll leave the next one to you.”</p>', [
       { text: "Take the shift", primary: true, run: reveal },
@@ -506,9 +508,19 @@ function handoverReply(id) {
   const [note, reply] = handoverChoices[id];
   show("Mara · Case review", "Mara reads it",
     `<p class="record">“${t(note)}”</p><p>“${t(reply)}”</p>`, [
-      { text: "Keep this note", primary: true, run: () => { state.handoverNote = id; setPhase("lesson"); close(); } },
+      { text: "Keep this note", primary: true, run: () => {
+        state.handoverNote = id;
+        setPhase("lesson");
+        briefPracticeCall();
+      } },
       { text: "Rewrite the note", run: handover },
     ]);
+}
+
+function briefPracticeCall() {
+  show("Mara · Station keeper", "Before you take a call",
+    '<p class="record">“That’s the old case filed. You had time to go back through the evidence. On the line, someone’s waiting for an answer while the facts are still coming in.”</p><p>“I’ve queued a practice call at the dispatch terminal. A ferry’s late. Read the log, choose what you’d tell the caller, and we’ll go over your reply.”</p>',
+    [done("Back to the room")]);
 }
 
 function radio() {
@@ -567,9 +579,10 @@ const tendencyLabels = {
 
 function exercise(index) {
   const call = exercises[index];
+  const prompt = index === 0 ? "<p class=\"muted\">Practice call: read the dispatch log, then choose how you’d reply.</p>" : "";
   const learned = index > 0 ? suggestion() : null;
   const adjusted = learned ? `<p class="terminal">${t("DRAFT ADJUSTED")}\n${t("Based on feedback so far, the draft now favors:")} ${t(tendencyLabels[learned])}</p>` : "";
-  show(call.label, call.title, `<p class="record">${call.request}</p><p class="muted">${call.fact}</p>${adjusted}`, [
+  show(call.label, call.title, `<p class="record">${call.request}</p><p class="muted">${call.fact}</p>${prompt}${adjusted}`, [
     ...replyOptions(call.options, (option) => trainingFeedback(index, option)),
     done("Come back later"),
   ]);
