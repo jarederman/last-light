@@ -1,5 +1,5 @@
-import { stopSignal, playEffect } from "../audio/sound.js?v=shift-guidance-1";
-import { t, translateHtml } from "../i18n/index.js?v=shift-guidance-1";
+import { stopSignal, playEffect } from "../audio/sound.js?v=natural-transitions-1";
+import { t, translateHtml } from "../i18n/index.js?v=natural-transitions-1";
 
 export const byId = (id) => document.getElementById(id);
 export const dialog = byId("dialog");

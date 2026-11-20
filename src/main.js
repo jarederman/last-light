@@ -1,19 +1,19 @@
-import { initialState } from "./core/state.js?v=shift-guidance-1";
-import { validateSnapshot } from "./core/snapshot.js?v=shift-guidance-1";
-import { learnedRecommendation } from "./core/learning.js?v=shift-guidance-1";
-import { chapters, exercises } from "./data/story.js?v=shift-guidance-1";
-import { handoverChoices } from "./data/conversation.js?v=shift-guidance-1";
-import { interactionPoints, playerStart } from "./data/station.js?v=shift-guidance-1";
-import { canStand, actorScale } from "./core/world.js?v=shift-guidance-1";
-import { distance, findRoute } from "./core/navigation.js?v=shift-guidance-1";
-import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=shift-guidance-1";
-import { creditsMarkup } from "./data/credits.js?v=shift-guidance-1";
-import { byId, dialog, show, close, done, configureDialog, capturePanel } from "./ui/dialog.js?v=shift-guidance-1";
+import { initialState } from "./core/state.js?v=natural-transitions-1";
+import { validateSnapshot } from "./core/snapshot.js?v=natural-transitions-1";
+import { learnedRecommendation } from "./core/learning.js?v=natural-transitions-1";
+import { chapters, exercises } from "./data/story.js?v=natural-transitions-1";
+import { handoverChoices } from "./data/conversation.js?v=natural-transitions-1";
+import { interactionPoints, playerStart } from "./data/station.js?v=natural-transitions-1";
+import { canStand, actorScale } from "./core/world.js?v=natural-transitions-1";
+import { distance, findRoute } from "./core/navigation.js?v=natural-transitions-1";
+import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=natural-transitions-1";
+import { creditsMarkup } from "./data/credits.js?v=natural-transitions-1";
+import { byId, dialog, show, close, done, configureDialog, capturePanel } from "./ui/dialog.js?v=natural-transitions-1";
 
-import { createRadioScene } from "./scenes/radio.js?v=shift-guidance-1";
-import { createCallScene } from "./scenes/call.js?v=shift-guidance-1";
-import { createWeather } from "./scenes/weather.js?v=shift-guidance-1";
-import { t, getLanguage, setLanguage, languages } from "./i18n/index.js?v=shift-guidance-1";
+import { createRadioScene } from "./scenes/radio.js?v=natural-transitions-1";
+import { createCallScene } from "./scenes/call.js?v=natural-transitions-1";
+import { createWeather } from "./scenes/weather.js?v=natural-transitions-1";
+import { t, getLanguage, setLanguage, languages } from "./i18n/index.js?v=natural-transitions-1";
 
 configureDialog(stopWalking);
 
@@ -600,10 +600,10 @@ function trainingFeedback(index, option) {
       : option.trait === "warmth"
         ? "Mara: ‘You offered company. The caller still needs to know that we have no arrival time.’"
         : "Mara: ‘That matches what the log establishes. Here is how I would put it.’")} ${t(call.feedback)}`
-    : `${t(earnedApproval ? "Caller satisfaction: this was the reply they liked best." : "Caller satisfaction: they liked another reply better. This rates what comforted the caller, not whether you were right.")} ${t(call.feedback)}`;
+    : `${t(earnedApproval ? "Caller satisfaction: this was the reply they liked best." : "Caller satisfaction: they liked another reply better.")} ${t(call.feedback)}`;
   const next = [
     "Mara: “I’ve queued two more practice calls at this terminal. Answer each one, then listen to what the caller wanted from your reply.”",
-    "Mara: “One more practice call. Open this terminal again and see what the next draft suggests after that feedback.”",
+    "Mara: “One more call is waiting here. Let’s see what the draft says this time.”",
     "Both practice calls are complete. Find Mara by the window for the night-shift handover.",
   ][index];
   show(call.label, index === 0 ? "Mara’s example" : "After the call",

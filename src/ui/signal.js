@@ -1,4 +1,4 @@
-import { t } from "../i18n/index.js?v=shift-guidance-1";
+import { t } from "../i18n/index.js?v=natural-transitions-1";
 
 export function signalTrace(label, clicks = true) {
   const trace = clicks

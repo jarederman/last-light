@@ -758,7 +758,7 @@ async function testHandoverPriorityAndDraftFacts() {
   use("Mara"); action("Take the shift"); action("Back to the room");
   use("Live terminal"); action("Give me a moment");
   assert.ok(hasAction("Compose a reply"), "Answering the incoming line offers a reply without leaving the terminal");
-  assert.match(elements["panel-body"].innerHTML, /radio has tonight’s recording/);
+  assert.match(elements["panel-body"].innerHTML, /tonight’s recording is at the radio/);
   action("Let me look into it first");
   key("j");
   assert.match(elements["panel-body"].innerHTML, /rescue board at the Terminal/);

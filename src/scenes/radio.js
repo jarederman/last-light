@@ -1,6 +1,6 @@
-import { show, done } from "../ui/dialog.js?v=shift-guidance-1";
-import { playSignal, stopSignal, playEffect } from "../audio/sound.js?v=shift-guidance-1";
-import { signalTrace } from "../ui/signal.js?v=shift-guidance-1";
+import { show, done } from "../ui/dialog.js?v=natural-transitions-1";
+import { playSignal, stopSignal, playEffect } from "../audio/sound.js?v=natural-transitions-1";
+import { signalTrace } from "../ui/signal.js?v=natural-transitions-1";
 
 export function createRadioScene({ getState, mark }) {
   function open() {

@@ -1,5 +1,5 @@
-import { fixture, presets, profiles } from "./fixtures.js?v=shift-guidance-1";
-import { History, validateSnapshot } from "./snapshots.js?v=shift-guidance-1";
+import { fixture, presets, profiles } from "./fixtures.js?v=natural-transitions-1";
+import { History, validateSnapshot } from "./snapshots.js?v=natural-transitions-1";
 
 const channel = "last-light-development-v1";
 export function connectDevelopment(adapter) {

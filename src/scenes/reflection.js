@@ -1,6 +1,6 @@
-import { show } from "../ui/dialog.js?v=shift-guidance-1";
-import { t } from "../i18n/index.js?v=shift-guidance-1";
-import { reflections, makerNote } from "../data/reflections.js?v=shift-guidance-1";
+import { show } from "../ui/dialog.js?v=natural-transitions-1";
+import { t } from "../i18n/index.js?v=natural-transitions-1";
+import { reflections, makerNote } from "../data/reflections.js?v=natural-transitions-1";
 
 export function reflectionMenu(back, backText = "Back to the end of the watch") {
   function menu() {

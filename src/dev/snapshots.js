@@ -1,4 +1,4 @@
-export { validateSnapshot } from "../core/snapshot.js?v=shift-guidance-1";
+export { validateSnapshot } from "../core/snapshot.js?v=natural-transitions-1";
 
 export class History {
   constructor(limit = 120) { this.limit = limit; this.entries = []; this.index = -1; }
