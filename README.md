@@ -2,6 +2,9 @@
 
 A short browser RPG set in a harbor radio station on a stormy night. Explore the room, review an old signal with Mara, and take a shift at the dispatch terminal.
 
+- [Current player version](https://jarederman.github.io/last-light/player.html)
+- [Archived player version (action-and-voice-1)](https://jarederman.github.io/last-light/archive/action-and-voice-1/player.html), with its own game progress
+
 ## Project structure
 
 | Path | Responsibility |

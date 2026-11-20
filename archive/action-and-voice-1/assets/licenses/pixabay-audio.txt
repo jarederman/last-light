@@ -1,0 +1,24 @@
+Last Light ambient recordings — Pixabay Content License
+Source pages and license checked 2026-11-06.
+
+Ocean Waves — DRAGON-STUDIO
+https://pixabay.com/zh/sound-effects/nature-ocean-waves-584733/
+Source published 2026-08-13; original duration approximately 60 seconds.
+Game file: assets/audio/harbor-waves.ogg
+
+CALMING RAIN — Liecio
+https://pixabay.com/zh/sound-effects/nature-calming-rain-257596/
+Source published 2024-10-31; original duration approximately 109 seconds.
+Game file: assets/audio/harbor-rain.ogg
+
+Full license: https://pixabay.com/service/terms/
+License summary: https://pixabay.com/service/license-summary/
+
+These recordings are NOT CC0. Pixabay permits adaptation and incorporation
+into creative works, subject to its terms, including the prohibition on
+standalone redistribution. The edited loops are integrated assets of this RPG,
+not a stock-audio collection or a standalone audio download offering.
+
+Edits: source excerpts, two-second wraparound crossfades, interior-frequency
+filtering, loudness normalization, stereo 32 kHz Ogg Vorbis encoding. The game
+mixes both loops at separate levels. Original MP3 downloads are not published.
