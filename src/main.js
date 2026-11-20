@@ -1,19 +1,19 @@
-import { initialState } from "./core/state.js?v=practice-briefing-1";
-import { validateSnapshot } from "./core/snapshot.js?v=practice-briefing-1";
-import { learnedRecommendation } from "./core/learning.js?v=practice-briefing-1";
-import { chapters, exercises } from "./data/story.js?v=practice-briefing-1";
-import { handoverChoices } from "./data/conversation.js?v=practice-briefing-1";
-import { interactionPoints, playerStart } from "./data/station.js?v=practice-briefing-1";
-import { canStand, actorScale } from "./core/world.js?v=practice-briefing-1";
-import { distance, findRoute } from "./core/navigation.js?v=practice-briefing-1";
-import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=practice-briefing-1";
-import { creditsMarkup } from "./data/credits.js?v=practice-briefing-1";
-import { byId, dialog, show, close, done, configureDialog, capturePanel } from "./ui/dialog.js?v=practice-briefing-1";
+import { initialState } from "./core/state.js?v=shift-guidance-1";
+import { validateSnapshot } from "./core/snapshot.js?v=shift-guidance-1";
+import { learnedRecommendation } from "./core/learning.js?v=shift-guidance-1";
+import { chapters, exercises } from "./data/story.js?v=shift-guidance-1";
+import { handoverChoices } from "./data/conversation.js?v=shift-guidance-1";
+import { interactionPoints, playerStart } from "./data/station.js?v=shift-guidance-1";
+import { canStand, actorScale } from "./core/world.js?v=shift-guidance-1";
+import { distance, findRoute } from "./core/navigation.js?v=shift-guidance-1";
+import { isSoundOn, toggleSound, startAmbience, stopAmbience, footstep, playEffect } from "./audio/sound.js?v=shift-guidance-1";
+import { creditsMarkup } from "./data/credits.js?v=shift-guidance-1";
+import { byId, dialog, show, close, done, configureDialog, capturePanel } from "./ui/dialog.js?v=shift-guidance-1";
 
-import { createRadioScene } from "./scenes/radio.js?v=practice-briefing-1";
-import { createCallScene } from "./scenes/call.js?v=practice-briefing-1";
-import { createWeather } from "./scenes/weather.js?v=practice-briefing-1";
-import { t, getLanguage, setLanguage, languages } from "./i18n/index.js?v=practice-briefing-1";
+import { createRadioScene } from "./scenes/radio.js?v=shift-guidance-1";
+import { createCallScene } from "./scenes/call.js?v=shift-guidance-1";
+import { createWeather } from "./scenes/weather.js?v=shift-guidance-1";
+import { t, getLanguage, setLanguage, languages } from "./i18n/index.js?v=shift-guidance-1";
 
 configureDialog(stopWalking);
 
@@ -485,6 +485,9 @@ function talk() {
     }
   } else if (state.phase === "lesson") {
     briefPracticeCall();
+  } else if (state.phase === "trial") {
+    show("Mara · Station keeper", "Training calls",
+      "<p>“The other practice calls are queued at the same terminal. Choose what you’d say and listen to what each caller wanted from the reply.”</p>", [done()]);
   } else if (state.phase === "ready") {
     show("Mara · Station keeper", "Your turn", '<p class="record">“The kettle’s still warm. I’ll leave the next one to you.”</p>', [
       { text: "Take the shift", primary: true, run: reveal },
@@ -598,8 +601,13 @@ function trainingFeedback(index, option) {
         ? "Mara: ‘You offered company. The caller still needs to know that we have no arrival time.’"
         : "Mara: ‘That matches what the log establishes. Here is how I would put it.’")} ${t(call.feedback)}`
     : `${t(earnedApproval ? "Caller satisfaction: this was the reply they liked best." : "Caller satisfaction: they liked another reply better. This rates what comforted the caller, not whether you were right.")} ${t(call.feedback)}`;
+  const next = [
+    "Mara: “I’ve queued two more practice calls at this terminal. Answer each one, then listen to what the caller wanted from your reply.”",
+    "Mara: “One more practice call. Open this terminal again and see what the next draft suggests after that feedback.”",
+    "Both practice calls are complete. Find Mara by the window for the night-shift handover.",
+  ][index];
   show(call.label, index === 0 ? "Mara’s example" : "After the call",
-    `<p class="record">${feedback}</p>${index === 1 ? "<p>Mara glances at the draft field. “The caller’s feedback is being filed. Watch what the next draft suggests.”</p>" : ""}`, [
+    `<p class="record">${feedback}</p><p>${t(next)}</p>`, [
       {
         text: "File this call", primary: true, run: () => {
           state.instinct[option.trait] += earnedApproval ? 3 : 1;
@@ -619,7 +627,7 @@ function trainingFeedback(index, option) {
 function reveal() {
   setPhase("live");
   show("Signal House · Handover", "ECHO-01",
-    '<p class="terminal">TRAINING SIMULATION COMPLETE\nARCHIVE CASES LOADED\nHUMAN FEEDBACK INTEGRATED\nLIVE CALLS HANDLED: 0\n\nCHANNEL 04 · INCOMING</p><p>The figure you move is ECHO-01’s station avatar. Mara was the recorded training guide; her session has ended. The room remains your interface. The next voice comes from the real harbor line.</p><p>The replies you chose in the trials are ECHO’s training history. Your choices, and the approval they received, shaped the draft you will see next. There was no other operator making those choices for you.</p>',
+    '<p class="terminal">TRAINING SIMULATION COMPLETE\nARCHIVE CASES LOADED\nHUMAN FEEDBACK INTEGRATED\nLIVE CALLS HANDLED: 0\n\nCHANNEL 04 · INCOMING</p><p>The figure you move is ECHO-01’s station avatar. Mara was the recorded training guide; her session has ended. The room remains your interface. The next voice comes from the real harbor line.</p><p>The replies you chose in the trials are ECHO’s training history. Your choices, and the approval they received, shaped the draft you will see next. There was no other operator making those choices for you.</p><p>Answer Channel 04 at the dispatch terminal.</p>',
     [{ text: "Back to the room", primary: true, run: close }]);
 }
 
@@ -630,6 +638,8 @@ function terminal() {
     exercise(state.trial + 1);
   } else if (["live", "investigation", "ending"].includes(state.phase)) {
     callScene.open();
+  } else if (state.phase === "ready") {
+    show("Dispatch terminal", "Channel closed", "<p>Both practice calls are complete. Find Mara by the window for the night-shift handover.</p>", [done()]);
   } else {
     show("Dispatch terminal", "Channel closed", "<p>The terminal is standing by.</p>", [done()]);
   }

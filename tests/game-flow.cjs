@@ -176,6 +176,7 @@ async function train(game, tendency = null) {
   action("Compare with archived tape"); action("definitely automatic");
   assert.equal(title(), t("Listen to the second source"));
   action("Compare the recordings again"); action("old source is still unknown");
+  assert.ok(elements["panel-body"].innerHTML.includes(t("Take your findings to Mara by the window.")));
   action("Close");
   assert.deepEqual(recommended(), targets("Mara"), "Only the case review remains");
   use("Mara"); action("Source unconfirmed"); action("Keep this note");
@@ -193,6 +194,7 @@ async function train(game, tendency = null) {
   use("Mara"); action("Take the shift"); action("Back to the room");
   assert.deepEqual(recommended(), targets("Live terminal"));
   use("Live terminal"); action("Give me a moment");
+  action("Let me look into it first");
   assert.deepEqual(recommended(), targets("Radio", "Archive", "Live terminal"));
 }
 
@@ -604,7 +606,11 @@ async function testReceiverBeforeLetter() {
     assert.equal(title(), t("One source tested"));
     assert.ok(!game.hasAction("The skipper must have answered by hand."));
     action("Close");
-    use("Archive"); action("Read Nell"); action("Back to the file"); action("Read the receiver");
+    use("Archive"); action("Read Nell"); action("Close");
+    use("Radio"); action("Open receiver bench"); action("Compare with archived tape"); action("old source is still unknown");
+    assert.ok(elements["panel-body"].innerHTML.includes(t("Read the receiver manual in the Archive before taking your findings to Mara.")));
+    action("Close");
+    use("Archive"); action("Read the receiver");
     assert.ok(game.hasAction("What did my bench test show?")); action("What did my bench test show?"); action("Back to the room");
     use("Radio"); action("Open receiver bench"); action("Compare with archived tape");
     assert.equal(title(), t("Two sources, one pattern"));
@@ -724,7 +730,7 @@ async function testSaveAndContinue() {
 
 async function testHandoverPriorityAndDraftFacts() {
   const game = await startGame();
-  const { action, use, title, elements, hasAction } = game;
+  const { action, use, title, elements, hasAction, key } = game;
   action("Begin night shift"); use("Mara");
   action("What case?"); action("Where do I start?"); action("I'll take a look");
   use("Archive"); action("Read Nell"); action("Back to the file"); action("Read the receiver"); action("Close");
@@ -744,11 +750,22 @@ async function testHandoverPriorityAndDraftFacts() {
     use("Terminal");
     if (choice === "ferry should be") assert.match(elements["panel-body"].innerHTML, /Practice call: read the dispatch log/);
     if (choice === "Go ahead") assert.match(elements["panel-body"].innerHTML, /DRAFT ADJUSTED/, "Earlier feedback visibly shapes the next draft");
-    action(choice); action("File this call");
+    action(choice);
+    if (choice === "ferry should be") assert.match(elements["panel-body"].innerHTML, /two more practice calls at this terminal/);
+    if (choice === "Go ahead") assert.match(elements["panel-body"].innerHTML, /Find Mara by the window/);
+    action("File this call");
   }
   use("Mara"); action("Take the shift"); action("Back to the room");
   use("Live terminal"); action("Give me a moment");
-  use("Radio"); action("Read tonight’s relay log"); action("Close");
+  assert.ok(hasAction("Compose a reply"), "Answering the incoming line offers a reply without leaving the terminal");
+  assert.match(elements["panel-body"].innerHTML, /radio has tonight’s recording/);
+  action("Let me look into it first");
+  key("j");
+  assert.match(elements["panel-body"].innerHTML, /rescue board at the Terminal/);
+  action("Close journal");
+  use("Radio");
+  assert.match(elements["panel-body"].innerHTML, /attach the recording to a signal report at the Terminal/);
+  action("Read tonight’s relay log"); action("Close");
   use("Live terminal"); action("Compose a reply");
   const draft = elements["panel-body"].innerHTML;
   assert.match(draft, /Known at the station/);

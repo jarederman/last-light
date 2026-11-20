@@ -1,9 +1,9 @@
-import { show, close, done } from "../ui/dialog.js?v=practice-briefing-1";
-import { t } from "../i18n/index.js?v=practice-briefing-1";
-import { assuranceReasons, correctionText, insistenceText, deferText, quietReplies, presenceReplies, presenceQuestion, handoverChoices } from "../data/conversation.js?v=practice-briefing-1";
-import { reflectionMenu } from "./reflection.js?v=practice-briefing-1";
-import { epilogue } from "../data/epilogue.js?v=practice-briefing-1";
-import { playEffect } from "../audio/sound.js?v=practice-briefing-1";
+import { show, done } from "../ui/dialog.js?v=shift-guidance-1";
+import { t } from "../i18n/index.js?v=shift-guidance-1";
+import { assuranceReasons, correctionText, insistenceText, deferText, quietReplies, presenceReplies, presenceQuestion, handoverChoices } from "../data/conversation.js?v=shift-guidance-1";
+import { reflectionMenu } from "./reflection.js?v=shift-guidance-1";
+import { epilogue } from "../data/epilogue.js?v=shift-guidance-1";
+import { playEffect } from "../audio/sound.js?v=shift-guidance-1";
 
 // Caller reactions and report delivery share one session state so closing a
 // panel never discards a sent reply or submits the same report twice.
@@ -20,21 +20,28 @@ WAITING FOR THE NEXT CALL</p>`, [{ text: "Review this shift", run: recap }, done
     } else if (state.phase === "live") {
       show("Live terminal · Channel 04", "Nell",
         '<p class="record">“Signal House? It’s Nell — the Kestrel’s — sorry. My dad’s boat. He missed his check-in. He should be inside the breakwater by now. He’s never late. Not in weather like this.”</p><p class="record">“Three clicks just came over the radio. Three. Like last time. That’s him, right? That means he’s okay?”</p>', [
-          { text: "“I’m here, Nell. Give me a moment.”", primary: true, run: () => { setPhase("investigation"); close(); } },
+          { text: "“I’m here, Nell. Give me a moment.”", primary: true, run: () => {
+            setPhase("investigation");
+            callWaiting("<p>Nell stays on the line while you decide how to answer.</p>");
+          } },
         ]);
     } else if (state.finalReply) {
       followup(state.reportSent && !state.finalReply.reportAtSend);
     } else {
-      show("Live terminal · Channel 04", "Nell is on the line",
-        state.reportSent
-          ? '<p class="record">“They said they got your recording. Okay. Okay. So… what do you think the clicks mean?”</p>'
-          : '<p class="record">“Hello? Are you still there? …Sorry. It’s just so quiet on your end.”</p>', [
-          { text: "Compose a reply", primary: true, run: compose },
-          { text: "Check the rescue board", run: rescueBoard },
-          ...reportAction(),
-          { text: "Stay with Nell", run: goodbye }, done("Let me look into it first"),
-        ]);
+      callWaiting(state.reportSent
+        ? '<p class="record">“They said they got your recording. Okay. Okay. So… what do you think the clicks mean?”</p>'
+        : '<p class="record">“Hello? Are you still there? …Sorry. It’s just so quiet on your end.”</p>');
     }
+  }
+
+  function callWaiting(body) {
+    const hint = getState().reportSent ? "" : "<p class=\"muted\">You can answer now. If you want to check first, the radio has tonight’s recording and relay log, the archive has the receiver manual, and the rescue board below shows the latest search status.</p>";
+    show("Live terminal · Channel 04", "Nell is on the line", body + hint, [
+      { text: "Compose a reply", primary: true, run: compose },
+      { text: "Check the rescue board", run: rescueBoard },
+      ...reportAction(),
+      { text: "Stay with Nell", run: goodbye }, done("Let me look into it first"),
+    ]);
   }
 
   function rescueBoard() {

@@ -1,4 +1,4 @@
-import { obstacles, maraObstacle, walkBounds } from "../data/station.js?v=practice-briefing-1";
+import { obstacles, maraObstacle, walkBounds } from "../data/station.js?v=shift-guidance-1";
 
 export function canStand({ x, y }, maraPresent = true) {
   const inside = ([left, top, right, bottom]) =>

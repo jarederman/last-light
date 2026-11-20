@@ -5,7 +5,7 @@ export const chapters = {
   trial: ["03 / The Trial", "Different ears", "Finish the two trial calls at the Terminal."],
   ready: ["04 / The First Call", "A quiet handover", "Speak to Mara before taking over the night shift."],
   live: ["04 / The First Call", "Incoming", "Pick up the live call at the Terminal."],
-  investigation: ["04 / The First Call", "A familiar signal", "Use the Radio, Archive or rescue board if you want to investigate. Return to the Terminal to reply."],
+  investigation: ["04 / The First Call", "A familiar signal", "Reply at the Terminal. To investigate first, check tonight’s recording and relay log at the Radio, the receiver manual in the Archive, or the rescue board at the Terminal."],
   ending: ["04 / The First Call", "Still here", "Your watch is complete. Explore the station or review the shift at the Terminal."],
 };
 

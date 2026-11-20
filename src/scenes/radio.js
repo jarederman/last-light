@@ -1,6 +1,6 @@
-import { show, done } from "../ui/dialog.js?v=practice-briefing-1";
-import { playSignal, stopSignal, playEffect } from "../audio/sound.js?v=practice-briefing-1";
-import { signalTrace } from "../ui/signal.js?v=practice-briefing-1";
+import { show, done } from "../ui/dialog.js?v=shift-guidance-1";
+import { playSignal, stopSignal, playEffect } from "../audio/sound.js?v=shift-guidance-1";
+import { signalTrace } from "../ui/signal.js?v=shift-guidance-1";
 
 export function createRadioScene({ getState, mark }) {
   function open() {
@@ -20,7 +20,8 @@ export function createRadioScene({ getState, mark }) {
       `<p class="terminal">${live ? "CHANNEL 04 · 00:17:06 · TONIGHT" : "ARCHIVE 07 · EIGHTEEN MONTHS AGO"}
 Captured after the coast station’s relay ping.</p>
       ${signalTrace(live ? "Captured live recording" : "Archived recording")}
-      ${live ? '<p class="muted">Recording and timestamp saved for the rescue team.</p>' : '<p class="muted">A matching receiver sits on the bench beside the set.</p>'}`, actions);
+      ${live ? '<p class="muted">Recording and timestamp saved for the rescue team.</p>' : '<p class="muted">A matching receiver sits on the bench beside the set.</p>'}
+      ${state.phase === "investigation" && !state.reportSent ? '<p class="muted">You can attach the recording to a signal report at the Terminal.</p>' : ""}`, actions);
   }
 
   function relayLog() {
@@ -77,9 +78,15 @@ AUTO-REPLY · ${test.automatic ? "ON" : "OFF"}</div>
 
   function comparisonResult(grounded) {
     if (grounded) mark("comparison");
+    const state = getState();
+    const next = state.phase === "archive"
+      ? state.evidence.has("manual")
+        ? "Take your findings to Mara by the window."
+        : "Read the receiver manual in the Archive before taking your findings to Mara."
+      : "";
     show("Radio · Signal comparison", grounded ? "An observation for the log" : "Listen to the second source",
       grounded
-        ? '<p>You made the same three clicks with the microphone unplugged. Either source could explain the old tape.</p><p class="muted">Comparison added to your field journal.</p>'
+        ? `<p>You made the same three clicks with the microphone unplugged. Either source could explain the old tape.</p><p class="muted">Comparison added to your field journal.</p>${next ? `<p class="muted">${next}</p>` : ""}`
         : '<p>The bench made those clicks without a person replying. The tape alone cannot tell you which source made the old signal.</p>', [
         { text: grounded ? "Back to the radio" : "Compare the recordings again", run: grounded ? open : compare }, done(),
       ]);
